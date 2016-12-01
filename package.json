@@ -1,0 +1,28 @@
+{
+  "name": "ds.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "demo.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bearzx/ds.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bearzx/ds.js/issues"
+  },
+  "homepage": "https://github.com/bearzx/ds.js#readme",
+  "dependencies": {
+    "@types/jquery": "^2.0.34",
+    "d3": "^4.4.0",
+    "jquery": "^3.1.1",
+    "ts-loader": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/jquery": "^2.0.34"
+  }
+}
