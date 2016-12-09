@@ -5,6 +5,7 @@
   },
   "files": [
     "demo.ts",
-    "tables.ts"
+    "./src/tables.ts",
+    "./src/vgtemplates.ts"
   ]
 }
