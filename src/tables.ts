@@ -3,6 +3,7 @@ import * as vgt from './vgtemplates';
 declare var d3: any;
 declare var $: any;
 declare var vg: any;
+declare var math: any;
 
 export class Table {
 
@@ -10,8 +11,14 @@ export class Table {
     private _labels: any = [];
     private _column_order: any = {};
 
-    constructor() {
+    constructor(t?: Table, l?: any[]) {
+        if (t != null) {
 
+        }
+
+        if (l != null) {
+            this._labels = l.slice();
+        }
     }
 
     read_table() {
@@ -117,38 +124,113 @@ export class Table {
         rows.forEach(function(row) {            
             _this.with_row(row);
         });
+        
+        return this;
     }
 
-    add_column() {
+    with_column(label, values) {
+        if (values.length == 1) {
+            for (var i = 0; i < this._t.length; i++) {
+                this._t[i][label] = values[0];
+            }
+        } else if (values.length == this._t.length) {
+            for (var i = 0; i < this._t.length; i++) {
+                this._t[i][label] = values[i];
+            }
+        }
 
+        if (!this._labels.includes(label)) {
+            this._labels.push(label);
+        }
+
+        return this;
     }
 
-    relabel() {
-
+    with_columns(...labels_and_values: any[]) {
+        if (labels_and_values.length % 2 == 0) {
+            for (var i = 0; i < labels_and_values.length / 2; i++) {
+                this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+            }
+        }
+        
+        return this;
     }
 
-    select_row() {
-
+    relabel(column_label, new_label) {
+        var index = this._labels.indexOf(column_label);
+        if (index != -1) {
+            this._labels[index] = new_label;
+            this._t.forEach(function(row) {
+                var val = row[column_label];
+                delete row[column_label];
+                row[new_label] = val;
+            });
+        }
+        
+        return this;
     }
 
-    select_column() {
+    select(...column_label_or_labels: any[]) {
+        console.log(column_label_or_labels);
+        var _this = this;
+        var table = new Table();
+        for (var i = 0; i < this._t.length; i++) {
+            table.with_row({});
+        }
+        column_label_or_labels.forEach(function(label) {
+            table.with_column(label, _this.column_by_name(label));
+        });
 
+        return table;
     }
 
-    delete_row() {
+    drop(...column_label_or_labels: any[]) {
+        var left_columns = this._labels.filter(function(c) {
+            return column_label_or_labels.indexOf(c) == -1;
+        });
 
+        return this.select.apply(this, left_columns);
     }
 
-    delete_column() {
+    where(column_or_label, value_or_predicate) {
+        var table = new Table(null, this.labels());
+        var predicate;
+        if (value_or_predicate instanceof Function) {
+            predicate = value_or_predicate;
+        } else {            
+            predicate = function(a) { return a == value_or_predicate; }; 
+        }
+        this._t.forEach(function(row) {
+            if (predicate(row[column_or_label])) {
+                table.with_row(row);
+            }
+        });
 
+        return table;
     }
 
-    where() {
+    sort(column_or_label, descending = false, distinct = false) {
+        var compare = function(a, b) {            
+            if (a[column_or_label] > b[column_or_label]) {
+                return 1;
+            } else if (a[column_or_label] < b[column_or_label]) {
+                return -1;
+            } else {
+                return 0;
+            }
+        };
 
-    }
-
-    sort() {
-
+        if (descending) {
+            this._t.sort(function(a, b) {
+                return -compare(a, b);
+            });
+        } else {
+            this._t.sort(function(a, b) {
+                return compare(a, b);
+            });
+        }        
+        
+        return this;
     }
 
     group() {
