@@ -18,7 +18,7 @@ export class Table {
 
         if (l != null) {
             this._labels = l.slice();
-        }
+        }        
     }
 
     read_table() {
@@ -210,7 +210,7 @@ export class Table {
     }
 
     sort(column_or_label, descending = false, distinct = false) {
-        var compare = function(a, b) {            
+        var compare = function(a, b) {
             if (a[column_or_label] > b[column_or_label]) {
                 return 1;
             } else if (a[column_or_label] < b[column_or_label]) {
@@ -310,7 +310,7 @@ export class Table {
         var bins = {};
         this._t.forEach(function(row) {
             var elem = row[column];
-            if (elem.length != 0) {                        
+            if (elem.length != 0) {
                 if (elem in bins) {
                     bins[elem] += 1;
                 } else {
@@ -325,7 +325,7 @@ export class Table {
         xs.forEach(function(x) {
             data.push({'x': x, 'y': bins[x]});
         });
-        console.log(data);
+        // console.log(data);
         var templates = new vgt.VGTemplate();
         vg.parse.spec(templates.bar(data), function(error, chart) {
             chart({el: "#vis"}).update();

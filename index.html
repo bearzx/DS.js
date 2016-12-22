@@ -5,17 +5,88 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://vega.github.io/vega/vega.min.js"></script>
     <script src="node_modules/mathjs/dist/math.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <style>
         th, td {
             border: 1px solid;
-        }    
-    </style>    
+        }
+
+        #repl {
+            float: left;
+            min-width: 400px;
+            min-height: 600px;
+            /*border: 1px dashed;*/
+            padding: 5px;
+        }
+
+        #show-panel {
+            float: left;
+            margin-left: 20px;
+            min-width: 400px;
+            min-height: 600px;
+            border: 1px dashed;
+            padding: 5px;
+        }
+
+        #vis {
+            min-height: 300px;
+            border: 1px dashed;
+        }
+
+        #table-area {
+            min-height: 300px;
+            border: 1px dashed;
+        }
+
+        #submitted {
+            min-height: 580px;
+        }
+
+        #inputs {
+            text-align: center;
+        }
+
+        #editor { 
+            position: absolute;
+            top: 5px;
+            right: 0;
+            bottom: 0;
+            left: 5px;
+            width: 400px;
+            height: 550px;
+        }
+    </style>
 </head>
 <body>
-    <div id="vis"></div>
-    <div id="table-area"></div>
+    <div id="repl">
+        <div id="submitted">
+            
+        </div>
+        <div id="inputs">
+            <div id="editor"></div>
+            <button id="run">Run</button>
+        </div>
+    </div>
+    <div id="show-panel">
+        <div id="vis"></div>
+        <div id="table-area"></div>
+    </div>
 </body>
 <footer>
-    <script src="out/bundle.js"></script>    
+    <script src="out/bundle.js"></script>
+    <script>
+        $(document).ready(function() {
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/chrome");
+            editor.getSession().setMode("ace/mode/javascript");
+
+            $('#run').click(function() {
+                $('#vis').html('');
+                $('#table-area').html('');
+                var code = editor.getValue();
+                eval(code);
+            });            
+        });
+    </script>    
 </footer>
 </html>

@@ -1,8 +1,13 @@
-var webpack = require('webpack');  
+var webpack = require('webpack');
 module.exports = {  
-  entry: './demo.ts',
+  entry: './src/tables.ts',
   output: {
-    filename: './out/bundle.js'
+    filename: './out/bundle.js',
+    libraryTarget: 'var',
+    library: 'Table'
+  },
+  externals: {
+
   },
   // Turn on sourcemaps
   devtool: 'source-map',
@@ -11,7 +16,7 @@ module.exports = {
   },
   // Add minification
   plugins: [
-    new webpack.optimize.UglifyJsPlugin()
+    // new webpack.optimize.UglifyJsPlugin()
   ],
   module: {
     loaders: [
