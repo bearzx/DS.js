@@ -59,7 +59,7 @@ export class Table {
         return this._t.length;
     }    
 
-    labels() {
+    public labels() {
         // console.log(d3.keys(this._t[0]));
         // return d3.keys(this._t[0]);
         return this._labels;
@@ -68,30 +68,29 @@ export class Table {
     public num_columns() {
         // console.log(this._t[0]);
         return Object.keys(this._t[0]).length;
-    }
+    }    
 
-    column_by_id(index: number) {
+    public column(index_or_label) {
         var col = [];
-        var column_name = this._labels[index];
-        this._t.forEach(function(row) {
-            col.push(row[column_name]);
-        });
-        return col;
-    }
-
-    column_by_name(name: string) {
-        var col = [];
-        this._t.forEach(function(row) {
-            col.push(row[name]);
-        });
-        return col;
-    }
+        if (typeof index_or_label === 'number') {
+            var column_label = this._labels[index_or_label];
+            this._t.forEach(function(row) {
+                col.push(row[column_label]);
+            });
+            return col;
+        } else if (typeof index_or_label === 'string') {
+            this._t.forEach(function(row) {
+                col.push(row[index_or_label]);
+            });
+            return col;
+        }
+    } 
 
     columns() {
         var _this = this;
         var cols = [];
         this._labels.forEach(function(label) {
-            cols.push(_this.column_by_name(label));
+            cols.push(_this.column(label));
         });
         return cols;
     }
@@ -133,22 +132,26 @@ export class Table {
             for (var i = 0; i < this._t.length; i++) {
                 this._t[i][label] = values[0];
             }
-        } else if (values.length == this._t.length) {
+        } else if (this._t.length != 0 && values.length == this._t.length) {
             for (var i = 0; i < this._t.length; i++) {
                 this._t[i][label] = values[i];
+            }
+        } else if (this._t.length == 0) {            
+            for (var i = 0; i < values.length; i++) {                
+                this._t.push({ [label]: values[i] });
             }
         }
 
         if (!this._labels.includes(label)) {
             this._labels.push(label);
         }
-
+        
         return this;
     }
 
-    with_columns(...labels_and_values: any[]) {
+    with_columns(...labels_and_values: any[]) {        
         if (labels_and_values.length % 2 == 0) {
-            for (var i = 0; i < labels_and_values.length / 2; i++) {
+            for (var i = 0; i < labels_and_values.length / 2; i++) {                
                 this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
             }
         }
@@ -156,13 +159,14 @@ export class Table {
         return this;
     }
 
-    relabel(column_label, new_label) {
-        var index = this._labels.indexOf(column_label);
+    relabel(label, new_label) {
+        label = this._as_label(label);
+        var index = this._labels.indexOf(label);
         if (index != -1) {
             this._labels[index] = new_label;
             this._t.forEach(function(row) {
-                var val = row[column_label];
-                delete row[column_label];
+                var val = row[label];
+                delete row[label];
                 row[new_label] = val;
             });
         }
@@ -170,18 +174,43 @@ export class Table {
         return this;
     }
 
+    relabeled(label, new_label) {
+        var copy = $.extend(true, {}, this);
+        copy.relabel(label, new_label);
+        return copy;
+    }
+
     select(...column_label_or_labels: any[]) {
-        console.log(column_label_or_labels);
+        // console.log(column_label_or_labels);
         var _this = this;
+        column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
         for (var i = 0; i < this._t.length; i++) {
             table.with_row({});
         }
         column_label_or_labels.forEach(function(label) {
-            table.with_column(label, _this.column_by_name(label));
+            table.with_column(label, _this.column(label));
         });
 
         return table;
+    }
+
+    private _as_labels(label_list) {
+        var new_labels = [];
+        var _this = this;
+        label_list.forEach(function(l) {            
+            new_labels.push(_this._as_label(l));
+        });
+
+        return new_labels;
+    }
+
+    private _as_label(label) {
+        if (typeof label === 'number') {
+            return this._labels[label];
+        } else if (typeof label === 'string') {            
+            return label;
+        }
     }
 
     drop(...column_label_or_labels: any[]) {
@@ -197,7 +226,7 @@ export class Table {
         var predicate;
         if (value_or_predicate instanceof Function) {
             predicate = value_or_predicate;
-        } else {            
+        } else {
             predicate = function(a) { return a == value_or_predicate; }; 
         }
         this._t.forEach(function(row) {
@@ -290,7 +319,7 @@ export class Table {
             s += "</tr>";
         });
         // console.log(s);
-        // console.log($("#table-area").html(s));        
+        // console.log($("#table-area").html(s));
         $("#table-area").html(s);
     }
 

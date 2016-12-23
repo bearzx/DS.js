@@ -5,7 +5,7 @@ export class VGTemplate {
 
     public bar(_values) {
         var x = {
-            "width": 400,
+            "width": 600,
             "height": 200,
             "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
 

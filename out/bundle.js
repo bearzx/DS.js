@@ -100,26 +100,27 @@ var Table =
 	        // console.log(this._t[0]);
 	        return Object.keys(this._t[0]).length;
 	    };
-	    Table.prototype.column_by_id = function (index) {
+	    Table.prototype.column = function (index_or_label) {
 	        var col = [];
-	        var column_name = this._labels[index];
-	        this._t.forEach(function (row) {
-	            col.push(row[column_name]);
-	        });
-	        return col;
-	    };
-	    Table.prototype.column_by_name = function (name) {
-	        var col = [];
-	        this._t.forEach(function (row) {
-	            col.push(row[name]);
-	        });
-	        return col;
+	        if (typeof index_or_label === 'number') {
+	            var column_label = this._labels[index_or_label];
+	            this._t.forEach(function (row) {
+	                col.push(row[column_label]);
+	            });
+	            return col;
+	        }
+	        else if (typeof index_or_label === 'string') {
+	            this._t.forEach(function (row) {
+	                col.push(row[index_or_label]);
+	            });
+	            return col;
+	        }
 	    };
 	    Table.prototype.columns = function () {
 	        var _this = this;
 	        var cols = [];
 	        this._labels.forEach(function (label) {
-	            cols.push(_this.column_by_name(label));
+	            cols.push(_this.column(label));
 	        });
 	        return cols;
 	    };
@@ -156,15 +157,21 @@ var Table =
 	                this._t[i][label] = values[0];
 	            }
 	        }
-	        else if (values.length == this._t.length) {
+	        else if (this._t.length != 0 && values.length == this._t.length) {
 	            for (var i = 0; i < this._t.length; i++) {
 	                this._t[i][label] = values[i];
+	            }
+	        }
+	        else if (this._t.length == 0) {
+	            for (var i = 0; i < values.length; i++) {
+	                this._t.push((_a = {}, _a[label] = values[i], _a));
 	            }
 	        }
 	        if (!this._labels.includes(label)) {
 	            this._labels.push(label);
 	        }
 	        return this;
+	        var _a;
 	    };
 	    Table.prototype.with_columns = function () {
 	        var labels_and_values = [];
@@ -178,33 +185,56 @@ var Table =
 	        }
 	        return this;
 	    };
-	    Table.prototype.relabel = function (column_label, new_label) {
-	        var index = this._labels.indexOf(column_label);
+	    Table.prototype.relabel = function (label, new_label) {
+	        label = this._as_label(label);
+	        var index = this._labels.indexOf(label);
 	        if (index != -1) {
 	            this._labels[index] = new_label;
 	            this._t.forEach(function (row) {
-	                var val = row[column_label];
-	                delete row[column_label];
+	                var val = row[label];
+	                delete row[label];
 	                row[new_label] = val;
 	            });
 	        }
 	        return this;
+	    };
+	    Table.prototype.relabeled = function (label, new_label) {
+	        var copy = $.extend(true, {}, this);
+	        copy.relabel(label, new_label);
+	        return copy;
 	    };
 	    Table.prototype.select = function () {
 	        var column_label_or_labels = [];
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            column_label_or_labels[_i - 0] = arguments[_i];
 	        }
-	        console.log(column_label_or_labels);
+	        // console.log(column_label_or_labels);
 	        var _this = this;
+	        column_label_or_labels = this._as_labels(column_label_or_labels);
 	        var table = new Table();
 	        for (var i = 0; i < this._t.length; i++) {
 	            table.with_row({});
 	        }
 	        column_label_or_labels.forEach(function (label) {
-	            table.with_column(label, _this.column_by_name(label));
+	            table.with_column(label, _this.column(label));
 	        });
 	        return table;
+	    };
+	    Table.prototype._as_labels = function (label_list) {
+	        var new_labels = [];
+	        var _this = this;
+	        label_list.forEach(function (l) {
+	            new_labels.push(_this._as_label(l));
+	        });
+	        return new_labels;
+	    };
+	    Table.prototype._as_label = function (label) {
+	        if (typeof label === 'number') {
+	            return this._labels[label];
+	        }
+	        else if (typeof label === 'string') {
+	            return label;
+	        }
 	    };
 	    Table.prototype.drop = function () {
 	        var column_label_or_labels = [];
@@ -297,7 +327,7 @@ var Table =
 	            s += "</tr>";
 	        });
 	        // console.log(s);
-	        // console.log($("#table-area").html(s));        
+	        // console.log($("#table-area").html(s));
 	        $("#table-area").html(s);
 	    };
 	    Table.prototype.plot = function () {
@@ -355,7 +385,7 @@ var Table =
 	    }
 	    VGTemplate.prototype.bar = function (_values) {
 	        var x = {
-	            "width": 400,
+	            "width": 600,
 	            "height": 200,
 	            "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
 	            "signals": [
