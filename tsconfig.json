@@ -3,6 +3,9 @@
     "module": "commonjs",
     "sourceMap": true
   },
+  "types": [
+    "node"
+  ],
   "files": [
     "demo.ts",
     "./src/tables.ts",

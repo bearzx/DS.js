@@ -3,7 +3,7 @@ import * as vgt from './vgtemplates';
 declare var d3: any;
 declare var $: any;
 declare var vg: any;
-declare var math: any;
+declare var ace: any;
 
 export class Table {
 
@@ -320,7 +320,7 @@ export class Table {
         });
         // console.log(s);
         // console.log($("#table-area").html(s));
-        $("#table-area").html(s);
+        $(".table-area").html(s);
     }
 
     plot() {

@@ -28,3 +28,17 @@ simple.with_columns([
 ---
 females = census.where('SEX', 2)
 sum(females.where(females.column('AGE') < 999))
+
+---
+var census = new Table.Table();
+census.read_table_csv_sync('data/nc-est2014-agesex-res.csv');
+var partial = census.select('SEX', 'AGE', 4, 8);
+// census.show();
+// partial.show();
+// var simple = partial.relabeled(2, '2010').relabel(3, '2014');
+// simple.show();
+// totals = t.where('AGE', 999);
+// totals.show();
+// census.hist('AGE');
+females = census.where('SEX', 2);
+females.where('AGE', function (x) { return x < 999; }).show();
