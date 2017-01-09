@@ -1,6 +1,6 @@
-import * as tables from './src/tables';
+// import * as tables from './src/tables';
 
-var t = new tables.Table();
+// var t = new tables.Table();
 
 // t.read_table_csv('demodata.csv', function() {
 //     console.log(t.num_rows());

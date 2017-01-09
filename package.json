@@ -25,6 +25,7 @@
     "vega": "^3.0.0-beta.10"
   },
   "devDependencies": {
+    "@types/core-js": "^0.9.35",
     "@types/jquery": "^2.0.34",
     "@types/node": "^6.0.54",
     "ace-builds": "^1.2.5"

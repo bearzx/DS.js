@@ -1,46 +1,51 @@
 window.$ = window.jQuery = require('jquery');
 window.d3 = require('d3');
 window.vg = require('vega');
+window.datai = '';
 
 $(document).ready(function() {
     $('a').each(function(i) {
         console.log($(this).attr('href'));
-        if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {            
-            $(this).after(`<button class="open-dsjs">Toggle ds.js</button>`);
+        if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {
+            $(this).after(`<button datai="${i}" class="open-dsjs">Toggle ds.js</button>`);
         }
-    });
+    });    
 
-    var editor;
-
-    $(".open-dsjs").click(function() {
-        if ($(".env").length) {
-            $('.env').toggle();    
+    $(".open-dsjs").click(function() {        
+        var datai = $(this).attr('datai');
+        var env_id = '#env-' + datai;        
+        var editor_id = `editor-${datai}`;
+        if ($(env_id).length) {
+            $(env_id).toggle();
         } else {
             var ds_env = `
-                <div class="env">
+                <div id="env-${datai}" class="env">
                     <div class="repl">
                         <div class="inputs">
-                            <div class="editor"></div>
-                            <button class="run">Run</button>
+                            <div id="${editor_id}" class="editor"></div>
+                            <button datai="${datai}" class="run">Run</button>
                         </div>
                     </div>
                     <div class="show-panel">
-                        <div class="vis"></div>
-                        <div class="table-area"></div>
+                        <div id="vis-${datai}" class="vis"></div>
+                        <div id="table-area-${datai}" class="table-area"></div>
                     </div>
                 </div>
             `;
             $(this).after(ds_env);
-            editor = ace.edit($('.editor')[0]);
+            var editor = ace.edit(editor_id);
             editor.setTheme("ace/theme/chrome");
             editor.getSession().setMode("ace/mode/javascript");
-            $('.env').toggle();
+            $(env_id).toggle();
         }
 
         $('.run').click(function() {
-            $('.vis').html('');
-            $('.table-area').html('');
+            var datai = $(this).attr('datai');
+            $(`#vis-${datai}`).html('');
+            $(`#table-area-${datai}`).html('');
+            var editor = ace.edit(`editor-${datai}`);
             var code = editor.getValue();
+            window.datai = datai;
             eval(code);
         });
     });

@@ -4,26 +4,26 @@ declare var d3: any;
 declare var $: any;
 declare var vg: any;
 declare var ace: any;
+declare var datai: any;
 
 export class Table {
 
     private _t: any = [];
     private _labels: any = [];
     private _column_order: any = {};
+    private _id: string;
 
-    constructor(t?: Table, l?: any[]) {
+    constructor(t?: Table, l?: any[]) {                
         if (t != null) {
 
         }
 
         if (l != null) {
             this._labels = l.slice();
-        }        
-    }
+        }
 
-    read_table() {
-
-    }
+        this._id = datai;        
+    }    
     
     private table_init() {
         this._labels = d3.keys(this._t[0]);
@@ -128,15 +128,15 @@ export class Table {
     }
 
     with_column(label, values) {
-        if (values.length == 1) {
+        if (values.length == 1) {            
             for (var i = 0; i < this._t.length; i++) {
                 this._t[i][label] = values[0];
             }
-        } else if (this._t.length != 0 && values.length == this._t.length) {
+        } else if (this._t.length != 0 && values.length == this._t.length) {            
             for (var i = 0; i < this._t.length; i++) {
                 this._t[i][label] = values[i];
             }
-        } else if (this._t.length == 0) {            
+        } else if (this._t.length == 0) {                        
             for (var i = 0; i < values.length; i++) {                
                 this._t.push({ [label]: values[i] });
             }
@@ -151,7 +151,7 @@ export class Table {
 
     with_columns(...labels_and_values: any[]) {        
         if (labels_and_values.length % 2 == 0) {
-            for (var i = 0; i < labels_and_values.length / 2; i++) {                
+            for (var i = 0; i < labels_and_values.length / 2; i++) {
                 this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
             }
         }
@@ -208,7 +208,7 @@ export class Table {
     private _as_label(label) {
         if (typeof label === 'number') {
             return this._labels[label];
-        } else if (typeof label === 'string') {            
+        } else if (typeof label === 'string') {
             return label;
         }
     }
@@ -262,28 +262,192 @@ export class Table {
         return this;
     }
 
-    group() {
+    group(column_or_label: any, collect?) {
+        var label = this._as_label(column_or_label);
+        var counts = {};
+        this._t.forEach(function(row) {
+            if (row[label] in counts) {
+                counts[row[label]] += 1;
+            } else {
+                counts[row[label]] = 1;
+            }
+        });
+        
+        var keys = Object.keys(counts);        
+        keys.sort();
+        var grouped = new Table(null, [label, 'count']);
+        keys.forEach(function(key) {
+            grouped.with_row({ [label]: key, 'count': counts[key] });
+        });
 
+        return grouped;
     }
 
-    groups() {
+    groups(columns_or_labels: any[], collect?) {
+        var labels = this._as_labels(columns_or_labels);
+        var counts = {};
+        var combinations = {};
+        this._t.forEach(function(row) {
+            var key = [];
+            labels.forEach(function(label) {
+                key.push(row[label]);
+            });
+            console.log(String(key));
+            if (String(key) in counts) {
+                counts[String(key)] += 1;
+            } else {
+                counts[String(key)] = 1;
+            }
 
+            if (!(String(key) in combinations)) {
+                combinations[String(key)] = key;
+            }
+        });
+        
+        var grouped = new Table(null, labels.concat(['count']));
+        Object.keys(combinations).forEach(function(key) {
+            var row = {};
+            labels.forEach(function(label, i) {
+                row[label] = combinations[key][i];
+            });
+            row['count'] = counts[key];
+            grouped.with_row(row);
+        });
+
+        return grouped;
     }
 
-    pivot() {
+    pivot(columns, rows, values, collect?, zero?) {
+        let column_labels = new Set();
+        let row_labels = new Set();
+        this._t.forEach(function(row) {
+            column_labels.add(row[columns]);
+            row_labels.add(row[rows]);
+        });
 
+        let pivot_t = {};
+        this._t.forEach(function(row) {
+            if (row[rows] in pivot_t) {
+                if (row[columns] in pivot_t[row[rows]]) {
+                    pivot_t[row[rows]][row[columns]].push(row[values]);
+                } else {
+                    pivot_t[row[rows]][row[columns]] = [row[values]];
+                }
+            } else {
+                pivot_t[row[rows]] = {};
+                pivot_t[row[rows]][row[columns]] = [row[values]];
+            }
+        });
+
+        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)));
+        // console.log(pivot_t);
+                        
+        row_labels.forEach(function(row_label: any) {
+            var pivot_row = { [rows]: row_label };            
+            column_labels.forEach(function(column_label: any) {                
+                // console.log(`${row_label} | ${column_label}`);
+                pivot_row[column_label] = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label].length : 0;
+            });                        
+            pivoted.with_row(pivot_row);
+        });
+
+        // console.log(pivoted._t);
+        return pivoted;
     }
 
-    join() {
+    private index_by(label) {
+        let column = this.column(label);
+        var indexed = {};
+        let _this = this;
+        column.forEach(function(c, i) {
+            if (c in indexed) {
+                indexed[c].push(_this.row(i));
+            } else {
+                indexed[c] = [_this.row(i)];
+            }
+        });
+        
+        return indexed;
+    }
 
+    private _unused_label(label) {
+        let original = label;
+        let existing = this.labels();
+        let i = 2;                
+        while (existing.indexOf(label) != -1) {            
+            label = `${original}_${i}`;
+            i += 1;
+        }
+        return label;
+    }
+
+    join(column_label, other: Table, other_label?) {
+        let _this = this;
+        
+        if (!other_label) {
+            other_label = column_label;
+        }
+        
+        column_label = this._as_label(column_label);
+        let this_rows = this.index_by(column_label);
+        let other_rows = other.index_by(other_label);
+        let joined_rows = [];        
+        Object.keys(this_rows).forEach(function(l) {
+            if (l in other_rows) {
+                let other_row = other_rows[l][0];
+                this_rows[l].forEach(function(row) {
+                    let new_row = Object.assign({}, row);
+                    Object.keys(other_row).forEach(function(l) {
+                        if (column_label != other_label) {                            
+                            new_row[_this._unused_label(l)] = other_row[l];
+                        } else {
+                            new_row[l] = other_row[l];
+                        }
+                    });
+                    joined_rows.push(new_row);
+                });
+            }
+        });
+
+        let joined_labels = this._labels;        
+        other.labels().forEach(function(l) {
+            if (l != other_label) {
+                joined_labels.push(_this._unused_label(l));
+            }
+        });
+
+        let joined = new Table(null, joined_labels);
+        joined.with_rows(joined_rows);
+
+        return joined;
     }
 
     stats() {
+        let _this = this;
+        let stats_table = new Table(null, ['statistics'].concat(this._labels));
+        let min_row = {'statistics': 'min'};
+        let max_row = {'statistics': 'max'};
+        let median_row = {'statistics': 'median'};
+        let sum_row = {'statistics': 'sum'};
+        this._labels.forEach(function(l) {
+            min_row[l] = d3.min(_this.column(l));
+            max_row[l] = d3.max(_this.column(l));
+            median_row[l] = d3.median(_this.column(l));
+            sum_row[l] = d3.sum(_this.column(l));
+        });
+        stats_table.with_row(min_row);                        
+        stats_table.with_row(max_row);                
+        stats_table.with_row(median_row);
+        stats_table.with_row(sum_row);
 
+        return stats_table;
     }
 
-    percentile() {
-
+    percentile(p) {
+        let pt = new Table(null, this._labels);
+        this._labels.forEach(function(l) {
+            
+        });
     }
 
     sample() {
@@ -300,7 +464,7 @@ export class Table {
 
     show() {
         var _this = this;
-        var s = "<table>";
+        var s = `<table class="ds-table">`;
         s += "<tr>";
         this._labels.forEach(function(label) {
             s += "<th>";
@@ -318,9 +482,8 @@ export class Table {
             });
             s += "</tr>";
         });
-        // console.log(s);
-        // console.log($("#table-area").html(s));
-        $(".table-area").html(s);
+
+        $(`#table-area-${this._id}`).html(s);
     }
 
     plot() {
@@ -356,15 +519,17 @@ export class Table {
         });
         // console.log(data);
         var templates = new vgt.VGTemplate();
+        var id = this._id;
         vg.parse.spec(templates.bar(data), function(error, chart) {
-            chart({el: "#vis"}).update();
+            chart({el: `#vis-${id}`}).update();
         });          
     }
 
     vhist(column: string) {
         var templates = new vgt.VGTemplate();
+        var id = this._id;
         vg.parse.spec(templates.vbar(this._t), function(error, chart) {
-            chart({el: "#vis"}).update();
+            chart({el: `#vis-${id}`}).update();
         });
     }
 

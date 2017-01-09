@@ -42,3 +42,17 @@ var partial = census.select('SEX', 'AGE', 4, 8);
 // census.hist('AGE');
 females = census.where('SEX', 2);
 females.where('AGE', function (x) { return x < 999; }).show();
+
+---
+var census = new Table.Table();
+census.read_table_csv_sync('data/nc-est2014-agesex-res.csv');
+census.group('SEX');
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.show();
+var other = new Table.Table();
+other.with_columns( 'a', [9, 1, 1, 1],'d', [1, 2, 2, 10],'e', [3, 4, 5, 6]);
+// other.show();
+var joined = table.join('a', other, 'd').show();
