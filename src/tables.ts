@@ -445,21 +445,45 @@ export class Table {
 
     percentile(p) {
         let pt = new Table(null, this._labels);
+        let _this = this;
+        let prow = {};
         this._labels.forEach(function(l) {
-            
-        });
+            let c = _this.column(l);
+            c.sort();
+            prow[l] = c[Math.ceil(c.length * p) - 1];
+        });        
+        pt.with_row(prow);
+
+        return pt;
     }
 
-    sample() {
-        
+    sample(k) {
+        let sampled = new Table(null, this._labels);
+        let n = this._t.length;
+        for (let i = 0; i < k; i++) {
+            sampled.with_row(this.row(Math.ceil(Math.random() * (n - 1))));
+        }
+
+        return sampled;
     }
 
     sample_from_distribution() {
 
     }
 
-    split() {
 
+    split(k) {
+        let shuffled_indices = d3.shuffle(d3.range(this._t.length));
+        let first = new Table(null, this._labels);
+        let rest = new Table(null, this._labels);
+        for (let i = 0; i < k; i++) {
+            first.with_row(this.row(shuffled_indices[i]));
+        }
+        for (let i = k; i < this._t.length; i++) {
+            rest.with_row(this.row(shuffled_indices[i]));
+        }
+
+        return { 'first': first, 'rest': rest };
     }
 
     show() {

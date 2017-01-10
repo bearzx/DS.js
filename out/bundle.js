@@ -59015,13 +59015,39 @@ var Table =
 	        stats_table.with_row(sum_row);
 	        return stats_table;
 	    };
-	    Table.prototype.percentile = function () {
+	    Table.prototype.percentile = function (p) {
+	        var pt = new Table(null, this._labels);
+	        var _this = this;
+	        var prow = {};
+	        this._labels.forEach(function (l) {
+	            var c = _this.column(l);
+	            c.sort();
+	            prow[l] = c[Math.ceil(c.length * p) - 1];
+	        });
+	        pt.with_row(prow);
+	        return pt;
 	    };
-	    Table.prototype.sample = function () {
+	    Table.prototype.sample = function (k) {
+	        var sampled = new Table(null, this._labels);
+	        var n = this._t.length;
+	        for (var i = 0; i < k; i++) {
+	            sampled.with_row(this.row(Math.ceil(Math.random() * (n - 1))));
+	        }
+	        return sampled;
 	    };
 	    Table.prototype.sample_from_distribution = function () {
 	    };
-	    Table.prototype.split = function () {
+	    Table.prototype.split = function (k) {
+	        var shuffled_indices = d3.shuffle(d3.range(this._t.length));
+	        var first = new Table(null, this._labels);
+	        var rest = new Table(null, this._labels);
+	        for (var i = 0; i < k; i++) {
+	            first.with_row(this.row(shuffled_indices[i]));
+	        }
+	        for (var i = k; i < this._t.length; i++) {
+	            rest.with_row(this.row(shuffled_indices[i]));
+	        }
+	        return { 'first': first, 'rest': rest };
 	    };
 	    Table.prototype.show = function () {
 	        var _this = this;
