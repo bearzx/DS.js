@@ -3,8 +3,127 @@ export class VGTemplate {
 
     }
 
+    public scatter(_values, xtitle, ytitle) {
+        let spec = {
+            "width": 400,
+            "height": 400,
+            "data": [
+                {
+                    "name": "gdp",
+                    // "url": "data/gdp.csv",
+                    // "format": {
+                    //     "type": "csv",
+                    //     "parse": {
+                    //         "agriculture_2010": "number",
+                    //         "industry_2010": "number"
+                    //     }
+                    // }
+                    "values": _values
+                }
+            ],
+            "scales": [
+                {
+                    "name": "xscale",
+                    "type": "linear",
+                    "domain": {
+                        "data": "gdp",
+                        "field": ["x"]
+                    },
+                    "range": "width",
+                    "nice": true
+                },
+                {
+                    "name": "yscale",
+                    "type": "linear",
+                    "domain": {
+                        "data": "gdp",
+                        "field": ["y"]
+                    },
+                    "range": "height",
+                    "nice": true
+                }
+            ],
+            "axes": [
+                {
+                    "type": "x",
+                    "scale": "xscale",
+                    "orient": "bottom",
+                    "title": xtitle
+                },
+                {
+                    "type": "y",
+                    "scale": "yscale",
+                    "orient": "left",
+                    "title": ytitle
+                }
+            ],
+            "marks": [
+                {
+                    "type": "symbol",
+                    "from": {
+                        "data": "gdp"
+                    },
+                    "properties": {
+                        "enter": {
+                            "x": {
+                                "field": "x",
+                                "scale": "xscale"
+                            },
+                            "y": {
+                                "field": "y",
+                                "scale": "yscale"
+                            },
+                            "size": { "value": 49 },
+                            "fill": { "value": "#3182bd" },
+                            "opacity": { "value": 0.7 }
+                        },
+                        "update": {
+                            "fill": { "value": "#3182bd" }
+                        },
+                        "hover": {
+                            "fill": { "value": "#de2d26" }
+                        }
+                    }
+                },
+                {
+                    "type": "text",
+                    "properties": {
+                        "enter": {
+                            "fill": { "value": "black" }
+                        },
+                        "update": {
+                            "x": {
+                                "scale": "xscale",
+                                "signal": "hover.x",
+                                "offset": 5
+                            },
+                            "y": {
+                                "scale": "yscale",
+                                "signal": "hover.y",
+                                "offset": -5
+                            }
+                            // "text": { "signal": "hover.country_name" }
+                        }
+                    }
+                }
+            ],
+            "signals": [
+                {
+                    "name": "hover",
+                    "init": {},
+                    "streams": [
+                        { "type": "symbol:mouseover", "expr": "datum" },
+                        { "type": "symbol:mouseout", "expr": "{}" }
+                    ]
+                }
+            ]
+        }
+
+        return spec;
+    }
+
     public bar(_values) {
-        var x = {
+        let spec = {
             "width": 600,
             "height": 200,
             "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
@@ -23,7 +142,7 @@ export class VGTemplate {
             "data": [
                 {
                     "name": "table",
-                    "values": _values                                        
+                    "values": _values
                 }
             ],
 
@@ -91,12 +210,12 @@ export class VGTemplate {
                 }
             ]
         };
-        
-        return x;
+
+        return spec;
     }
 
     public vbar(_values) {
-        var x = {
+        var spec = {
             "width": 400,
             "height": 200,
             "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
@@ -120,7 +239,7 @@ export class VGTemplate {
                         {
                             "type": "bin",
                             "field": "month_required",
-                            "output": {"start": "bin_start", "end": "bin_end"},
+                            "output": { "start": "bin_start", "end": "bin_end" },
                             "maxbins": 12
                         }
                         // ,{
@@ -197,7 +316,7 @@ export class VGTemplate {
                 }
             ]
         };
-        
-        return x;
+
+        return spec;
     }
 }

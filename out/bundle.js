@@ -10805,9 +10805,61 @@ var Table =
 	    };
 	    Table.prototype.bar = function () {
 	    };
-	    Table.prototype.scatter = function () {
+	    Table.prototype.scatter = function (xlabel, ylabel) {
 	        var id = this._id;
-	        vg.parse.spec('src/scatterplot.json', function (chart) { chart({ "el": "#vis-" + id }).update(); });
+	        var values = [];
+	        this._t.forEach(function (row) {
+	            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+	        });
+	        var templates = new vgt.VGTemplate();
+	        vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": "#vis-" + id }).update(); });
+	    };
+	    Table.prototype.scatter_d3 = function (xlabel, ylabel) {
+	        var id = this._id;
+	        var values = [];
+	        this._t.forEach(function (row) {
+	            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+	        });
+	        var margin = { top: 20, right: 15, bottom: 60, left: 60 }, width = 400 - margin.left - margin.right, height = 400 - margin.top - margin.bottom;
+	        var x = d3.scale.linear()
+	            .domain([0, d3.max(values, function (d) { return d.x; })])
+	            .range([0, width]);
+	        var y = d3.scale.linear()
+	            .domain([0, d3.max(values, function (d) { return d.y; })])
+	            .range([height, 0]);
+	        var chart = d3.select("#vis-" + id)
+	            .append('svg:svg')
+	            .attr('width', width + margin.right + margin.left)
+	            .attr('height', height + margin.top + margin.bottom)
+	            .attr('class', 'chart');
+	        var main = chart.append('g')
+	            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+	            .attr('width', width)
+	            .attr('height', height)
+	            .attr('class', 'main');
+	        // draw the x axis
+	        var xAxis = d3.svg.axis()
+	            .scale(x)
+	            .orient('bottom');
+	        main.append('g')
+	            .attr('transform', 'translate(0,' + height + ')')
+	            .attr('class', 'main axis date')
+	            .call(xAxis);
+	        // draw the y axis
+	        var yAxis = d3.svg.axis()
+	            .scale(y)
+	            .orient('left');
+	        main.append('g')
+	            .attr('transform', 'translate(0,0)')
+	            .attr('class', 'main axis date')
+	            .call(yAxis);
+	        var g = main.append("svg:g");
+	        g.selectAll("scatter-dots")
+	            .data(values)
+	            .enter().append("svg:circle")
+	            .attr("cx", function (d, i) { return x(d.x); })
+	            .attr("cy", function (d) { return y(d.y); })
+	            .attr("r", 8);
 	    };
 	    Table.prototype.hist = function (column) {
 	        var bins = {};
@@ -10859,8 +10911,124 @@ var Table =
 	var VGTemplate = (function () {
 	    function VGTemplate() {
 	    }
+	    VGTemplate.prototype.scatter = function (_values, xtitle, ytitle) {
+	        var spec = {
+	            "width": 400,
+	            "height": 400,
+	            "data": [
+	                {
+	                    "name": "gdp",
+	                    // "url": "data/gdp.csv",
+	                    // "format": {
+	                    //     "type": "csv",
+	                    //     "parse": {
+	                    //         "agriculture_2010": "number",
+	                    //         "industry_2010": "number"
+	                    //     }
+	                    // }
+	                    "values": _values
+	                }
+	            ],
+	            "scales": [
+	                {
+	                    "name": "xscale",
+	                    "type": "linear",
+	                    "domain": {
+	                        "data": "gdp",
+	                        "field": ["x"]
+	                    },
+	                    "range": "width",
+	                    "nice": true
+	                },
+	                {
+	                    "name": "yscale",
+	                    "type": "linear",
+	                    "domain": {
+	                        "data": "gdp",
+	                        "field": ["y"]
+	                    },
+	                    "range": "height",
+	                    "nice": true
+	                }
+	            ],
+	            "axes": [
+	                {
+	                    "type": "x",
+	                    "scale": "xscale",
+	                    "orient": "bottom",
+	                    "title": xtitle
+	                },
+	                {
+	                    "type": "y",
+	                    "scale": "yscale",
+	                    "orient": "left",
+	                    "title": ytitle
+	                }
+	            ],
+	            "marks": [
+	                {
+	                    "type": "symbol",
+	                    "from": {
+	                        "data": "gdp"
+	                    },
+	                    "properties": {
+	                        "enter": {
+	                            "x": {
+	                                "field": "x",
+	                                "scale": "xscale"
+	                            },
+	                            "y": {
+	                                "field": "y",
+	                                "scale": "yscale"
+	                            },
+	                            "size": { "value": 49 },
+	                            "fill": { "value": "#3182bd" },
+	                            "opacity": { "value": 0.7 }
+	                        },
+	                        "update": {
+	                            "fill": { "value": "#3182bd" }
+	                        },
+	                        "hover": {
+	                            "fill": { "value": "#de2d26" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "text",
+	                    "properties": {
+	                        "enter": {
+	                            "fill": { "value": "black" }
+	                        },
+	                        "update": {
+	                            "x": {
+	                                "scale": "xscale",
+	                                "signal": "hover.x",
+	                                "offset": 5
+	                            },
+	                            "y": {
+	                                "scale": "yscale",
+	                                "signal": "hover.y",
+	                                "offset": -5
+	                            }
+	                        }
+	                    }
+	                }
+	            ],
+	            "signals": [
+	                {
+	                    "name": "hover",
+	                    "init": {},
+	                    "streams": [
+	                        { "type": "symbol:mouseover", "expr": "datum" },
+	                        { "type": "symbol:mouseout", "expr": "{}" }
+	                    ]
+	                }
+	            ]
+	        };
+	        return spec;
+	    };
 	    VGTemplate.prototype.bar = function (_values) {
-	        var x = {
+	        var spec = {
 	            "width": 600,
 	            "height": 200,
 	            "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
@@ -10942,10 +11110,10 @@ var Table =
 	                }
 	            ]
 	        };
-	        return x;
+	        return spec;
 	    };
 	    VGTemplate.prototype.vbar = function (_values) {
-	        var x = {
+	        var spec = {
 	            "width": 400,
 	            "height": 200,
 	            "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
@@ -11035,7 +11203,7 @@ var Table =
 	                }
 	            ]
 	        };
-	        return x;
+	        return spec;
 	    };
 	    return VGTemplate;
 	}());
