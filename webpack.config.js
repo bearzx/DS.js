@@ -1,5 +1,5 @@
 var webpack = require('webpack');
-module.exports = {  
+module.exports = {
   entry: ['./src/parse.js', './src/tables.ts'],
   output: {
     filename: './out/bundle.js',
@@ -7,7 +7,7 @@ module.exports = {
     library: 'Table'
   },
   externals: {
-    
+
   },
   // Turn on sourcemaps
   devtool: 'source-map',
@@ -26,7 +26,18 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.ts$/, loader: 'ts' },
-      { test: /\.less$/, loader: 'style!css!less' }
-    ]
+      { test: /\.less$/, loader: 'style!css!less' },
+      {
+        test: require.resolve('./libs/vega'),
+        loaders: [
+          'transform?vega/scripts/strip-schema.js'
+        ]
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      }
+    ]    
   }
 }
+

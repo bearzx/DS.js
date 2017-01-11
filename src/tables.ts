@@ -373,8 +373,8 @@ export class Table {
     private _unused_label(label) {
         let original = label;
         let existing = this.labels();
-        let i = 2;                
-        while (existing.indexOf(label) != -1) {            
+        let i = 2;
+        while (existing.indexOf(label) != -1) {
             label = `${original}_${i}`;
             i += 1;
         }
@@ -511,7 +511,7 @@ export class Table {
     }
 
     plot() {
-
+        
     }
 
     bar() {
@@ -519,7 +519,9 @@ export class Table {
     }
 
     scatter() {
-
+        var id = this._id;        
+        
+        vg.parse.spec('src/scatterplot.json', function (chart) { chart({"el": `#vis-${id}`}).update(); });
     }
 
     hist(column: string) {

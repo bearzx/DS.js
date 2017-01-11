@@ -1,6 +1,6 @@
 window.$ = window.jQuery = require('jquery');
-window.d3 = require('d3');
-window.vg = require('vega');
+// window.d3 = require('script!../libs/d3.v3.min.js');
+// window.vg = require('script!../libs/vega/vega.js');
 window.datai = '';
 
 $(document).ready(function() {

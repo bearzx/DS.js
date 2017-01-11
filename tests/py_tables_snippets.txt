@@ -73,3 +73,12 @@ table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
 table.sample(2).show();
 
 ---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+var a = table.split(1);
+a.first.show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.scatter();
