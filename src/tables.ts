@@ -510,12 +510,24 @@ export class Table {
         $(`#table-area-${this._id}`).html(s);
     }
 
-    plot() {
-
+    plot(xlabel, ylabel) {
+        let id = this._id;
+        let values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        let templates = new vgt.VGTemplate();
+        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
     }
 
-    bar() {
-
+    bar(xlabel, ylabel) {
+        let id = this._id;
+        let templates = new vgt.VGTemplate();
+        let values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
     }
 
     scatter(xlabel, ylabel) {
@@ -611,7 +623,7 @@ export class Table {
         // console.log(data);
         var templates = new vgt.VGTemplate();
         var id = this._id;
-        vg.parse.spec(templates.bar(data), function (error, chart) {
+        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
             chart({ el: `#vis-${id}` }).update();
         });
     }
@@ -625,7 +637,11 @@ export class Table {
     }
 
     boxplot() {
-
+        let id = this._id;
+        let templates = new vgt.VGTemplate();
+        vg.parse.spec(templates.boxplot(), function (error, chart) {
+            chart({ el: `#vis-${id}` }).update();
+        });
     }
 
 }

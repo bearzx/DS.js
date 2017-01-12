@@ -10801,9 +10801,23 @@ var Table =
 	        });
 	        $("#table-area-" + this._id).html(s);
 	    };
-	    Table.prototype.plot = function () {
+	    Table.prototype.plot = function (xlabel, ylabel) {
+	        var id = this._id;
+	        var values = [];
+	        this._t.forEach(function (row) {
+	            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+	        });
+	        var templates = new vgt.VGTemplate();
+	        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": "#vis-" + id }).update(); });
 	    };
-	    Table.prototype.bar = function () {
+	    Table.prototype.bar = function (xlabel, ylabel) {
+	        var id = this._id;
+	        var templates = new vgt.VGTemplate();
+	        var values = [];
+	        this._t.forEach(function (row) {
+	            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+	        });
+	        vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": "#vis-" + id }).update(); });
 	    };
 	    Table.prototype.scatter = function (xlabel, ylabel) {
 	        var id = this._id;
@@ -10884,7 +10898,7 @@ var Table =
 	        // console.log(data);
 	        var templates = new vgt.VGTemplate();
 	        var id = this._id;
-	        vg.parse.spec(templates.bar(data), function (error, chart) {
+	        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
 	            chart({ el: "#vis-" + id }).update();
 	        });
 	    };
@@ -10896,6 +10910,11 @@ var Table =
 	        });
 	    };
 	    Table.prototype.boxplot = function () {
+	        var id = this._id;
+	        var templates = new vgt.VGTemplate();
+	        vg.parse.spec(templates.boxplot(), function (error, chart) {
+	            chart({ el: "#vis-" + id }).update();
+	        });
 	    };
 	    return Table;
 	}());
@@ -10911,6 +10930,505 @@ var Table =
 	var VGTemplate = (function () {
 	    function VGTemplate() {
 	    }
+	    VGTemplate.prototype.boxplot = function () {
+	        var spec = {
+	            "name": "boxplot",
+	            "height": 200,
+	            "padding": "auto",
+	            "width": 600,
+	            "signals": [
+	                {
+	                    "name": "boxSize",
+	                    "init": 40
+	                }
+	            ],
+	            "axes": [
+	                {
+	                    "type": "x",
+	                    "scale": "x"
+	                },
+	                {
+	                    "offset": 5,
+	                    "properties": {
+	                        "axis": {
+	                            "stroke": {
+	                                "value": "transparent"
+	                            }
+	                        }
+	                    },
+	                    "type": "y",
+	                    "scale": "y",
+	                    "tickSize": 0
+	                }
+	            ],
+	            "scales": [
+	                {
+	                    "name": "y",
+	                    "points": true,
+	                    "padding": 1.5,
+	                    "range": "height",
+	                    "domain": {
+	                        "data": "table",
+	                        "field": "x"
+	                    },
+	                    "type": "ordinal",
+	                    "round": true
+	                },
+	                {
+	                    "name": "x",
+	                    "nice": true,
+	                    "range": "width",
+	                    "domain": {
+	                        "data": "table",
+	                        "field": [
+	                            "y"
+	                        ]
+	                    },
+	                    "type": "linear",
+	                    "round": true
+	                }
+	            ],
+	            "data": [
+	                {
+	                    "name": "table",
+	                    "values": [
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 21
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 21
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 22.8
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 21.4
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 18.7
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 18.1
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 14.3
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 24.4
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 22.8
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 19.2
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 17.8
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 16.4
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 17.3
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 15.2
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 10.4
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 10.4
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 14.7
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 32.4
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 30.4
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 33.9
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 21.5
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 15.5
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 15.2
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 13.3
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 19.2
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 27.3
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 26
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 30.4
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 15.8
+	                        },
+	                        {
+	                            "x": 6,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 19.7
+	                        },
+	                        {
+	                            "x": 8,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 15
+	                        },
+	                        {
+	                            "x": 4,
+	                            "y2": 0,
+	                            "group": 1,
+	                            "y": 21.4
+	                        }
+	                    ]
+	                },
+	                {
+	                    "name": "stats",
+	                    "source": "table",
+	                    "transform": [
+	                        {
+	                            "type": "aggregate",
+	                            "groupby": [
+	                                "x"
+	                            ],
+	                            "summarize": {
+	                                "y": ["min", "max", "median", "q1", "q3", "valid"]
+	                            }
+	                        }
+	                    ]
+	                },
+	                {
+	                    "name": "iqrcalcs",
+	                    "source": "stats",
+	                    "transform": [{ "type": "formula", "field": "lower", "expr": "max(datum.min_y,datum.q1_y-1.5*(datum.q3_y-datum.q1_y))" },
+	                        { "type": "formula", "field": "upper", "expr": "min(datum.max_y,datum.q3_y+1.5*(datum.q3_y-datum.q1_y))" }]
+	                }
+	            ],
+	            "marks": [
+	                {
+	                    "properties": {
+	                        "enter": {
+	                            "height": {
+	                                "value": 1
+	                            },
+	                            "x2": {
+	                                "field": "upper",
+	                                "scale": "x"
+	                            },
+	                            "x": {
+	                                "field": "lower",
+	                                "scale": "x"
+	                            },
+	                            "yc": {
+	                                "field": "x",
+	                                "scale": "y"
+	                            },
+	                            "fill": {
+	                                "value": "#888"
+	                            }
+	                        }
+	                    },
+	                    "from": {
+	                        "data": "iqrcalcs"
+	                    },
+	                    "type": "rect"
+	                },
+	                {
+	                    "type": "rect",
+	                    "from": { "data": "iqrcalcs" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "q1_y" },
+	                            "x2": { "scale": "x", "field": "q3_y" },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "height": { "signal": "boxSize" },
+	                            "fill": { "value": "green" },
+	                            "stroke": { "value": "#888" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "rect",
+	                    "from": { "data": "iqrcalcs" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "median_y" },
+	                            "width": { "value": 2 },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "height": { "signal": "boxSize" },
+	                            "fill": { "value": "#000" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "rect",
+	                    "from": { "data": "iqrcalcs" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "lower" },
+	                            "width": { "value": 1 },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "height": { "signal": "boxSize", "mult": 0.5 },
+	                            "fill": { "value": "#000" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "rect",
+	                    "from": { "data": "iqrcalcs" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "upper" },
+	                            "width": { "value": 1 },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "height": { "signal": "boxSize", "mult": 0.5 },
+	                            "fill": { "value": "#000" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "symbol",
+	                    "from": { "data": "stats" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "min_y" },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "size": { "value": 20 },
+	                            "stroke": { "value": "#000" },
+	                            "fill": { "value": "#fff" }
+	                        }
+	                    }
+	                },
+	                {
+	                    "type": "symbol",
+	                    "from": { "data": "stats" },
+	                    "properties": {
+	                        "enter": {
+	                            "x": { "scale": "x", "field": "max_y" },
+	                            "yc": { "scale": "y", "field": "x" },
+	                            "size": { "value": 20 },
+	                            "stroke": { "value": "#000" },
+	                            "fill": { "value": "#fff" }
+	                        }
+	                    }
+	                }
+	            ]
+	        };
+	        return spec;
+	    };
+	    VGTemplate.prototype.plot = function (_values, xtitle, ytitle) {
+	        var spec = {
+	            "width": 1,
+	            "height": 1,
+	            "padding": "auto",
+	            "data": [
+	                {
+	                    "name": "source",
+	                    // "url": "data/stocks.csv",
+	                    // "format": {
+	                    //     "type": "csv",
+	                    //     "parse": { "date": "date", "price": "number" }
+	                    // },
+	                    // "transform": [
+	                    //     {
+	                    //         "type": "filter",
+	                    //         "test": "datum[\"date\"] !== null && !isNaN(datum[\"date\"]) && datum[\"price\"] !== null && !isNaN(datum[\"price\"])"
+	                    //     },
+	                    //     { "type": "filter", "test": "datum.symbol==='GOOG'" }
+	                    // ]
+	                    "values": _values
+	                },
+	                {
+	                    "name": "layout",
+	                    "values": [{}],
+	                    "transform": [
+	                        { "type": "formula", "field": "width", "expr": "200" },
+	                        { "type": "formula", "field": "height", "expr": "200" }
+	                    ]
+	                }
+	            ],
+	            "marks": [
+	                {
+	                    "name": "root",
+	                    "type": "group",
+	                    // "description": "Google's stock price over time.",
+	                    "from": { "data": "layout" },
+	                    "properties": {
+	                        "update": {
+	                            "width": { "field": "width" },
+	                            "height": { "field": "height" }
+	                        }
+	                    },
+	                    "marks": [
+	                        {
+	                            "name": "marks",
+	                            "type": "line",
+	                            "from": {
+	                                "data": "source"
+	                            },
+	                            "properties": {
+	                                "update": {
+	                                    "x": { "scale": "x", "field": "x" },
+	                                    "y": { "scale": "y", "field": "y" },
+	                                    "strokeWidth": { "value": 2 },
+	                                    "stroke": { "value": "#4682b4" }
+	                                }
+	                            }
+	                        }
+	                    ],
+	                    "scales": [
+	                        {
+	                            "name": "x",
+	                            "type": "linear",
+	                            "domain": {
+	                                "data": "source",
+	                                "field": "x"
+	                            },
+	                            "rangeMin": 0,
+	                            "rangeMax": 200,
+	                            "round": true
+	                        },
+	                        {
+	                            "name": "y",
+	                            "type": "linear",
+	                            "domain": {
+	                                "data": "source",
+	                                "field": "y"
+	                            },
+	                            "rangeMin": 200,
+	                            "rangeMax": 0,
+	                            "round": true,
+	                            "nice": true,
+	                            "zero": true
+	                        }
+	                    ],
+	                    "axes": [
+	                        {
+	                            "type": "x",
+	                            "scale": "x",
+	                            "grid": true,
+	                            "layer": "back",
+	                            "ticks": 5,
+	                            "title": xtitle
+	                        },
+	                        {
+	                            "type": "y",
+	                            "scale": "y",
+	                            "format": "s",
+	                            "grid": true,
+	                            "layer": "back",
+	                            "title": ytitle
+	                        }
+	                    ]
+	                }
+	            ]
+	        };
+	        return spec;
+	    };
 	    VGTemplate.prototype.scatter = function (_values, xtitle, ytitle) {
 	        var spec = {
 	            "width": 400,
@@ -11027,7 +11545,7 @@ var Table =
 	        };
 	        return spec;
 	    };
-	    VGTemplate.prototype.bar = function (_values) {
+	    VGTemplate.prototype.bar = function (_values, xtitle, ytitle) {
 	        var spec = {
 	            "width": 600,
 	            "height": 200,
@@ -11063,7 +11581,18 @@ var Table =
 	                    "nice": true
 	                }
 	            ],
-	            "axes": [{ "type": "x", "scale": "x" }],
+	            "axes": [
+	                {
+	                    "type": "x",
+	                    "scale": "x",
+	                    "title": xtitle
+	                },
+	                {
+	                    "type": "y",
+	                    "scale": "y",
+	                    "title": ytitle
+	                }
+	            ],
 	            "marks": [
 	                {
 	                    "type": "rect",
