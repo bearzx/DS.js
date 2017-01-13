@@ -1,1 +1,1 @@
-cat bookmarklets/test.js | tr -d '\n'
+cat bookmarklets/load.js | tr -d '\n'

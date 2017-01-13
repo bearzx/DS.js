@@ -10912,7 +10912,19 @@ var Table =
 	    Table.prototype.boxplot = function () {
 	        var id = this._id;
 	        var templates = new vgt.VGTemplate();
-	        vg.parse.spec(templates.boxplot(), function (error, chart) {
+	        var values = [];
+	        var _this = this;
+	        this._t.forEach(function (row) {
+	            _this._labels.forEach(function (l, i) {
+	                values.push({
+	                    'x': i,
+	                    'y2': 0,
+	                    'group': 1,
+	                    'y': row[l]
+	                });
+	            });
+	        });
+	        vg.parse.spec(templates.boxplot(values), function (error, chart) {
 	            chart({ el: "#vis-" + id }).update();
 	        });
 	    };
@@ -10930,7 +10942,7 @@ var Table =
 	var VGTemplate = (function () {
 	    function VGTemplate() {
 	    }
-	    VGTemplate.prototype.boxplot = function () {
+	    VGTemplate.prototype.boxplot = function (_values) {
 	        var spec = {
 	            "name": "boxplot",
 	            "height": 200,
@@ -10991,200 +11003,7 @@ var Table =
 	            "data": [
 	                {
 	                    "name": "table",
-	                    "values": [
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 21
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 21
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 22.8
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 21.4
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 18.7
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 18.1
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 14.3
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 24.4
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 22.8
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 19.2
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 17.8
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 16.4
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 17.3
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 15.2
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 10.4
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 10.4
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 14.7
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 32.4
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 30.4
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 33.9
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 21.5
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 15.5
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 15.2
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 13.3
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 19.2
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 27.3
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 26
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 30.4
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 15.8
-	                        },
-	                        {
-	                            "x": 6,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 19.7
-	                        },
-	                        {
-	                            "x": 8,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 15
-	                        },
-	                        {
-	                            "x": 4,
-	                            "y2": 0,
-	                            "group": 1,
-	                            "y": 21.4
-	                        }
-	                    ]
+	                    "values": _values
 	                },
 	                {
 	                    "name": "stats",

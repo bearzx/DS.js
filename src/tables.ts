@@ -639,7 +639,19 @@ export class Table {
     boxplot() {
         let id = this._id;
         let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.boxplot(), function (error, chart) {
+        let values = [];
+        let _this = this;        
+        this._t.forEach(function(row) {
+            _this._labels.forEach(function(l, i) {
+                values.push({
+                    'x': i,
+                    'y2': 0,
+                    'group': 1,
+                    'y': row[l]
+                });
+            });            
+        });
+        vg.parse.spec(templates.boxplot(values), function (error, chart) {
             chart({ el: `#vis-${id}` }).update();
         });
     }
