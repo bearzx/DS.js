@@ -10917,7 +10917,7 @@ var Table =
 	        this._t.forEach(function (row) {
 	            _this._labels.forEach(function (l, i) {
 	                values.push({
-	                    'x': i,
+	                    'x': l,
 	                    'y2': 0,
 	                    'group': 1,
 	                    'y': row[l]
