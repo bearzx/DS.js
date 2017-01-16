@@ -8,7 +8,7 @@
     "node"
   ],
   "files": [
-    "demo.ts",
+    // "demo.ts",
     "./src/tables.ts",
     "./src/vgtemplates.ts"
   ]

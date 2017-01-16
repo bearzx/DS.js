@@ -2,6 +2,9 @@
 .ds-table td {
   border: 1px solid;
 }
+.open-dsjs {
+  margin-left: 2px;
+}
 .repl {
   float: left;
   min-width: 400px;
@@ -24,6 +27,8 @@
 .table-area {
   min-height: 300px;
   border: 1px dashed;
+  padding-top: 5px;
+  padding-left: 5px;
 }
 .submitted {
   min-height: 580px;

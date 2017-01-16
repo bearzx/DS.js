@@ -7,7 +7,7 @@ $(document).ready(function() {
     $('a').each(function(i) {
         console.log($(this).attr('href'));
         if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {
-            $(this).after(`<button datai="${i}" class="open-dsjs">Toggle ds.js</button>`);
+            $(this).after(`<button datai="${i}" class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
         }
     });    
 
@@ -31,11 +31,13 @@ $(document).ready(function() {
                         <div id="table-area-${datai}" class="table-area"></div>
                     </div>
                 </div>
+                <div style="clear: both"></div>
             `;
             $(this).after(ds_env);
             var editor = ace.edit(editor_id);
             editor.setTheme("ace/theme/chrome");
             editor.getSession().setMode("ace/mode/javascript");
+            editor.getSession().setUseWrapMode(true);
             $(env_id).toggle();
         }
 

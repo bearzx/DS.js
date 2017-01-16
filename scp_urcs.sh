@@ -1,2 +1,3 @@
-scp out/bundle.js xzhang92@cycle1.cs.rochester.edu:/u/www/u/xzhang92/ds.js/
-scp out/ds.js.css xzhang92@cycle1.cs.rochester.edu:/u/www/u/xzhang92/ds.js/
+scp -r out/ xzhang92@cycle1.cs.rochester.edu:/u/www/u/xzhang92/ds.js/
+scp -r samples/ xzhang92@cycle1.cs.rochester.edu:/u/www/u/xzhang92/ds.js
+scp -r data/ xzhang92@cycle1.cs.rochester.edu:/u/www/u/xzhang92/ds.js

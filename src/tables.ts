@@ -640,7 +640,7 @@ export class Table {
         let id = this._id;
         let templates = new vgt.VGTemplate();
         let values = [];
-        let _this = this;        
+        let _this = this;
         this._t.forEach(function(row) {
             _this._labels.forEach(function(l, i) {
                 values.push({
