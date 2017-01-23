@@ -66,9 +66,9 @@ var Table =
 	        }
 	    });    
 	
-	    $(".open-dsjs").click(function() {        
+	    $(".open-dsjs").click(function() {
 	        var datai = $(this).attr('datai');
-	        var env_id = '#env-' + datai;        
+	        var env_id = '#env-' + datai;
 	        var editor_id = `editor-${datai}`;
 	        if ($(env_id).length) {
 	            $(env_id).toggle();
@@ -87,8 +87,14 @@ var Table =
 	                    </div>
 	                </div>
 	                <div style="clear: both"></div>
-	            `;
-	            $(this).after(ds_env);
+	            `;            
+	            
+	            var cur = this;
+	            while (!$(cur).is('div')) {
+	                cur = $(cur).parent();
+	            }
+	            // console.log($(cur).get(0).tagName);
+	            $(cur).after(ds_env);
 	            var editor = ace.edit(editor_id);
 	            editor.setTheme("ace/theme/chrome");
 	            editor.getSession().setMode("ace/mode/javascript");
