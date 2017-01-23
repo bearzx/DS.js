@@ -25,6 +25,10 @@ export class Table {
         this._id = datai;
     }
 
+    public copy_from(t: Table) {
+        return this;
+    }
+
     private table_init() {
         this._labels = d3.keys(this._t[0]);
         this._labels.forEach((item, index) => {
@@ -53,6 +57,15 @@ export class Table {
                 _this.table_init();
             }
         });
+    }
+
+    public set(column_or_label, f) {
+        let l = this._as_label(column_or_label);
+        this._t.forEach(function(row) {
+            row[l] = f(row[l]);
+        });
+
+        return this;
     }
 
     public num_rows() {

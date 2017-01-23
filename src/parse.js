@@ -5,11 +5,11 @@ window.datai = '';
 
 $(document).ready(function() {
     $('a').each(function(i) {
-        console.log($(this).attr('href'));
+        // console.log($(this).attr('href'));
         if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {
             $(this).after(`<button datai="${i}" class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
         }
-    });    
+    });
 
     $(".open-dsjs").click(function() {
         var datai = $(this).attr('datai');
@@ -21,6 +21,7 @@ $(document).ready(function() {
             var ds_env = `
                 <div id="env-${datai}" class="env">
                     <div class="repl">
+                        <div class="history" id="history-${datai}"></div>
                         <div class="inputs">
                             <div id="${editor_id}" class="editor"></div>
                             <button datai="${datai}" class="run">Run</button>
@@ -29,13 +30,15 @@ $(document).ready(function() {
                     <div class="show-panel">
                         <div id="vis-${datai}" class="vis"></div>
                         <div id="table-area-${datai}" class="table-area"></div>
-                    </div>
+                    </div>                    
                 </div>
                 <div style="clear: both"></div>
             `;            
             
             var cur = this;
-            while (!$(cur).is('div')) {
+            let block_styles = ['block', 'inline-block'];
+            while (!block_styles.includes($(cur).css('display'))) {
+                // console.log($(cur).css('display'));
                 cur = $(cur).parent();
             }
             // console.log($(cur).get(0).tagName);
@@ -52,7 +55,9 @@ $(document).ready(function() {
             $(`#vis-${datai}`).html('');
             $(`#table-area-${datai}`).html('');
             var editor = ace.edit(`editor-${datai}`);
-            var code = editor.getValue();
+            var code = editor.getValue();            
+            $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+            editor.setValue('');
             window.datai = datai;
             eval(code);
         });

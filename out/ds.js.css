@@ -1,3 +1,17 @@
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-family: Consolas;
+  line-height: 1.42857143;
+  color: #333;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 .ds-table th,
 .ds-table td {
   border: 1px solid;
@@ -8,7 +22,7 @@
 .repl {
   float: left;
   min-width: 400px;
-  min-height: 600px;
+  min-height: 300px;
   /*border: 1px dashed;*/
   padding: 5px;
 }
@@ -19,6 +33,13 @@
   min-height: 600px;
   border: 1px dashed;
   padding: 5px;
+}
+.history {
+  float: left;
+  min-width: 400px;
+  min-height: 300px;
+  padding: 5px;
+  border: 1px dashed;
 }
 .vis {
   min-height: 300px;
@@ -41,12 +62,13 @@
   top: 5px;
   right: 0;
   bottom: 0;
-  left: 5px;
   margin-bottom: 10px;
   width: 400px;
-  height: 550px;
+  height: 300px;
+  border: 1px dashed;
 }
 .env {
+  min-width: 1200px;
   min-height: 600px;
   display: none;
 }
