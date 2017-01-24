@@ -2,14 +2,16 @@ javascript: (
     function () {
         function bundle_load() {
             var css = document.createElement('link');
-            css.setAttribute('href', 'http://cs.rochester.edu/~xzhang92/ds.js/out/ds.js.css'); 
+            /*css.setAttribute('href', 'http://cs.rochester.edu/~xzhang92/ds.js/out/ds.js.css');*/
             /*css.setAttribute('href', 'http://localhost/~bearzx/ds.js/out/ds.js.css');*/
+            css.setAttribute('href', 'https://www.bearzx.com/ds.js/out/ds.js.css');
             css.setAttribute('rel', 'stylesheet');
-            document.head.appendChild(css);                                
+            document.head.appendChild(css);
 
             var bundlejs = document.createElement('script');
-            bundlejs.setAttribute('src', 'http://cs.rochester.edu/~xzhang92/ds.js/out/bundle.js'); 
+            /*bundlejs.setAttribute('src', 'http://cs.rochester.edu/~xzhang92/ds.js/out/bundle.js');*/
             /*bundlejs.setAttribute('src', 'http://localhost/~bearzx/ds.js/out/bundle.js');*/
+            bundlejs.setAttribute('src', 'https://www.bearzx.com/ds.js/out/bundle.js');
             document.body.appendChild(bundlejs);    
         }
 
