@@ -1,15 +1,36 @@
 window.$ = window.jQuery = require('jquery');
+require('../libs/jquery.tableparser.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
 window.datai = '';
 
 $(document).ready(function() {
-    $('a').each(function(i) {
-        // console.log($(this).attr('href'));
+    // console.log($('#complex').parsetable(true, true));
+
+    // csv detection
+    $('a').each(function(i) {        
         let data_link = $(this).attr('href');
         if (data_link && data_link.endsWith('.csv')) {
             $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
         }
+    });
+
+    // html table detection
+    $('table').each(function(i) {
+        // console.log($(this).parsetable(true, true));
+        $(this).before(`<button datai="${i}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+        $(this).addClass(`dsjs-htable-${i}`);
+    });
+
+    $(".open-dsjs-htable").click(function() {
+        var datai = $(this).attr('datai');
+        console.log($(`.dsjs-htable-${datai}`).parsetable(true, true));
+        let code = `
+            ht${datai} = new Table.Table();
+            ht${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+            console.log(ht${datai});
+        `;
+        eval(code);
     });
 
     $(".open-dsjs").click(function() {

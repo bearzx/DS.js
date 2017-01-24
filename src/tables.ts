@@ -176,6 +176,15 @@ export class Table {
         return this;
     }
 
+    from_columns(columns: any[]) {
+        let _this = this;
+        columns.forEach(function(column) {
+            _this.with_column(column[0], column.slice(1, column.length));
+        });
+
+        return this;
+    }
+
     relabel(label, new_label) {
         label = this._as_label(label);
         var index = this._labels.indexOf(label);

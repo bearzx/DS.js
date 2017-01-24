@@ -19,12 +19,14 @@
   "dependencies": {
     "@types/jquery": "^2.0.34",
     "ace-builds": "^1.2.5",
+    "cheerio": "^0.22.0",
+    "cheerio-tableparser": "^1.0.1",
     "d3": "^4.4.0",
     "jquery": "^3.1.1",
-    "ts-loader": "^1.2.2",
     "jstransform": "^11.0.2",
     "through": "^2.3.8",
-    "transform-loader": "^0.2.3"
+    "transform-loader": "^0.2.3",
+    "ts-loader": "^1.2.2"
   },
   "devDependencies": {
     "@types/core-js": "^0.9.35",

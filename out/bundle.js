@@ -46,7 +46,7 @@ var Table =
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(1);
-	module.exports = __webpack_require__(3);
+	module.exports = __webpack_require__(4);
 
 
 /***/ },
@@ -54,17 +54,38 @@ var Table =
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function($) {window.$ = window.jQuery = __webpack_require__(2);
+	__webpack_require__(3);
 	// window.d3 = require('script!../libs/d3.v3.min.js');
 	// window.vg = require('script!../libs/vega/vega.js');
 	window.datai = '';
 	
 	$(document).ready(function() {
-	    $('a').each(function(i) {
-	        // console.log($(this).attr('href'));
+	    // console.log($('#complex').parsetable(true, true));
+	
+	    // csv detection
+	    $('a').each(function(i) {        
 	        let data_link = $(this).attr('href');
 	        if (data_link && data_link.endsWith('.csv')) {
 	            $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
 	        }
+	    });
+	
+	    // html table detection
+	    $('table').each(function(i) {
+	        // console.log($(this).parsetable(true, true));
+	        $(this).before(`<button datai="${i}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+	        $(this).addClass(`dsjs-htable-${i}`);
+	    });
+	
+	    $(".open-dsjs-htable").click(function() {
+	        var datai = $(this).attr('datai');
+	        console.log($(`.dsjs-htable-${datai}`).parsetable(true, true));
+	        let code = `
+	            ht${datai} = new Table.Table();
+	            ht${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+	            console.log(ht${datai});
+	        `;
+	        eval(code);
 	    });
 	
 	    $(".open-dsjs").click(function() {
@@ -10358,8 +10379,67 @@ var Table =
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/* WEBPACK VAR INJECTION */(function(jQuery) {/*!
+	 * jQuery Parse Table plugin
+	 *
+	 * Copyright 2011, Francis Chong
+	 * Licensed under the MIT licenses.
+	 *
+	 */
+	(function($) {
+	    $.fn.parsetable = function(dupCols, dupRows) {
+	        if (dupRows == undefined) dupRows = false;
+	        if (dupCols == undefined) dupCols = false;
+	        
+	        var columns = [],
+	        curr_x = 0,
+	        curr_y = 0;
+	
+	        $("tr", this).each(function(row_idx, row) {
+	            curr_y = 0;
+	            $("td, th", row).each(function(col_idx, col) {
+	                var rowspan = $(col).attr('rowspan') || 1;
+	                var colspan = $(col).attr('colspan') || 1;
+	                var content = col.innerHTML || "";
+	
+	                var x = 0,
+	                y = 0;
+	                for (x = 0; x < rowspan; x++) {
+	                    for (y = 0; y < colspan; y++) {
+	                        if (columns[curr_y + y] == undefined) {
+	                            columns[curr_y + y] = []
+	                        }
+	
+	                        while (columns[curr_y + y][curr_x + x] != undefined) {
+	                            curr_y += 1
+	                            if (columns[curr_y + y] == undefined) {
+	                                columns[curr_y + y] = []
+	                            }
+	                        }
+	
+	                        if ((x == 0 || dupRows) && (y == 0 || dupCols)) {
+	                            columns[curr_y + y][curr_x + x] = content
+	                        } else {
+	                            columns[curr_y + y][curr_x + x] = ""
+	                        }
+	                    }
+	                }
+	                curr_y += 1;
+	            });
+	            curr_x += 1;
+	        });
+	
+	        return columns;
+	    };
+	})(jQuery);
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
-	var vgt = __webpack_require__(4);
+	var vgt = __webpack_require__(5);
 	var Table = (function () {
 	    function Table(t, l, url) {
 	        this._t = [];
@@ -10508,6 +10588,13 @@ var Table =
 	                this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
 	            }
 	        }
+	        return this;
+	    };
+	    Table.prototype.from_columns = function (columns) {
+	        var _this = this;
+	        columns.forEach(function (column) {
+	            _this.with_column(column[0], column.slice(1, column.length));
+	        });
 	        return this;
 	    };
 	    Table.prototype.relabel = function (label, new_label) {
@@ -10970,7 +11057,7 @@ var Table =
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	"use strict";
