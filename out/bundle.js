@@ -61,8 +61,9 @@ var Table =
 	$(document).ready(function() {
 	    $('a').each(function(i) {
 	        // console.log($(this).attr('href'));
-	        if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {
-	            $(this).after(`<button datai="${i}" class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+	        let data_link = $(this).attr('href');
+	        if (data_link && data_link.endsWith('.csv')) {
+	            $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
 	        }
 	    });
 	
@@ -71,8 +72,10 @@ var Table =
 	        var env_id = '#env-' + datai;
 	        var editor_id = `editor-${datai}`;
 	        if ($(env_id).length) {
+	            // open existing environment
 	            $(env_id).toggle();
 	        } else {
+	            // create new environment
 	            var ds_env = `
 	                <div id="env-${datai}" class="env">
 	                    <div class="repl">
@@ -90,7 +93,7 @@ var Table =
 	                <div style="clear: both"></div>
 	            `;            
 	            
-	            var cur = this;
+	            let cur = this;
 	            let block_styles = ['block', 'inline-block'];
 	            while (!block_styles.includes($(cur).css('display'))) {
 	                // console.log($(cur).css('display'));
@@ -101,7 +104,12 @@ var Table =
 	            var editor = ace.edit(editor_id);
 	            editor.setTheme("ace/theme/chrome");
 	            editor.getSession().setMode("ace/mode/javascript");
-	            editor.getSession().setUseWrapMode(true);
+	            editor.getSession().setUseWrapMode(true);            
+	            let data_link = $(this).attr('data-link');
+	            let code = `t${datai} = new Table.Table(null, null, '${data_link}');`;
+	            $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+	            window.datai = datai;
+	            eval(code);
 	            $(env_id).toggle();
 	        }
 	
@@ -113,7 +121,7 @@ var Table =
 	            var code = editor.getValue();            
 	            $(`#history-${datai}`).append(`<pre>${code}</pre>`);
 	            editor.setValue('');
-	            window.datai = datai;
+	            window.datai = datai;            
 	            eval(code);
 	        });
 	    });
@@ -10353,7 +10361,7 @@ var Table =
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
 	var vgt = __webpack_require__(4);
 	var Table = (function () {
-	    function Table(t, l) {
+	    function Table(t, l, url) {
 	        this._t = [];
 	        this._labels = [];
 	        this._column_order = {};
@@ -10361,6 +10369,9 @@ var Table =
 	        }
 	        if (l != null) {
 	            this._labels = l.slice();
+	        }
+	        if (url != null) {
+	            this.read_table_csv_sync(url);
 	        }
 	        this._id = datai;
 	    }
@@ -10822,6 +10833,7 @@ var Table =
 	            });
 	            s += "</tr>";
 	        });
+	        console.log("#table-area-" + this._id);
 	        $("#table-area-" + this._id).html(s);
 	    };
 	    Table.prototype.plot = function (xlabel, ylabel) {

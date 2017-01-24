@@ -6,8 +6,9 @@ window.datai = '';
 $(document).ready(function() {
     $('a').each(function(i) {
         // console.log($(this).attr('href'));
-        if ($(this).attr('href') && $(this).attr('href').endsWith('.csv')) {
-            $(this).after(`<button datai="${i}" class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+        let data_link = $(this).attr('href');
+        if (data_link && data_link.endsWith('.csv')) {
+            $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
         }
     });
 
@@ -16,8 +17,10 @@ $(document).ready(function() {
         var env_id = '#env-' + datai;
         var editor_id = `editor-${datai}`;
         if ($(env_id).length) {
+            // open existing environment
             $(env_id).toggle();
         } else {
+            // create new environment
             var ds_env = `
                 <div id="env-${datai}" class="env">
                     <div class="repl">
@@ -35,7 +38,7 @@ $(document).ready(function() {
                 <div style="clear: both"></div>
             `;            
             
-            var cur = this;
+            let cur = this;
             let block_styles = ['block', 'inline-block'];
             while (!block_styles.includes($(cur).css('display'))) {
                 // console.log($(cur).css('display'));
@@ -46,7 +49,12 @@ $(document).ready(function() {
             var editor = ace.edit(editor_id);
             editor.setTheme("ace/theme/chrome");
             editor.getSession().setMode("ace/mode/javascript");
-            editor.getSession().setUseWrapMode(true);
+            editor.getSession().setUseWrapMode(true);            
+            let data_link = $(this).attr('data-link');
+            let code = `t${datai} = new Table.Table(null, null, '${data_link}');`;
+            $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+            window.datai = datai;
+            eval(code);
             $(env_id).toggle();
         }
 
@@ -58,7 +66,7 @@ $(document).ready(function() {
             var code = editor.getValue();            
             $(`#history-${datai}`).append(`<pre>${code}</pre>`);
             editor.setValue('');
-            window.datai = datai;
+            window.datai = datai;            
             eval(code);
         });
     });

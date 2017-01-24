@@ -36,7 +36,7 @@ pre {
 }
 .history {
   float: left;
-  min-width: 400px;
+  width: 400px;
   min-height: 300px;
   padding: 5px;
   border: 1px dashed;
@@ -68,7 +68,7 @@ pre {
   border: 1px dashed;
 }
 .env {
-  min-width: 1200px;
+  min-width: 2000px;
   min-height: 600px;
   display: none;
 }

@@ -13,13 +13,17 @@ export class Table {
     private _column_order: any = {};
     private _id: string;
 
-    constructor(t?: Table, l?: any[]) {
+    constructor(t?: Table, l?: any[], url?) {
         if (t != null) {
 
         }
 
         if (l != null) {
             this._labels = l.slice();
+        }
+
+        if (url != null) {
+            this.read_table_csv_sync(url);
         }
 
         this._id = datai;
@@ -520,6 +524,7 @@ export class Table {
             s += "</tr>";
         });
 
+        console.log(`#table-area-${this._id}`);
         $(`#table-area-${this._id}`).html(s);
     }
 
