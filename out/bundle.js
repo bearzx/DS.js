@@ -87,23 +87,18 @@ var Table =
 	        
 	        let cur = _this;
 	        let block_styles = ['block', 'inline-block'];
-	        while (!block_styles.includes($(cur).css('display'))) {
-	            // console.log($(cur).css('display'));
+	        while (!block_styles.includes($(cur).css('display'))) {            
 	            cur = $(cur).parent();
-	        }
-	        // console.log($(cur).get(0).tagName);
+	        }        
 	        $(cur).after(ds_env);
 	        var editor = ace.edit(editor_id);
 	        editor.setTheme("ace/theme/chrome");
 	        editor.getSession().setMode("ace/mode/javascript");
 	        editor.getSession().setUseWrapMode(true);
-	        let data_link = $(_this).attr('data-link');
-	        // let code = `
-	        //     t${datai} = new Table.Table(null, null, '${data_link}');
-	        // `;
-	        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+	        let data_link = $(_this).attr('data-link');        
+	        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
 	        window.datai = datai;
-	        eval(code);
+	        // eval(code);
 	        $(env_id).toggle();
 	    }
 	
@@ -120,62 +115,39 @@ var Table =
 	    });
 	}
 	
-	$(document).ready(function() {    
+	$(document).ready(function() {
+	    let datai = 0;
 	    // csv detection
 	    $('a').each(function(i) {        
 	        let data_link = $(this).attr('href');
 	        if (data_link && data_link.endsWith('.csv')) {
-	            $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+	            $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+	            eval(`
+	                t${datai} = new Table.Table(null, null, '${data_link}', ${datai})
+	            `);
+	            datai += 1;
 	        }
 	    });
 	
 	    // html table detection
-	    $('table').each(function(i) {        
-	        $(this).after(`<button datai="h${i}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
-	        $(this).addClass(`dsjs-htable-h${i}`);
+	    $('table').each(function(i) {
+	        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+	        $(this).addClass(`dsjs-htable-${datai}`);        
+	        eval(`
+	            t${datai} = new Table.Table(null, null, null, ${datai});
+	            t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+	        `);
+	        datai += 1;
 	    });    
 	
 	    $(".open-dsjs-htable").click(function() {
-	        // var datai = $(this).attr('datai');
-	        // var env_id = `#env-${datai}`;
-	        // var editor_id = `heditor-${datai}`;
-	        // if ($(env_id).length) {
-	
-	        // } else {
-	        //     let code = `
-	        //         ht${datai} = new Table.Table();
-	        //         ht${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
-	        //     `;
-	        //     eval(code);
-	        //     var ds_env = `
-	        //         <div id="henv-${datai}" class="env">
-	        //             <div class="repl">
-	        //                 <div class="history" id="history-${datai}"></div>
-	        //                 <div class="inputs">
-	        //                     <div id="${editor_id}" class="editor"></div>
-	        //                     <button datai="${datai}" class="run">Run</button>
-	        //                 </div>
-	        //             </div>
-	        //             <div class="show-panel">
-	        //                 <div id="vis-${datai}" class="vis"></div>
-	        //                 <div id="table-area-${datai}" class="table-area"></div>
-	        //             </div>
-	        //         </div>
-	        //         <div style="clear: both"></div>
-	        //     `;
-	        //     $(this).after(ds_env);
-	        //     $(env_id).toggle();
-	        // }        
-	        let datai = $(this).attr('datai');
-	        let code = `t${datai} = new Table.Table(); t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));`;
-	        env_init(this, code);
+	        let datai = $(this).attr('datai');        
+	        env_init(this, '');
 	    });
 	
 	    $(".open-dsjs").click(function() {
-	        let datai = $(this).attr('datai');
-	        let data_link = $(this).attr('data-link');
-	        let code = `t${datai} = new Table.Table(null, null, '${data_link}')`;
-	        env_init(this, code);
+	        let datai = $(this).attr('datai');        
+	        env_init(this, '');
 	    });
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
@@ -10471,8 +10443,9 @@ var Table =
 
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
 	var vgt = __webpack_require__(5);
+	// declare var datai: any;
 	var Table = (function () {
-	    function Table(t, l, url) {
+	    function Table(t, l, url, datai) {
 	        this._t = [];
 	        this._labels = [];
 	        this._column_order = {};
@@ -10588,7 +10561,7 @@ var Table =
 	        return this;
 	    };
 	    Table.prototype.with_column = function (label, values) {
-	        if (values.length == 1) {
+	        if ((values.length == 1) && (this._t.length != 0)) {
 	            for (var i = 0; i < this._t.length; i++) {
 	                this._t[i][label] = values[0];
 	            }
@@ -10624,6 +10597,11 @@ var Table =
 	    Table.prototype.from_columns = function (columns) {
 	        var _this = this;
 	        columns.forEach(function (column) {
+	            column.forEach(function (s, i) {
+	                var node = document.createElement('div');
+	                node.innerHTML = s;
+	                column[i] = node.textContent || node.innerText || '';
+	            });
 	            _this.with_column(column[0], column.slice(1, column.length));
 	        });
 	        return this;

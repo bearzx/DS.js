@@ -4,7 +4,7 @@ declare var d3: any;
 declare var $: any;
 declare var vg: any;
 declare var ace: any;
-declare var datai: any;
+// declare var datai: any;
 
 export class Table {
 
@@ -13,7 +13,7 @@ export class Table {
     private _column_order: any = {};
     private _id: string;
 
-    constructor(t?: Table, l?: any[], url?) {
+    constructor(t?: Table, l?: any[], url?, datai?) {
         if (t != null) {
 
         }
@@ -145,7 +145,7 @@ export class Table {
     }
 
     with_column(label, values) {
-        if (values.length == 1) {
+        if ((values.length == 1) && (this._t.length != 0)) {
             for (var i = 0; i < this._t.length; i++) {
                 this._t[i][label] = values[0];
             }
@@ -179,6 +179,11 @@ export class Table {
     from_columns(columns: any[]) {
         let _this = this;
         columns.forEach(function(column) {
+            column.forEach(function(s, i) {
+                let node = document.createElement('div');
+                node.innerHTML = s;
+                column[i] = node.textContent || node.innerText || '';
+            });
             _this.with_column(column[0], column.slice(1, column.length));
         });
 

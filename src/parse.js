@@ -41,9 +41,9 @@ function env_init(_this, code) {
         editor.getSession().setMode("ace/mode/javascript");
         editor.getSession().setUseWrapMode(true);
         let data_link = $(_this).attr('data-link');        
-        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
         window.datai = datai;
-        eval(code);
+        // eval(code);
         $(env_id).toggle();
     }
 
@@ -60,31 +60,38 @@ function env_init(_this, code) {
     });
 }
 
-$(document).ready(function() {    
+$(document).ready(function() {
+    let datai = 0;
     // csv detection
     $('a').each(function(i) {        
         let data_link = $(this).attr('href');
         if (data_link && data_link.endsWith('.csv')) {
-            $(this).after(`<button datai="${i}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+            $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
+            eval(`
+                t${datai} = new Table.Table(null, null, '${data_link}', ${datai})
+            `);
+            datai += 1;
         }
     });
 
     // html table detection
-    $('table').each(function(i) {        
-        $(this).after(`<button datai="h${i}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
-        $(this).addClass(`dsjs-htable-h${i}`);
+    $('table').each(function(i) {
+        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+        $(this).addClass(`dsjs-htable-${datai}`);        
+        eval(`
+            t${datai} = new Table.Table(null, null, null, ${datai});
+            t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+        `);
+        datai += 1;
     });    
 
     $(".open-dsjs-htable").click(function() {
-        let datai = $(this).attr('datai');
-        let code = `t${datai} = new Table.Table(); t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));`;
-        env_init(this, code);
+        let datai = $(this).attr('datai');        
+        env_init(this, '');
     });
 
     $(".open-dsjs").click(function() {
-        let datai = $(this).attr('datai');
-        let data_link = $(this).attr('data-link');
-        let code = `t${datai} = new Table.Table(null, null, '${data_link}')`;
-        env_init(this, code);
+        let datai = $(this).attr('datai');        
+        env_init(this, '');
     });
 });
