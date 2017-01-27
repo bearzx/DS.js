@@ -688,4 +688,47 @@ export class Table {
         });
     }
 
+    preview(method_call) {
+        let method_name = method_call.slice(0, method_call.indexOf('('));        
+        let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+
+        console.log(args);
+
+        if (method_name == 'with_row') {
+            var _this = this;
+            var s = `<table class="ds-table">`;
+            s += "<tr>";
+            this._labels.forEach(function (label) {
+                s += "<th>";
+                s += label;
+                s += "</th>";
+            });
+            s += "</tr>";
+
+            s += `<tr class="blank_row"><td colspan="${this._labels.length}" align="center">...</td></tr>`;
+
+            this._t.slice(this._t.length - 2, this._t.length).forEach(function (row) {
+                s += "<tr>";                
+                _this._labels.forEach(function (label) {
+                    s += "<td>";
+                    s += row[label];
+                    s += "</td>";
+                });
+                s += "</tr>";
+            });            
+
+            s += `<tr class='preview'>`;
+            this._labels.forEach(function(label) {
+                s += "<td>";
+                s += args[label];
+                s += "</td>";
+            });
+            s += "</tr>";
+                        
+            $(`#table-area-${this._id}`).html(s);
+        } else if (method_name == 'with_column') {
+
+        }
+    }
+
 }

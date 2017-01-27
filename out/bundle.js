@@ -93,12 +93,37 @@ var Table =
 	        $(cur).after(ds_env);
 	        var editor = ace.edit(editor_id);
 	        editor.setTheme("ace/theme/chrome");
+	        // editor.setBehavioursEnabled(false);
 	        editor.getSession().setMode("ace/mode/javascript");
 	        editor.getSession().setUseWrapMode(true);
+	
+	        editor.commands.addCommand({
+	            name: 'preview',
+	            bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
+	            exec: function(_editor) {                
+	                let row = _editor.getCursorPosition().row;
+	                let col = _editor.getCursorPosition().col;
+	                let line = _editor.getSession().getLine(row);
+	                if (line.trim().endsWith(')')) {
+	                    let items = line.trim().split('.');
+	                    let variable_name = items[0];
+	                    let method_call = items[items.length - 1];
+	                    let pre_eval_code = '';
+	                    let all_code = _editor.getValue().split('\n');
+	                    for (let i = 0; i < row; i++) {
+	                        pre_eval_code += all_code[i] + '\n';
+	                    }
+	                    pre_eval_code += items.slice(0, items.length - 1).join('.');                
+	                    eval(pre_eval_code);
+	                    eval(`${variable_name}.preview('${method_call}')`);
+	                }    
+	            }
+	        });
+	        
 	        let data_link = $(_this).attr('data-link');        
 	        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
 	        window.datai = datai;
-	        // eval(code);
+	        // eval(code); // I used to keep it to run some specialized init code
 	        $(env_id).toggle();
 	    }
 	
@@ -106,7 +131,7 @@ var Table =
 	        var datai = $(this).attr('datai');
 	        $(`#vis-${datai}`).html('');
 	        $(`#table-area-${datai}`).html('');
-	        var editor = ace.edit(`editor-${datai}`);
+	        var editor = ace.edit(`editor-${datai}`);                
 	        var code = editor.getValue();            
 	        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
 	        editor.setValue('');
@@ -11058,6 +11083,40 @@ var Table =
 	        vg.parse.spec(templates.boxplot(values), function (error, chart) {
 	            chart({ el: "#vis-" + id }).update();
 	        });
+	    };
+	    Table.prototype.preview = function (method_call) {
+	        var method_name = method_call.slice(0, method_call.indexOf('('));
+	        var args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+	        console.log(args);
+	        if (method_name == 'with_row') {
+	            var _this = this;
+	            var s = "<table class=\"ds-table\">";
+	            s += "<tr>";
+	            this._labels.forEach(function (label) {
+	                s += "<th>";
+	                s += label;
+	                s += "</th>";
+	            });
+	            s += "</tr>";
+	            s += "<tr class=\"blank_row\"><td colspan=\"" + this._labels.length + "\" align=\"center\">...</td></tr>";
+	            this._t.slice(this._t.length - 2, this._t.length).forEach(function (row) {
+	                s += "<tr>";
+	                _this._labels.forEach(function (label) {
+	                    s += "<td>";
+	                    s += row[label];
+	                    s += "</td>";
+	                });
+	                s += "</tr>";
+	            });
+	            s += "<tr class='preview'>";
+	            this._labels.forEach(function (label) {
+	                s += "<td>";
+	                s += args[label];
+	                s += "</td>";
+	            });
+	            s += "</tr>";
+	            $("#table-area-" + this._id).html(s);
+	        }
 	    };
 	    return Table;
 	}());
