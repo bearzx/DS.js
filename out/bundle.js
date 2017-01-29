@@ -10586,17 +10586,21 @@ var Table =
 	        return this;
 	    };
 	    Table.prototype.with_column = function (label, values) {
+	        // TODO: what if label is already in _labels?
 	        if ((values.length == 1) && (this._t.length != 0)) {
+	            // insert a new column with all the same values
 	            for (var i = 0; i < this._t.length; i++) {
 	                this._t[i][label] = values[0];
 	            }
 	        }
 	        else if (this._t.length != 0 && values.length == this._t.length) {
+	            // values is a complete column, and the current table is not empty
 	            for (var i = 0; i < this._t.length; i++) {
 	                this._t[i][label] = values[i];
 	            }
 	        }
 	        else if (this._t.length == 0) {
+	            // current table is empty
 	            for (var i = 0; i < values.length; i++) {
 	                this._t.push((_a = {}, _a[label] = values[i], _a));
 	            }
@@ -10954,6 +10958,7 @@ var Table =
 	            });
 	            s += "</tr>";
 	        });
+	        s += "</table>";
 	        console.log("#table-area-" + this._id);
 	        $("#table-area-" + this._id).html(s);
 	    };
@@ -11090,7 +11095,7 @@ var Table =
 	        console.log(args);
 	        if (method_name == 'with_row') {
 	            var _this = this;
-	            var s = "<table class=\"ds-table\">";
+	            var s = "<table class=\"preview-table\">";
 	            s += "<tr>";
 	            this._labels.forEach(function (label) {
 	                s += "<th>";
@@ -11109,12 +11114,30 @@ var Table =
 	                s += "</tr>";
 	            });
 	            s += "<tr class='preview'>";
-	            this._labels.forEach(function (label) {
-	                s += "<td>";
-	                s += args[label];
-	                s += "</td>";
-	            });
-	            s += "</tr>";
+	            if (args instanceof Array) {
+	                this._labels.forEach(function (label, i) {
+	                    s += "<td>";
+	                    s += args[i];
+	                    s += "</td>";
+	                });
+	            }
+	            else if (args instanceof Object) {
+	                this._labels.forEach(function (label) {
+	                    s += "<td>";
+	                    s += args[label];
+	                    s += "</td>";
+	                });
+	            }
+	            s += "</tr></table>";
+	            $("#table-area-" + this._id).html(s);
+	        }
+	        else if (method_name == 'with_column') {
+	            var s = "<table class=\"preview-table\">";
+	            if (this._t.length == 0) {
+	            }
+	            else {
+	            }
+	            s += "</table>";
 	            $("#table-area-" + this._id).html(s);
 	        }
 	    };

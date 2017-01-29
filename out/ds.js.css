@@ -14,7 +14,9 @@ pre {
   overflow: auto;
 }
 .ds-table th,
-.ds-table td {
+.preview-table th,
+.ds-table td,
+.preview-table td {
   border: 1px solid;
 }
 .open-dsjs {
