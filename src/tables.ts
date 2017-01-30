@@ -122,6 +122,13 @@ export class Table {
     }
 
     with_row(row) {
+        let copy = this.copy();
+        copy._with_row(row);
+        
+        return copy;
+    }
+
+    private _with_row(row) {
         if (row instanceof Array) {
             var o_row = {};
             this._labels.forEach(function (label, index) {
@@ -132,7 +139,7 @@ export class Table {
             this._t.push(row);
         }
 
-        return this;
+        return this;        
     }
 
     with_rows(rows) {
@@ -214,6 +221,10 @@ export class Table {
         var copy = $.extend(true, {}, this);
         copy.relabel(label, new_label);
         return copy;
+    }
+
+    copy() {
+        return $.extend(true, {}, this);
     }
 
     select(...column_label_or_labels: any[]) {
@@ -694,52 +705,100 @@ export class Table {
         });
     }
 
+    construct_table_components() {
+        let components = [];
+        let _this = this;
+        let ths = [];
+        _this._labels.forEach(function(label) {
+            ths.push(`<th>${label}</th>`);
+        });
+        components.push(ths);
+
+        _this._t.forEach(function(row) {
+            let tds = [];
+            _this._labels.forEach(function(label) {
+                tds.push(`<td>${row[label]}</td>`);
+            });
+            components.push(tds);
+        });
+
+        return components;
+    }
+
+    construct_html_table(raw_components) {
+        let s = '<table class="ds-table">';
+        for (let i = 0; i < raw_components.length; i++) {
+            s += '<tr>';
+            s += raw_components[i].join('');
+            s += '</tr>';
+        }
+        s += '</table>';
+
+        return s;
+    }
+
     preview(method_call) {
         let method_name = method_call.slice(0, method_call.indexOf('('));        
         let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
 
         console.log(args);
 
+        // 1 call the actual mutation functions
+        // 2 construct html partial tags
+        // 3 do customization, use jquery if necessary
+        // 4 combine them into the real table
+        // 5 show the table
+        // this will also affect the actual show function
+        // change impure (e.g. with_row) functions to pure functions
+
         if (method_name == 'with_row') {
-            var _this = this;
-            var s = `<table class="preview-table">`;
-            s += "<tr>";
-            this._labels.forEach(function (label) {
-                s += "<th>";
-                s += label;
-                s += "</th>";
-            });
-            s += "</tr>";
+            let new_table = this.with_row(args);
+            let raw_components = new_table.construct_table_components();
+            for (let i = 0; i < raw_components[0].length; i++) {
+                raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
+            }
 
-            s += `<tr class="blank_row"><td colspan="${this._labels.length}" align="center">...</td></tr>`;
+            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));
+            
+            // var _this = this;
+            // var s = `<table class="preview-table">`;
+            // s += "<tr>";
+            // this._labels.forEach(function (label) {
+            //     s += "<th>";
+            //     s += label;
+            //     s += "</th>";
+            // });
+            // s += "</tr>";
 
-            this._t.slice(this._t.length - 2, this._t.length).forEach(function (row) {
-                s += "<tr>";                
-                _this._labels.forEach(function (label) {
-                    s += "<td>";
-                    s += row[label];
-                    s += "</td>";
-                });
-                s += "</tr>";
-            });            
+            // s += `<tr class="blank_row"><td colspan="${this._labels.length}" align="center">...</td></tr>`;
 
-            s += `<tr class='preview'>`;
-            if (args instanceof Array) {
-                this._labels.forEach(function(label, i) {
-                    s += "<td>";
-                    s += args[i];
-                    s += "</td>";
-                });                
-            } else if (args instanceof Object) {
-                this._labels.forEach(function(label) {
-                    s += "<td>";
-                    s += args[label];
-                    s += "</td>";
-                });                
-            }            
-            s += "</tr></table>";
+            // this._t.slice(this._t.length - 2, this._t.length).forEach(function (row) {
+            //     s += "<tr>";                
+            //     _this._labels.forEach(function (label) {
+            //         s += "<td>";
+            //         s += row[label];
+            //         s += "</td>";
+            //     });
+            //     s += "</tr>";
+            // });            
 
-            $(`#table-area-${this._id}`).html(s);
+            // s += `<tr class='preview'>`;
+            // if (args instanceof Array) {
+            //     this._labels.forEach(function(label, i) {
+            //         s += "<td>";
+            //         s += args[i];
+            //         s += "</td>";
+            //     });                
+            // } else if (args instanceof Object) {
+            //     this._labels.forEach(function(label) {
+            //         s += "<td>";
+            //         s += args[label];
+            //         s += "</td>";
+            //     });                
+            // }            
+            // s += "</tr></table>";
+
+            // $(`#table-area-${this._id}`).html(s);
         } else if (method_name == 'with_column') {
             var s = `<table class="preview-table">`;
             if (this._t.length == 0) {
@@ -751,7 +810,7 @@ export class Table {
 
             $(`#table-area-${this._id}`).html(s);
         } else if (method_name == 'select') {
-            
+
         }
     }
 

@@ -49,7 +49,7 @@ function env_init(_this, code) {
                 let row = _editor.getCursorPosition().row;
                 let col = _editor.getCursorPosition().col;
                 let line = _editor.getSession().getLine(row);
-                if (line.trim().endsWith(')')) {
+                if (line.trim().endsWith(')') || line.trim().endsWith(');')) {
                     let items = line.trim().split('.');
                     let variable_name = items[0];
                     let method_call = items[items.length - 1];
