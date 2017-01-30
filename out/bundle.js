@@ -10691,6 +10691,26 @@ var Table =
 	        });
 	        return new_labels;
 	    };
+	    Table.prototype._as_label_indices = function () {
+	        var label_list = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            label_list[_i - 0] = arguments[_i];
+	        }
+	        var indices = [];
+	        var _this = this;
+	        label_list.forEach(function (l) {
+	            indices.push(_this._as_label_index(l));
+	        });
+	        return indices;
+	    };
+	    Table.prototype._as_label_index = function (label) {
+	        if (typeof label === 'number') {
+	            return label;
+	        }
+	        else if (typeof label === 'string') {
+	            return this._labels.indexOf(label);
+	        }
+	    };
 	    Table.prototype._as_label = function (label) {
 	        if (typeof label === 'number') {
 	            return this._labels[label];
@@ -11130,6 +11150,7 @@ var Table =
 	        return s;
 	    };
 	    Table.prototype.preview = function (method_call) {
+	        console.log(method_call);
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
 	        // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
@@ -11159,6 +11180,17 @@ var Table =
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components));
 	        }
 	        else if (method_name == 'select') {
+	            var raw_components_1 = this.construct_table_components();
+	            var label_locs = eval("this._as_label_indices(" + args + ")");
+	            var _loop_1 = function(i) {
+	                label_locs.forEach(function (loc) {
+	                    raw_components_1[i][loc] = $(raw_components_1[i][loc]).attr('class', 'preview').prop('outerHTML');
+	                });
+	            };
+	            for (var i = 0; i < raw_components_1.length; i++) {
+	                _loop_1(i);
+	            }
+	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1));
 	        }
 	    };
 	    return Table;

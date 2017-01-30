@@ -245,16 +245,34 @@ export class Table {
         });
 
         return table;
-    }
+    }    
 
     private _as_labels(label_list) {
         var new_labels = [];
         var _this = this;
-        label_list.forEach(function (l) {
-            new_labels.push(_this._as_label(l));
+        label_list.forEach(function (l) {            
+            new_labels.push(_this._as_label(l));            
         });
 
         return new_labels;
+    }
+
+    private _as_label_indices(...label_list) {        
+        let indices = [];
+        let _this = this;
+        label_list.forEach(function(l) {
+            indices.push(_this._as_label_index(l));
+        });
+
+        return indices;
+    }
+
+    private _as_label_index(label) {
+        if (typeof label === 'number') {
+            return label;
+        } else if (typeof label === 'string') {
+            return this._labels.indexOf(label);
+        }
     }
 
     private _as_label(label) {
@@ -743,6 +761,7 @@ export class Table {
     }
 
     preview(method_call) {
+        console.log(method_call);
         let method_name = method_call.slice(0, method_call.indexOf('('));
         // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
 
@@ -765,7 +784,6 @@ export class Table {
             for (let i = 0; i < raw_components[0].length; i++) {
                 raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
             }
-
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));            
         } else if (method_name == 'with_column') {
             let new_table = eval(`this.with_column(${args})`);
@@ -773,11 +791,16 @@ export class Table {
             for (let i = 0; i < raw_components.length; i++) {
                 raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
             }
-
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));
         } else if (method_name == 'select') {
-            
+            let raw_components = this.construct_table_components();            
+            let label_locs = eval(`this._as_label_indices(${args})`);
+            for (let i = 0; i < raw_components.length; i++) {
+                label_locs.forEach(function(loc) {
+                    raw_components[i][loc] = $(raw_components[i][loc]).attr('class', 'preview').prop('outerHTML');
+                });
+            }
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components));
         }
     }
-
 }
