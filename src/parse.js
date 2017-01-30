@@ -60,7 +60,7 @@ function env_init(_this, code) {
                     }
                     pre_eval_code += items.slice(0, items.length - 1).join('.');                
                     eval(pre_eval_code);
-                    eval(`${variable_name}.preview('${method_call}')`);
+                    eval(`${variable_name}.preview(\`${method_call}\`)`);
                 }    
             }
         });

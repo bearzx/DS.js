@@ -153,7 +153,12 @@ export class Table {
 
     with_column(label, values) {
         // TODO: what if label is already in _labels?
-        
+        let copy = this.copy();
+        copy._with_column(label, values);
+        return copy;
+    }
+
+    private _with_column(label, values) {
         if ((values.length == 1) && (this._t.length != 0)) {
             // insert a new column with all the same values
             for (var i = 0; i < this._t.length; i++) {
@@ -738,8 +743,10 @@ export class Table {
     }
 
     preview(method_call) {
-        let method_name = method_call.slice(0, method_call.indexOf('('));        
-        let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+        let method_name = method_call.slice(0, method_call.indexOf('('));
+        // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+
+        let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
         console.log(args);
 
@@ -752,65 +759,24 @@ export class Table {
         // change impure (e.g. with_row) functions to pure functions
 
         if (method_name == 'with_row') {
-            let new_table = this.with_row(args);
+            // let new_table = this.with_row(args);
+            let new_table = eval(`this.with_row(${args})`); 
             let raw_components = new_table.construct_table_components();
             for (let i = 0; i < raw_components[0].length; i++) {
                 raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
             }
 
-            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));
-            
-            // var _this = this;
-            // var s = `<table class="preview-table">`;
-            // s += "<tr>";
-            // this._labels.forEach(function (label) {
-            //     s += "<th>";
-            //     s += label;
-            //     s += "</th>";
-            // });
-            // s += "</tr>";
-
-            // s += `<tr class="blank_row"><td colspan="${this._labels.length}" align="center">...</td></tr>`;
-
-            // this._t.slice(this._t.length - 2, this._t.length).forEach(function (row) {
-            //     s += "<tr>";                
-            //     _this._labels.forEach(function (label) {
-            //         s += "<td>";
-            //         s += row[label];
-            //         s += "</td>";
-            //     });
-            //     s += "</tr>";
-            // });            
-
-            // s += `<tr class='preview'>`;
-            // if (args instanceof Array) {
-            //     this._labels.forEach(function(label, i) {
-            //         s += "<td>";
-            //         s += args[i];
-            //         s += "</td>";
-            //     });                
-            // } else if (args instanceof Object) {
-            //     this._labels.forEach(function(label) {
-            //         s += "<td>";
-            //         s += args[label];
-            //         s += "</td>";
-            //     });                
-            // }            
-            // s += "</tr></table>";
-
-            // $(`#table-area-${this._id}`).html(s);
+            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));            
         } else if (method_name == 'with_column') {
-            var s = `<table class="preview-table">`;
-            if (this._t.length == 0) {
-                
-            } else {
-
+            let new_table = eval(`this.with_column(${args})`);
+            let raw_components = new_table.construct_table_components();
+            for (let i = 0; i < raw_components.length; i++) {
+                raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
             }
-            s += `</table>`;
 
-            $(`#table-area-${this._id}`).html(s);
+            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));
         } else if (method_name == 'select') {
-
+            
         }
     }
 

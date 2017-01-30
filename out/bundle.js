@@ -115,7 +115,7 @@ var Table =
 	                    }
 	                    pre_eval_code += items.slice(0, items.length - 1).join('.');                
 	                    eval(pre_eval_code);
-	                    eval(`${variable_name}.preview('${method_call}')`);
+	                    eval(`${variable_name}.preview(\`${method_call}\`)`);
 	                }    
 	            }
 	        });
@@ -10592,6 +10592,11 @@ var Table =
 	    };
 	    Table.prototype.with_column = function (label, values) {
 	        // TODO: what if label is already in _labels?
+	        var copy = this.copy();
+	        copy._with_column(label, values);
+	        return copy;
+	    };
+	    Table.prototype._with_column = function (label, values) {
 	        if ((values.length == 1) && (this._t.length != 0)) {
 	            // insert a new column with all the same values
 	            for (var i = 0; i < this._t.length; i++) {
@@ -11126,7 +11131,8 @@ var Table =
 	    };
 	    Table.prototype.preview = function (method_call) {
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
-	        var args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+	        // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
+	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 	        console.log(args);
 	        // 1 call the actual mutation functions
 	        // 2 construct html partial tags
@@ -11136,7 +11142,8 @@ var Table =
 	        // this will also affect the actual show function
 	        // change impure (e.g. with_row) functions to pure functions
 	        if (method_name == 'with_row') {
-	            var new_table = this.with_row(args);
+	            // let new_table = this.with_row(args);
+	            var new_table = eval("this.with_row(" + args + ")");
 	            var raw_components = new_table.construct_table_components();
 	            for (var i = 0; i < raw_components[0].length; i++) {
 	                raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
@@ -11144,13 +11151,12 @@ var Table =
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components));
 	        }
 	        else if (method_name == 'with_column') {
-	            var s = "<table class=\"preview-table\">";
-	            if (this._t.length == 0) {
+	            var new_table = eval("this.with_column(" + args + ")");
+	            var raw_components = new_table.construct_table_components();
+	            for (var i = 0; i < raw_components.length; i++) {
+	                raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
 	            }
-	            else {
-	            }
-	            s += "</table>";
-	            $("#table-area-" + this._id).html(s);
+	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components));
 	        }
 	        else if (method_name == 'select') {
 	        }
