@@ -113,7 +113,8 @@ var Table =
 	                    for (let i = 0; i < row; i++) {
 	                        pre_eval_code += all_code[i] + '\n';
 	                    }
-	                    pre_eval_code += items.slice(0, items.length - 1).join('.');                
+	                    pre_eval_code += items.slice(0, items.length - 1).join('.');
+	                    pre_eval_code = `${variable_name} = ${pre_eval_code}`;
 	                    eval(pre_eval_code);
 	                    eval(`${variable_name}.preview(\`${method_call}\`)`);
 	                }    
@@ -11139,20 +11140,60 @@ var Table =
 	        });
 	        return components;
 	    };
-	    Table.prototype.construct_html_table = function (raw_components) {
+	    Table.prototype.construct_html_table = function (raw_components, hide_row, hide_col) {
+	        if (hide_row === void 0) { hide_row = false; }
+	        if (hide_col === void 0) { hide_col = false; }
 	        var s = '<table class="ds-table">';
-	        for (var i = 0; i < raw_components.length; i++) {
-	            s += '<tr>';
-	            s += raw_components[i].join('');
+	        // for (let i = 0; i < raw_components.length; i++) {
+	        //     s += '<tr>';
+	        //     s += raw_components[i].join('');
+	        //     s += '</tr>';
+	        // }
+	        if (raw_components.length > 10 && hide_row) {
+	            for (var i = 0; i < 5; i++) {
+	                s += '<tr>';
+	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += '</tr>';
+	            }
+	            s += '<tr class="blank">';
+	            raw_components[0].forEach(function () {
+	                s += "<td>...</td>";
+	            });
 	            s += '</tr>';
+	            for (var i = raw_components.length - 5; i < raw_components.length; i++) {
+	                s += '<tr>';
+	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += '</tr>';
+	            }
+	        }
+	        else {
+	            for (var i = 0; i < raw_components.length; i++) {
+	                s += '<tr>';
+	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += '</tr>';
+	            }
 	        }
 	        s += '</table>';
 	        return s;
 	    };
+	    Table.prototype.construct_html_column = function (components, hide_col) {
+	        var s = '';
+	        if (components.length > 10 && hide_col) {
+	            for (var i = 0; i < 5; i++) {
+	                s += components[i];
+	            }
+	            s += '<td class="blank">...</td>';
+	            for (var i = components.length - 5; i < components.length; i++) {
+	                s += components[i];
+	            }
+	        }
+	        else {
+	            return components.join('');
+	        }
+	    };
 	    Table.prototype.preview = function (method_call) {
 	        console.log(method_call);
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
-	        // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 	        console.log(args);
 	        // 1 call the actual mutation functions
@@ -11169,7 +11210,7 @@ var Table =
 	            for (var i = 0; i < raw_components[0].length; i++) {
 	                raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
 	            }
-	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components));
+	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'with_column') {
 	            var new_table = eval("this.with_column(" + args + ")");
@@ -11177,7 +11218,7 @@ var Table =
 	            for (var i = 0; i < raw_components.length; i++) {
 	                raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
 	            }
-	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components));
+	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'select') {
 	            var raw_components_1 = this.construct_table_components();
@@ -11190,7 +11231,7 @@ var Table =
 	            for (var i = 0; i < raw_components_1.length; i++) {
 	                _loop_1(i);
 	            }
-	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1));
+	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true));
 	        }
 	    };
 	    return Table;

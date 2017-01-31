@@ -58,7 +58,8 @@ function env_init(_this, code) {
                     for (let i = 0; i < row; i++) {
                         pre_eval_code += all_code[i] + '\n';
                     }
-                    pre_eval_code += items.slice(0, items.length - 1).join('.');                
+                    pre_eval_code += items.slice(0, items.length - 1).join('.');
+                    pre_eval_code = `${variable_name} = ${pre_eval_code}`;
                     eval(pre_eval_code);
                     eval(`${variable_name}.preview(\`${method_call}\`)`);
                 }    

@@ -748,22 +748,66 @@ export class Table {
         return components;
     }
 
-    construct_html_table(raw_components) {
+    construct_html_table(raw_components, hide_row = false, hide_col = false) {
         let s = '<table class="ds-table">';
-        for (let i = 0; i < raw_components.length; i++) {
-            s += '<tr>';
-            s += raw_components[i].join('');
+        
+        // for (let i = 0; i < raw_components.length; i++) {
+        //     s += '<tr>';
+        //     s += raw_components[i].join('');
+        //     s += '</tr>';
+        // }
+
+        if (raw_components.length > 10 && hide_row) {
+            for (let i = 0; i < 5; i++) {
+                s += '<tr>';                
+                s += this.construct_html_column(raw_components[i], hide_col);
+                s += '</tr>';
+            }
+
+            s += '<tr class="blank">'
+            raw_components[0].forEach(function() {
+                s += `<td>...</td>`;
+            });
             s += '</tr>';
+
+            for (let i = raw_components.length - 5; i < raw_components.length; i++) {
+                s += '<tr>';                
+                s += this.construct_html_column(raw_components[i], hide_col);
+                s += '</tr>';
+            }
+        } else {
+            for (let i = 0; i < raw_components.length; i++) {
+                s += '<tr>';
+                s += this.construct_html_column(raw_components[i], hide_col);
+                s += '</tr>';
+            }
         }
+
         s += '</table>';
 
         return s;
     }
 
+    construct_html_column(components, hide_col) {
+        let s = '';
+        if (components.length > 10 && hide_col) {
+            for (let i = 0; i < 5; i++) {
+                s += components[i];
+            }
+
+            s += '<td class="blank">...</td>';
+
+            for (let i = components.length - 5; i < components.length; i++) {
+                s += components[i];
+            }
+        } else {
+            return components.join('');
+        }
+    }
+
     preview(method_call) {
         console.log(method_call);
         let method_name = method_call.slice(0, method_call.indexOf('('));
-        // let args = eval('(' + method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')')) + ')');
 
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
@@ -784,23 +828,26 @@ export class Table {
             for (let i = 0; i < raw_components[0].length; i++) {
                 raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
             }
-            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));            
+            
+            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'with_column') {
             let new_table = eval(`this.with_column(${args})`);
             let raw_components = new_table.construct_table_components();
             for (let i = 0; i < raw_components.length; i++) {
                 raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
             }
-            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components));
+            
+            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'select') {
-            let raw_components = this.construct_table_components();            
+            let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
                 label_locs.forEach(function(loc) {
                     raw_components[i][loc] = $(raw_components[i][loc]).attr('class', 'preview').prop('outerHTML');
                 });
             }
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components));
+            
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true));
         }
     }
 }
