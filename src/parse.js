@@ -51,7 +51,7 @@ function env_init(_this, code) {
                 let line = _editor.getSession().getLine(row);
                 if (line.trim().endsWith(')') || line.trim().endsWith(');')) {
                     let items = line.trim().split('.');
-                    let variable_name = items[0];
+                    let variable_name = items[0];                    
                     let method_call = items[items.length - 1];
                     let pre_eval_code = '';
                     let all_code = _editor.getValue().split('\n');
@@ -59,9 +59,8 @@ function env_init(_this, code) {
                         pre_eval_code += all_code[i] + '\n';
                     }
                     pre_eval_code += items.slice(0, items.length - 1).join('.');
-                    pre_eval_code = `${variable_name} = ${pre_eval_code}`;
-                    eval(pre_eval_code);
-                    eval(`${variable_name}.preview(\`${method_call}\`)`);
+                    var partial_result = eval(pre_eval_code);
+                    eval(`partial_result.preview(\`${method_call}\`)`);
                 }    
             }
         });

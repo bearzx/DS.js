@@ -259,12 +259,13 @@ export class Table {
         return new_labels;
     }
 
-    private _as_label_indices(...label_list) {        
+    private _as_label_indices(...label_list) {
         let indices = [];
         let _this = this;
         label_list.forEach(function(l) {
             indices.push(_this._as_label_index(l));
         });
+        indices.sort((a, b) => (a - b));        
 
         return indices;
     }
@@ -751,21 +752,24 @@ export class Table {
     }
 
     construct_html_table(raw_components, hide_row = false, hide_col = false, kept_cols?: any[]) {
-        let s = '<table class="ds-table">';        
-
+        let s = '<table class="ds-table">';
+        let dot_counts;
         if (raw_components.length > 10 && hide_row) {
             for (let i = 0; i < 5; i++) {
-                s += '<tr>';                
-                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += '<tr>';
+                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                let row = this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                dot_counts = row.length;
+                s += row.join('');
                 s += '</tr>';
             }
 
-            s += '<tr class="blank">';            
+            s += '<tr class="blank">';
             let blank_row_cols_count;
-            if (hide_col && (raw_components[0].length > 10)) {                
-                blank_row_cols_count = kept_cols ? kept_cols.length * 2 + 1 : 11;
+            if (hide_col && (raw_components[0].length > 10)) {
+                blank_row_cols_count = kept_cols ? dot_counts : 11;
             } else {
-                blank_row_cols_count = raw_components[0].length;
+                blank_row_cols_count = kept_cols ? dot_counts : raw_components[0].length;
             }            
 
             for (let i = 0; i < blank_row_cols_count; i++) {
@@ -775,47 +779,60 @@ export class Table {
 
             for (let i = raw_components.length - 5; i < raw_components.length; i++) {
                 s += '<tr>';
-                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
         } else {
             for (let i = 0; i < raw_components.length; i++) {
                 s += '<tr>';
-                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
         }
 
         s += '</table>';
-
+        
         return s;
     }
 
     construct_html_row(components, hide_col, kept_cols?: any[]) {
-        let s = '';
+        let row = [];
         if (kept_cols) {
-            s += '<td class="blank">...</td>';
-            kept_cols.forEach(function(i) {
-                s += components[i];
-                s += '<td class="blank">...</td>';
-            });
+            if (kept_cols[0] > 0) {
+                row.push('<td class="blank">...</td>');
+            }
+            
+            for (let i = 0; i < kept_cols.length - 1; i++) {
+                row.push(components[kept_cols[i]]);
+                if (kept_cols[i] + 1 != kept_cols[i + 1]) {
+                    row.push('<td class="blank">...</td>');
+                }
+            }
 
-            return s;
-        } else {            
+            row.push(components[kept_cols[kept_cols.length - 1]]);
+            console.log(this._labels);
+            if (kept_cols[kept_cols.length - 1] < (this._labels.length - 1)) {
+                row.push('<td class="blank">...</td>');
+            }            
+
+            return row;
+        } else {
             if (components.length > 10 && hide_col) {
                 for (let i = 0; i < 5; i++) {
-                    s += components[i];
+                    row.push(components[i]);
                 }
 
-                s += '<td class="blank">...</td>';
+                row.push('<td class="blank">...</td>');
 
                 for (let i = components.length - 5; i < components.length; i++) {
-                    s += components[i];
+                    row.push(components[i]);
                 }
                 
-                return s;
+                return row;
             } else {
-                return components.join('');
+                return components;
             }
         }        
     }
@@ -826,7 +843,7 @@ export class Table {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
-        console.log(args);
+        // console.log(args);
 
         // 1 call the actual mutation functions
         // 2 construct html partial tags
@@ -836,9 +853,8 @@ export class Table {
         // this will also affect the actual show function
         // change impure (e.g. with_row) functions to pure functions
 
-        if (method_name == 'with_row') {
-            // let new_table = this.with_row(args);
-            let new_table = eval(`this.with_row(${args})`); 
+        if (method_name == 'with_row') {            
+            let new_table = eval(`this.with_row(${args})`);
             let raw_components = new_table.construct_table_components();
             for (let i = 0; i < raw_components[0].length; i++) {
                 raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
@@ -853,7 +869,7 @@ export class Table {
             }
             
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
-        } else if (method_name == 'select') {
+        } else if (method_name == 'select' || method_name == 'drop') {                        
             let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
@@ -861,10 +877,23 @@ export class Table {
                     raw_components[i][loc] = $(raw_components[i][loc]).attr('class', 'preview').prop('outerHTML');
                 });
             }
-            
+                        
             $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
-        } else if (method_name == 'drop') {
+            // bugs on the ...
+        } else if (method_name == 'relabeled') {
 
+        } else if (method_name == 'where') {
+
+        } else if (method_name == 'sort') {
+            
+        } else if (method_name == 'group') {
+
+        } else if (method_name == 'pivot') {
+
+        } else if (method_name == 'join') {
+
+        } else {
+            
         }
     }
 }

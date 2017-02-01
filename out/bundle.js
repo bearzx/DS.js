@@ -106,7 +106,7 @@ var Table =
 	                let line = _editor.getSession().getLine(row);
 	                if (line.trim().endsWith(')') || line.trim().endsWith(');')) {
 	                    let items = line.trim().split('.');
-	                    let variable_name = items[0];
+	                    let variable_name = items[0];                    
 	                    let method_call = items[items.length - 1];
 	                    let pre_eval_code = '';
 	                    let all_code = _editor.getValue().split('\n');
@@ -114,9 +114,10 @@ var Table =
 	                        pre_eval_code += all_code[i] + '\n';
 	                    }
 	                    pre_eval_code += items.slice(0, items.length - 1).join('.');
-	                    pre_eval_code = `${variable_name} = ${pre_eval_code}`;
-	                    eval(pre_eval_code);
-	                    eval(`${variable_name}.preview(\`${method_call}\`)`);
+	                    // pre_eval_code = `${variable_name} = ${pre_eval_code}`;
+	                    // eval(pre_eval_code);
+	                    var partial_result = eval(pre_eval_code);
+	                    eval(`partial_result.preview(\`${method_call}\`)`);
 	                }    
 	            }
 	        });
@@ -10704,6 +10705,7 @@ var Table =
 	        label_list.forEach(function (l) {
 	            indices.push(_this._as_label_index(l));
 	        });
+	        indices.sort(function (a, b) { return (a - b); });
 	        return indices;
 	    };
 	    Table.prototype._as_label_index = function (label) {
@@ -11146,19 +11148,23 @@ var Table =
 	        if (hide_row === void 0) { hide_row = false; }
 	        if (hide_col === void 0) { hide_col = false; }
 	        var s = '<table class="ds-table">';
+	        var dot_counts;
 	        if (raw_components.length > 10 && hide_row) {
 	            for (var i = 0; i < 5; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                var row = this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                dot_counts = row.length;
+	                s += row.join('');
 	                s += '</tr>';
 	            }
 	            s += '<tr class="blank">';
 	            var blank_row_cols_count = void 0;
 	            if (hide_col && (raw_components[0].length > 10)) {
-	                blank_row_cols_count = kept_cols ? kept_cols.length * 2 + 1 : 11;
+	                blank_row_cols_count = kept_cols ? dot_counts : 11;
 	            }
 	            else {
-	                blank_row_cols_count = raw_components[0].length;
+	                blank_row_cols_count = kept_cols ? dot_counts : raw_components[0].length;
 	            }
 	            for (var i = 0; i < blank_row_cols_count; i++) {
 	                s += "<td>...</td>";
@@ -11166,14 +11172,16 @@ var Table =
 	            s += '</tr>';
 	            for (var i = raw_components.length - 5; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
 	        }
 	        else {
 	            for (var i = 0; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
 	        }
@@ -11181,28 +11189,37 @@ var Table =
 	        return s;
 	    };
 	    Table.prototype.construct_html_row = function (components, hide_col, kept_cols) {
-	        var s = '';
+	        var row = [];
 	        if (kept_cols) {
-	            s += '<td class="blank">...</td>';
-	            kept_cols.forEach(function (i) {
-	                s += components[i];
-	                s += '<td class="blank">...</td>';
-	            });
-	            return s;
+	            if (kept_cols[0] > 0) {
+	                row.push('<td class="blank">...</td>');
+	            }
+	            for (var i = 0; i < kept_cols.length - 1; i++) {
+	                row.push(components[kept_cols[i]]);
+	                if (kept_cols[i] + 1 != kept_cols[i + 1]) {
+	                    row.push('<td class="blank">...</td>');
+	                }
+	            }
+	            row.push(components[kept_cols[kept_cols.length - 1]]);
+	            console.log(this._labels);
+	            if (kept_cols[kept_cols.length - 1] < (this._labels.length - 1)) {
+	                row.push('<td class="blank">...</td>');
+	            }
+	            return row;
 	        }
 	        else {
 	            if (components.length > 10 && hide_col) {
 	                for (var i = 0; i < 5; i++) {
-	                    s += components[i];
+	                    row.push(components[i]);
 	                }
-	                s += '<td class="blank">...</td>';
+	                row.push('<td class="blank">...</td>');
 	                for (var i = components.length - 5; i < components.length; i++) {
-	                    s += components[i];
+	                    row.push(components[i]);
 	                }
-	                return s;
+	                return row;
 	            }
 	            else {
-	                return components.join('');
+	                return components;
 	            }
 	        }
 	    };
@@ -11210,7 +11227,7 @@ var Table =
 	        console.log(method_call);
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
-	        console.log(args);
+	        // console.log(args);
 	        // 1 call the actual mutation functions
 	        // 2 construct html partial tags
 	        // 3 do customization, use jquery if necessary
@@ -11219,7 +11236,6 @@ var Table =
 	        // this will also affect the actual show function
 	        // change impure (e.g. with_row) functions to pure functions
 	        if (method_name == 'with_row') {
-	            // let new_table = this.with_row(args);
 	            var new_table = eval("this.with_row(" + args + ")");
 	            var raw_components = new_table.construct_table_components();
 	            for (var i = 0; i < raw_components[0].length; i++) {
@@ -11235,7 +11251,7 @@ var Table =
 	            }
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
-	        else if (method_name == 'select') {
+	        else if (method_name == 'select' || method_name == 'drop') {
 	            var raw_components_1 = this.construct_table_components();
 	            var label_locs = eval("this._as_label_indices(" + args + ")");
 	            var _loop_1 = function(i) {
@@ -11248,7 +11264,19 @@ var Table =
 	            }
 	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
 	        }
-	        else if (method_name == 'drop') {
+	        else if (method_name == 'relabeled') {
+	        }
+	        else if (method_name == 'where') {
+	        }
+	        else if (method_name == 'sort') {
+	        }
+	        else if (method_name == 'group') {
+	        }
+	        else if (method_name == 'pivot') {
+	        }
+	        else if (method_name == 'join') {
+	        }
+	        else {
 	        }
 	    };
 	    return Table;
