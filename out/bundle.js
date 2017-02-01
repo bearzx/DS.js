@@ -10672,16 +10672,18 @@ var Table =
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            column_label_or_labels[_i - 0] = arguments[_i];
 	        }
-	        // console.log(column_label_or_labels);
+	        // /console.log(column_label_or_labels);
 	        var _this = this;
 	        column_label_or_labels = this._as_labels(column_label_or_labels);
 	        var table = new Table();
+	        table._id = this._id;
 	        for (var i = 0; i < this._t.length; i++) {
 	            table.with_row({});
 	        }
 	        column_label_or_labels.forEach(function (label) {
-	            table.with_column(label, _this.column(label));
+	            table = table.with_column(label, _this.column(label));
 	        });
+	        // console.log(table);
 	        return table;
 	    };
 	    Table.prototype._as_labels = function (label_list) {
@@ -10801,7 +10803,7 @@ var Table =
 	            labels.forEach(function (label) {
 	                key.push(row[label]);
 	            });
-	            console.log(String(key));
+	            // console.log(String(key));
 	            if (String(key) in counts) {
 	                counts[String(key)] += 1;
 	            }
@@ -11140,55 +11142,68 @@ var Table =
 	        });
 	        return components;
 	    };
-	    Table.prototype.construct_html_table = function (raw_components, hide_row, hide_col) {
+	    Table.prototype.construct_html_table = function (raw_components, hide_row, hide_col, kept_cols) {
 	        if (hide_row === void 0) { hide_row = false; }
 	        if (hide_col === void 0) { hide_col = false; }
 	        var s = '<table class="ds-table">';
-	        // for (let i = 0; i < raw_components.length; i++) {
-	        //     s += '<tr>';
-	        //     s += raw_components[i].join('');
-	        //     s += '</tr>';
-	        // }
 	        if (raw_components.length > 10 && hide_row) {
 	            for (var i = 0; i < 5; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                s += '</tr>';
 	            }
 	            s += '<tr class="blank">';
-	            raw_components[0].forEach(function () {
+	            var blank_row_cols_count = void 0;
+	            if (hide_col && (raw_components[0].length > 10)) {
+	                blank_row_cols_count = kept_cols ? kept_cols.length * 2 + 1 : 11;
+	            }
+	            else {
+	                blank_row_cols_count = raw_components[0].length;
+	            }
+	            for (var i = 0; i < blank_row_cols_count; i++) {
 	                s += "<td>...</td>";
-	            });
+	            }
 	            s += '</tr>';
 	            for (var i = raw_components.length - 5; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                s += '</tr>';
 	            }
 	        }
 	        else {
 	            for (var i = 0; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                s += this.construct_html_column(raw_components[i], hide_col);
+	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                s += '</tr>';
 	            }
 	        }
 	        s += '</table>';
 	        return s;
 	    };
-	    Table.prototype.construct_html_column = function (components, hide_col) {
+	    Table.prototype.construct_html_row = function (components, hide_col, kept_cols) {
 	        var s = '';
-	        if (components.length > 10 && hide_col) {
-	            for (var i = 0; i < 5; i++) {
-	                s += components[i];
-	            }
+	        if (kept_cols) {
 	            s += '<td class="blank">...</td>';
-	            for (var i = components.length - 5; i < components.length; i++) {
+	            kept_cols.forEach(function (i) {
 	                s += components[i];
-	            }
+	                s += '<td class="blank">...</td>';
+	            });
+	            return s;
 	        }
 	        else {
-	            return components.join('');
+	            if (components.length > 10 && hide_col) {
+	                for (var i = 0; i < 5; i++) {
+	                    s += components[i];
+	                }
+	                s += '<td class="blank">...</td>';
+	                for (var i = components.length - 5; i < components.length; i++) {
+	                    s += components[i];
+	                }
+	                return s;
+	            }
+	            else {
+	                return components.join('');
+	            }
 	        }
 	    };
 	    Table.prototype.preview = function (method_call) {
@@ -11231,7 +11246,9 @@ var Table =
 	            for (var i = 0; i < raw_components_1.length; i++) {
 	                _loop_1(i);
 	            }
-	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true));
+	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
+	        }
+	        else if (method_name == 'drop') {
 	        }
 	    };
 	    return Table;

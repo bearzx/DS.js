@@ -233,16 +233,18 @@ export class Table {
     }
 
     select(...column_label_or_labels: any[]) {
-        // console.log(column_label_or_labels);
+        // /console.log(column_label_or_labels);
         var _this = this;
         column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
+        table._id = this._id;
         for (var i = 0; i < this._t.length; i++) {
             table.with_row({});
         }
         column_label_or_labels.forEach(function (label) {
-            table.with_column(label, _this.column(label));
+            table = table.with_column(label, _this.column(label));
         });
+        // console.log(table);
 
         return table;
     }    
@@ -362,7 +364,7 @@ export class Table {
             labels.forEach(function (label) {
                 key.push(row[label]);
             });
-            console.log(String(key));
+            // console.log(String(key));
             if (String(key) in counts) {
                 counts[String(key)] += 1;
             } else {
@@ -748,37 +750,38 @@ export class Table {
         return components;
     }
 
-    construct_html_table(raw_components, hide_row = false, hide_col = false) {
-        let s = '<table class="ds-table">';
-        
-        // for (let i = 0; i < raw_components.length; i++) {
-        //     s += '<tr>';
-        //     s += raw_components[i].join('');
-        //     s += '</tr>';
-        // }
+    construct_html_table(raw_components, hide_row = false, hide_col = false, kept_cols?: any[]) {
+        let s = '<table class="ds-table">';        
 
         if (raw_components.length > 10 && hide_row) {
             for (let i = 0; i < 5; i++) {
                 s += '<tr>';                
-                s += this.construct_html_column(raw_components[i], hide_col);
+                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
                 s += '</tr>';
             }
 
-            s += '<tr class="blank">'
-            raw_components[0].forEach(function() {
+            s += '<tr class="blank">';            
+            let blank_row_cols_count;
+            if (hide_col && (raw_components[0].length > 10)) {                
+                blank_row_cols_count = kept_cols ? kept_cols.length * 2 + 1 : 11;
+            } else {
+                blank_row_cols_count = raw_components[0].length;
+            }            
+
+            for (let i = 0; i < blank_row_cols_count; i++) {
                 s += `<td>...</td>`;
-            });
+            }
             s += '</tr>';
 
             for (let i = raw_components.length - 5; i < raw_components.length; i++) {
-                s += '<tr>';                
-                s += this.construct_html_column(raw_components[i], hide_col);
+                s += '<tr>';
+                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
                 s += '</tr>';
             }
         } else {
             for (let i = 0; i < raw_components.length; i++) {
                 s += '<tr>';
-                s += this.construct_html_column(raw_components[i], hide_col);
+                s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
                 s += '</tr>';
             }
         }
@@ -788,27 +791,39 @@ export class Table {
         return s;
     }
 
-    construct_html_column(components, hide_col) {
+    construct_html_row(components, hide_col, kept_cols?: any[]) {
         let s = '';
-        if (components.length > 10 && hide_col) {
-            for (let i = 0; i < 5; i++) {
-                s += components[i];
-            }
-
+        if (kept_cols) {
             s += '<td class="blank">...</td>';
-
-            for (let i = components.length - 5; i < components.length; i++) {
+            kept_cols.forEach(function(i) {
                 s += components[i];
+                s += '<td class="blank">...</td>';
+            });
+
+            return s;
+        } else {            
+            if (components.length > 10 && hide_col) {
+                for (let i = 0; i < 5; i++) {
+                    s += components[i];
+                }
+
+                s += '<td class="blank">...</td>';
+
+                for (let i = components.length - 5; i < components.length; i++) {
+                    s += components[i];
+                }
+                
+                return s;
+            } else {
+                return components.join('');
             }
-        } else {
-            return components.join('');
-        }
+        }        
     }
 
     preview(method_call) {
         console.log(method_call);
-        let method_name = method_call.slice(0, method_call.indexOf('('));
 
+        let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
         console.log(args);
@@ -847,7 +862,9 @@ export class Table {
                 });
             }
             
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true));
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
+        } else if (method_name == 'drop') {
+
         }
     }
 }
