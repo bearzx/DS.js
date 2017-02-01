@@ -837,12 +837,17 @@ export class Table {
         }        
     }
 
+    _as_args(...args) {
+        return args;
+    }
+
     preview(method_call) {
         console.log(method_call);
 
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
+        console.log(method_name);
         // console.log(args);
 
         // 1 call the actual mutation functions
@@ -879,9 +884,14 @@ export class Table {
                 });
             }
                         
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));            
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
         } else if (method_name == 'relabeled') {
+            args = eval(`this._as_args(${args})`);            
+            let raw_components = this.construct_table_components();
+            let label_loc = this._as_label_index(args[0]);            
+            raw_components[0][label_loc] = $(raw_components[0][label_loc]).text(args[0] + '=>' + args[1]).attr('class', 'preview').prop('outerHTML');            
 
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'where') {
 
         } else if (method_name == 'sort') {

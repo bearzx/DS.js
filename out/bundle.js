@@ -11221,10 +11221,18 @@ var Table =
 	            }
 	        }
 	    };
+	    Table.prototype._as_args = function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        return args;
+	    };
 	    Table.prototype.preview = function (method_call) {
 	        console.log(method_call);
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
+	        console.log(method_name);
 	        // console.log(args);
 	        // 1 call the actual mutation functions
 	        // 2 construct html partial tags
@@ -11250,6 +11258,7 @@ var Table =
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'select' || method_name == 'drop') {
+	            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error
 	            var raw_components_1 = this.construct_table_components();
 	            var label_locs = eval("this._as_label_indices(" + args + ")");
 	            var _loop_1 = function(i) {
@@ -11263,6 +11272,11 @@ var Table =
 	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
 	        }
 	        else if (method_name == 'relabeled') {
+	            args = eval("this._as_args(" + args + ")");
+	            var raw_components = this.construct_table_components();
+	            var label_loc = this._as_label_index(args[0]);
+	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).text(args[0] + '=>' + args[1]).attr('class', 'preview').prop('outerHTML');
+	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'where') {
 	        }
