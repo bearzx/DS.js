@@ -114,8 +114,6 @@ var Table =
 	                        pre_eval_code += all_code[i] + '\n';
 	                    }
 	                    pre_eval_code += items.slice(0, items.length - 1).join('.');
-	                    // pre_eval_code = `${variable_name} = ${pre_eval_code}`;
-	                    // eval(pre_eval_code);
 	                    var partial_result = eval(pre_eval_code);
 	                    eval(`partial_result.preview(\`${method_call}\`)`);
 	                }    
@@ -11256,7 +11254,7 @@ var Table =
 	            var label_locs = eval("this._as_label_indices(" + args + ")");
 	            var _loop_1 = function(i) {
 	                label_locs.forEach(function (loc) {
-	                    raw_components_1[i][loc] = $(raw_components_1[i][loc]).attr('class', 'preview').prop('outerHTML');
+	                    raw_components_1[i][loc] = $(raw_components_1[i][loc]).attr('class', method_name == 'select' ? 'preview' : 'preview-del').prop('outerHTML');
 	                });
 	            };
 	            for (var i = 0; i < raw_components_1.length; i++) {

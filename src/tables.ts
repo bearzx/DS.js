@@ -869,17 +869,17 @@ export class Table {
             }
             
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
-        } else if (method_name == 'select' || method_name == 'drop') {                        
+        } else if (method_name == 'select' || method_name == 'drop') {
+            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error
             let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
-                label_locs.forEach(function(loc) {
-                    raw_components[i][loc] = $(raw_components[i][loc]).attr('class', 'preview').prop('outerHTML');
+                label_locs.forEach(function(loc) {                    
+                    raw_components[i][loc] = $(raw_components[i][loc]).attr('class', method_name == 'select' ? 'preview' : 'preview-del').prop('outerHTML');
                 });
             }
                         
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
-            // bugs on the ...
+            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));            
         } else if (method_name == 'relabeled') {
 
         } else if (method_name == 'where') {

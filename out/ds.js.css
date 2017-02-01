@@ -78,10 +78,13 @@ pre {
 .preview {
   background-color: #5cb85c;
 }
-.blank_row {
+.preview-del {
+  text-decoration: line-through;
+}
+.blank {
   height: 10px;
   background-color: #eee;
 }
-.blank_row td {
+.blank td {
   border: none;
 }
