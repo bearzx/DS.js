@@ -10474,6 +10474,7 @@ var Table =
 	        this._t = [];
 	        this._labels = [];
 	        this._column_order = {};
+	        // types of column variables, especially in the cases when we want to do sorting
 	        if (t != null) {
 	        }
 	        if (l != null) {
@@ -10521,6 +10522,9 @@ var Table =
 	            row[l] = f(row[l]);
 	        });
 	        return this;
+	    };
+	    Table.prototype.elem = function (row, col) {
+	        return this._t[row][col];
 	    };
 	    Table.prototype.num_rows = function () {
 	        return this._t.length;
@@ -10733,7 +10737,14 @@ var Table =
 	        return this.select.apply(this, left_columns);
 	    };
 	    Table.prototype.where = function (column_or_label, value_or_predicate) {
-	        var table = new Table(null, this.labels());
+	        return this._where(column_or_label, value_or_predicate, false);
+	    };
+	    Table.prototype.iwhere = function (column_or_label, value_or_predicate) {
+	        return this._where(column_or_label, value_or_predicate, true);
+	    };
+	    Table.prototype._where = function (column_or_label, value_or_predicate, keep_index) {
+	        var table = new Table(null, this.labels(), null, this._id);
+	        var indices = [];
 	        var predicate;
 	        if (value_or_predicate instanceof Function) {
 	            predicate = value_or_predicate;
@@ -10741,12 +10752,13 @@ var Table =
 	        else {
 	            predicate = function (a) { return a == value_or_predicate; };
 	        }
-	        this._t.forEach(function (row) {
+	        this._t.forEach(function (row, i) {
 	            if (predicate(row[column_or_label])) {
-	                table.with_row(row);
+	                table._with_row(row);
+	                indices.push(i);
 	            }
 	        });
-	        return table;
+	        return keep_index ? { table: table, index: indices, label: this._as_label_index(column_or_label) } : table;
 	    };
 	    Table.prototype.sort = function (column_or_label, descending, distinct) {
 	        if (descending === void 0) { descending = false; }
@@ -10774,6 +10786,13 @@ var Table =
 	        }
 	        return this;
 	    };
+	    Table.prototype.sorted = function (column_or_label, descending, distinct) {
+	        if (descending === void 0) { descending = false; }
+	        if (distinct === void 0) { distinct = false; }
+	        var copy = this.copy();
+	        copy.sort(column_or_label, descending, distinct);
+	        return copy;
+	    };
 	    Table.prototype.group = function (column_or_label, collect) {
 	        var label = this._as_label(column_or_label);
 	        var counts = {};
@@ -10787,11 +10806,12 @@ var Table =
 	        });
 	        var keys = Object.keys(counts);
 	        keys.sort();
-	        var grouped = new Table(null, [label, 'count']);
+	        var grouped = new Table(null, [label, 'count'], null, this._id);
 	        keys.forEach(function (key) {
-	            grouped.with_row((_a = {}, _a[label] = key, _a['count'] = counts[key], _a));
+	            grouped._with_row((_a = {}, _a[label] = key, _a['count'] = counts[key], _a));
 	            var _a;
 	        });
+	        console.log(grouped);
 	        return grouped;
 	    };
 	    Table.prototype.groups = function (columns_or_labels, collect) {
@@ -11150,7 +11170,6 @@ var Table =
 	        if (raw_components.length > 10 && hide_row) {
 	            for (var i = 0; i < 5; i++) {
 	                s += '<tr>';
-	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                var row = this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                dot_counts = row.length;
 	                s += row.join('');
@@ -11170,7 +11189,6 @@ var Table =
 	            s += '</tr>';
 	            for (var i = raw_components.length - 5; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
@@ -11178,7 +11196,6 @@ var Table =
 	        else {
 	            for (var i = 0; i < raw_components.length; i++) {
 	                s += '<tr>';
-	                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
 	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
@@ -11186,7 +11203,31 @@ var Table =
 	        s += '</table>';
 	        return s;
 	    };
+	    Table.prototype.construct_html_table_peek = function (raw_components, peek_indices, label, hide_col) {
+	        var s = '<table class="ds-table">';
+	        var rown = peek_indices.length > 5 ? 5 : peek_indices.length;
+	        var table_head = this.construct_html_row(raw_components[0], hide_col);
+	        s += '<tr>' + table_head.join('') + '</tr>';
+	        if (peek_indices[0] > 0) {
+	            s += this.construct_blank_row(table_head.length);
+	        }
+	        for (var i = 0; i < rown; i++) {
+	            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col).join('') + '</tr>';
+	        }
+	        s += this.construct_blank_row(table_head.length);
+	        s += '</table>';
+	        return s;
+	    };
+	    Table.prototype.construct_blank_row = function (n) {
+	        var s = '<tr>';
+	        for (var i = 0; i < n; i++) {
+	            s += '<td>...</td>';
+	        }
+	        s += '</tr>';
+	        return s;
+	    };
 	    Table.prototype.construct_html_row = function (components, hide_col, kept_cols) {
+	        // TODO: hide-show buttons for hidden columns
 	        var row = [];
 	        if (kept_cols) {
 	            if (kept_cols[0] > 0) {
@@ -11199,7 +11240,6 @@ var Table =
 	                }
 	            }
 	            row.push(components[kept_cols[kept_cols.length - 1]]);
-	            console.log(this._labels);
 	            if (kept_cols[kept_cols.length - 1] < (this._labels.length - 1)) {
 	                row.push('<td class="blank">...</td>');
 	            }
@@ -11258,7 +11298,7 @@ var Table =
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'select' || method_name == 'drop') {
-	            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error
+	            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
 	            var raw_components_1 = this.construct_table_components();
 	            var label_locs = eval("this._as_label_indices(" + args + ")");
 	            var _loop_1 = function(i) {
@@ -11272,17 +11312,45 @@ var Table =
 	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
 	        }
 	        else if (method_name == 'relabeled') {
+	            // [bug] what if we give it a non-existing label name?
 	            args = eval("this._as_args(" + args + ")");
 	            var raw_components = this.construct_table_components();
 	            var label_loc = this._as_label_index(args[0]);
-	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).text(args[0] + '=>' + args[1]).attr('class', 'preview').prop('outerHTML');
+	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-del\">" + args[0] + "</span> <span class=\"preview-select\">" + args[1] + "</span>").attr('class', 'preview').prop('outerHTML');
 	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'where') {
+	            var res = eval("this.iwhere(" + args + ")");
+	            var raw_components_2 = this.construct_table_components();
+	            raw_components_2[0][res.label] = $(raw_components_2[0][res.label]).attr('class', 'preview-select').prop('outerHTML');
+	            res.index.forEach(function (i) {
+	                for (var j = 0; j < raw_components_2[i + 1].length; j++) {
+	                    raw_components_2[i + 1][j] = $(raw_components_2[i + 1][j]).attr('class', 'preview').prop('outerHTML');
+	                }
+	            });
+	            $("#table-area-" + this._id).html(this.construct_html_table_peek(raw_components_2, res.index, res.label, false));
 	        }
-	        else if (method_name == 'sort') {
+	        else if (method_name == 'sorted') {
+	            var sorted_table = eval("this.sorted(" + args + ")");
+	            args = eval("this._as_args(" + args + ")");
+	            var raw_components = sorted_table.construct_table_components();
+	            var label_loc = sorted_table._as_label_index(args[0]);
+	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-select\">" + args[0] + " sorted</span>").prop('outerHTML');
+	            $("#table-area-" + this._id).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'group') {
+	            var grouped_table = eval("this.group(" + args + ")");
+	            args = eval("this._as_args(" + args + ")");
+	            var left_group_index = this._as_label_index(args[0]);
+	            var left_raw_components = this.construct_table_components();
+	            left_raw_components[0][left_group_index] = $(left_raw_components[0][left_group_index]).attr('class', 'preview-select').prop('outerHTML');
+	            var right_group_index = grouped_table._as_label_index(args[0]);
+	            var right_raw_components = grouped_table.construct_table_components();
+	            right_raw_components[0][right_group_index] = $(right_raw_components[0][right_group_index]).attr('class', 'preview-select').prop('outerHTML');
+	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
+	            var right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
+	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
+	            $("#table-area-" + this._id).html(template);
 	        }
 	        else if (method_name == 'pivot') {
 	        }

@@ -14,6 +14,7 @@ export class Table {
     private _id: string;
 
     constructor(t?: Table, l?: any[], url?, datai?) {
+        // types of column variables, especially in the cases when we want to do sorting
         if (t != null) {
 
         }
@@ -72,6 +73,10 @@ export class Table {
         return this;
     }
 
+    public elem(row, col) {
+        return this._t[row][col];
+    }
+
     public num_rows() {
         return this._t.length;
     }
@@ -128,7 +133,7 @@ export class Table {
         return copy;
     }
 
-    private _with_row(row) {
+    _with_row(row) {
         if (row instanceof Array) {
             var o_row = {};
             this._labels.forEach(function (label, index) {
@@ -139,7 +144,7 @@ export class Table {
             this._t.push(row);
         }
 
-        return this;        
+        return this;
     }
 
     with_rows(rows) {
@@ -152,7 +157,7 @@ export class Table {
     }
 
     with_column(label, values) {
-        // TODO: what if label is already in _labels?
+        // [TODO] what if label is already in _labels?
         let copy = this.copy();
         copy._with_column(label, values);
         return copy;
@@ -265,7 +270,7 @@ export class Table {
         label_list.forEach(function(l) {
             indices.push(_this._as_label_index(l));
         });
-        indices.sort((a, b) => (a - b));        
+        indices.sort((a, b) => (a - b));
 
         return indices;
     }
@@ -295,20 +300,30 @@ export class Table {
     }
 
     where(column_or_label, value_or_predicate) {
-        var table = new Table(null, this.labels());
-        var predicate;
+        return this._where(column_or_label, value_or_predicate, false);
+    }
+
+    iwhere(column_or_label, value_or_predicate) {
+        return this._where(column_or_label, value_or_predicate, true);
+    }
+
+    _where(column_or_label, value_or_predicate, keep_index: boolean) {
+        let table = new Table(null, this.labels(), null, this._id);
+        let indices = [];
+        let predicate;
         if (value_or_predicate instanceof Function) {
             predicate = value_or_predicate;
         } else {
             predicate = function (a) { return a == value_or_predicate; };
         }
-        this._t.forEach(function (row) {
+        this._t.forEach(function (row, i) {
             if (predicate(row[column_or_label])) {
-                table.with_row(row);
+                table._with_row(row);
+                indices.push(i);
             }
         });
 
-        return table;
+        return keep_index ? { table: table, index: indices, label: this._as_label_index(column_or_label) } : table;
     }
 
     sort(column_or_label, descending = false, distinct = false) {
@@ -335,24 +350,31 @@ export class Table {
         return this;
     }
 
-    group(column_or_label: any, collect?) {
-        var label = this._as_label(column_or_label);
-        var counts = {};
+    sorted(column_or_label, descending = false, distinct = false) {
+        let copy = this.copy();
+        copy.sort(column_or_label, descending, distinct);
+        return copy;
+    }
+
+    group(column_or_label: any, collect?) {        
+        let label = this._as_label(column_or_label);
+        let counts = {};
         this._t.forEach(function (row) {
             if (row[label] in counts) {
                 counts[row[label]] += 1;
             } else {
                 counts[row[label]] = 1;
             }
-        });
+        });        
 
-        var keys = Object.keys(counts);
-        keys.sort();
-        var grouped = new Table(null, [label, 'count']);
+        let keys = Object.keys(counts);
+        keys.sort();        
+        let grouped = new Table(null, [label, 'count'], null, this._id);
         keys.forEach(function (key) {
-            grouped.with_row({ [label]: key, 'count': counts[key] });
+            grouped._with_row({ [label]: key, 'count': counts[key] });
         });
 
+        console.log(grouped);
         return grouped;
     }
 
@@ -391,6 +413,7 @@ export class Table {
     }
 
     pivot(columns, rows, values, collect?, zero?) {
+        // [TODO] implement more optional arguments
         let column_labels = new Set();
         let row_labels = new Set();
         this._t.forEach(function (row) {
@@ -756,8 +779,7 @@ export class Table {
         let dot_counts;
         if (raw_components.length > 10 && hide_row) {
             for (let i = 0; i < 5; i++) {
-                s += '<tr>';
-                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += '<tr>';                
                 let row = this.construct_html_row(raw_components[i], hide_col, kept_cols);
                 dot_counts = row.length;
                 s += row.join('');
@@ -778,15 +800,13 @@ export class Table {
             s += '</tr>';
 
             for (let i = raw_components.length - 5; i < raw_components.length; i++) {
-                s += '<tr>';
-                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += '<tr>';                
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
         } else {
             for (let i = 0; i < raw_components.length; i++) {
-                s += '<tr>';
-                // s += this.construct_html_row(raw_components[i], hide_col, kept_cols);
+                s += '<tr>';                
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
@@ -795,24 +815,49 @@ export class Table {
         s += '</table>';
         
         return s;
+    }    
+
+    construct_html_table_peek(raw_components, peek_indices, label, hide_col) {
+        let s = '<table class="ds-table">';
+        let rown = peek_indices.length > 5 ? 5 : peek_indices.length;
+        let table_head = this.construct_html_row(raw_components[0], hide_col);
+        s += '<tr>' + table_head.join('') + '</tr>';
+        if (peek_indices[0] > 0) {
+            s += this.construct_blank_row(table_head.length);
+        }
+        for (let i = 0; i < rown; i++) {
+            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col).join('') + '</tr>';
+        }
+        s += this.construct_blank_row(table_head.length);
+        s += '</table>';
+        return s;
+    }
+
+    construct_blank_row(n) {
+        let s = '<tr>';
+        for (let i = 0; i < n; i++) {
+            s += '<td>...</td>';
+        }
+        s += '</tr>';
+        return s;
     }
 
     construct_html_row(components, hide_col, kept_cols?: any[]) {
+        // [TODO] hide-show buttons for hidden columns
         let row = [];
         if (kept_cols) {
             if (kept_cols[0] > 0) {
                 row.push('<td class="blank">...</td>');
             }
             
-            for (let i = 0; i < kept_cols.length - 1; i++) {
+            for (let i = 0; i < kept_cols.length - 1; i++) {                
                 row.push(components[kept_cols[i]]);
                 if (kept_cols[i] + 1 != kept_cols[i + 1]) {
                     row.push('<td class="blank">...</td>');
                 }
             }
-
-            row.push(components[kept_cols[kept_cols.length - 1]]);
-            console.log(this._labels);
+            
+            row.push(components[kept_cols[kept_cols.length - 1]]);            
             if (kept_cols[kept_cols.length - 1] < (this._labels.length - 1)) {
                 row.push('<td class="blank">...</td>');
             }            
@@ -875,7 +920,7 @@ export class Table {
             
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'select' || method_name == 'drop') {
-            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error
+            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
@@ -886,20 +931,55 @@ export class Table {
                         
             $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
         } else if (method_name == 'relabeled') {
+            // [bug] what if we give it a non-existing label name?
             args = eval(`this._as_args(${args})`);            
             let raw_components = this.construct_table_components();
             let label_loc = this._as_label_index(args[0]);            
-            raw_components[0][label_loc] = $(raw_components[0][label_loc]).text(args[0] + '=>' + args[1]).attr('class', 'preview').prop('outerHTML');            
+            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');            
 
             $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'where') {
+            // [TODO] hide_col strategies on this
+            let res = eval(`this.iwhere(${args})`);            
+            let raw_components = this.construct_table_components();
+            raw_components[0][res.label] = $(raw_components[0][res.label]).attr('class', 'preview-select').prop('outerHTML');
+            res.index.forEach(function(i) {
+                for (let j = 0; j < raw_components[i + 1].length; j++) {
+                    raw_components[i + 1][j] = $(raw_components[i + 1][j]).attr('class', 'preview').prop('outerHTML');
+                }
+            });
 
-        } else if (method_name == 'sort') {
-            
+            $(`#table-area-${this._id}`).html(this.construct_html_table_peek(raw_components, res.index, res.label, false));
+        } else if (method_name == 'sorted') {
+            let sorted_table = eval(`this.sorted(${args})`);
+            args = eval(`this._as_args(${args})`);
+            let raw_components = sorted_table.construct_table_components();
+            let label_loc = sorted_table._as_label_index(args[0]);
+            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-select">${args[0]} sorted</span>`).prop('outerHTML');
+            $(`#table-area-${this._id}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'group') {
+            let grouped_table = eval(`this.group(${args})`);
+            args = eval(`this._as_args(${args})`);
+            let left_group_index = this._as_label_index(args[0]);
+            let left_raw_components = this.construct_table_components();
+            left_raw_components[0][left_group_index] = $(left_raw_components[0][left_group_index]).attr('class', 'preview-select').prop('outerHTML');
+            let right_group_index = grouped_table._as_label_index(args[0]);
+            let right_raw_components = grouped_table.construct_table_components();            
+            right_raw_components[0][right_group_index] = $(right_raw_components[0][right_group_index]).attr('class', 'preview-select').prop('outerHTML');
+            let left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
+            let right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
+            
+            let template = `
+                <div class="multi-table-preview">
+                    <div class="left">${left_table}</div>
+                    <div class="arrow">=></div>
+                    <div class="right">${right_table}</div>
+                </div>
+            `;
 
+            $(`#table-area-${this._id}`).html(template);
         } else if (method_name == 'pivot') {
-
+            let pivoted_table = eval(`this.pivot(${args})`);
         } else if (method_name == 'join') {
 
         } else {
