@@ -10485,6 +10485,20 @@ var Table =
 	        }
 	        this._id = datai;
 	    }
+	    Table.prototype.convert = function (cast) {
+	        var _this = this;
+	        this._t.forEach(function (row) {
+	            _this._labels.forEach(function (l) {
+	                row[l] = cast(row[l]);
+	            });
+	        });
+	        return this;
+	    };
+	    Table.prototype.converted = function (cast) {
+	        var copy = this.copy();
+	        copy.convert(cast);
+	        return copy;
+	    };
 	    Table.prototype.copy_from = function (t) {
 	        return this;
 	    };
@@ -10595,7 +10609,7 @@ var Table =
 	        return this;
 	    };
 	    Table.prototype.with_column = function (label, values) {
-	        // TODO: what if label is already in _labels?
+	        // [TODO] what if label is already in _labels?
 	        var copy = this.copy();
 	        copy._with_column(label, values);
 	        return copy;
@@ -10846,6 +10860,7 @@ var Table =
 	        return grouped;
 	    };
 	    Table.prototype.pivot = function (columns, rows, values, collect, zero) {
+	        // [TODO] implement more optional arguments
 	        var column_labels = new Set();
 	        var row_labels = new Set();
 	        this._t.forEach(function (row) {
@@ -10867,7 +10882,7 @@ var Table =
 	                pivot_t[row[rows]][row[columns]] = [row[values]];
 	            }
 	        });
-	        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)));
+	        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null, this._id);
 	        // console.log(pivot_t);
 	        row_labels.forEach(function (row_label) {
 	            var pivot_row = (_a = {}, _a[rows] = row_label, _a);
@@ -10875,10 +10890,10 @@ var Table =
 	                // console.log(`${row_label} | ${column_label}`);
 	                pivot_row[column_label] = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label].length : 0;
 	            });
-	            pivoted.with_row(pivot_row);
+	            pivoted._with_row(pivot_row);
 	            var _a;
 	        });
-	        // console.log(pivoted._t);
+	        console.log(pivoted);
 	        return pivoted;
 	    };
 	    Table.prototype.index_by = function (label) {
@@ -11227,7 +11242,7 @@ var Table =
 	        return s;
 	    };
 	    Table.prototype.construct_html_row = function (components, hide_col, kept_cols) {
-	        // TODO: hide-show buttons for hidden columns
+	        // [TODO] hide-show buttons for hidden columns
 	        var row = [];
 	        if (kept_cols) {
 	            if (kept_cols[0] > 0) {
@@ -11320,6 +11335,7 @@ var Table =
 	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'where') {
+	            // [TODO] hide_col strategies on this
 	            var res = eval("this.iwhere(" + args + ")");
 	            var raw_components_2 = this.construct_table_components();
 	            raw_components_2[0][res.label] = $(raw_components_2[0][res.label]).attr('class', 'preview-select').prop('outerHTML');
@@ -11335,7 +11351,11 @@ var Table =
 	            args = eval("this._as_args(" + args + ")");
 	            var raw_components = sorted_table.construct_table_components();
 	            var label_loc = sorted_table._as_label_index(args[0]);
+	            // raw_components[0] is the table header
 	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-select\">" + args[0] + " sorted</span>").prop('outerHTML');
+	            for (var i = 1; i < raw_components.length; i++) {
+	                raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
+	            }
 	            $("#table-area-" + this._id).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'group') {
@@ -11344,15 +11364,33 @@ var Table =
 	            var left_group_index = this._as_label_index(args[0]);
 	            var left_raw_components = this.construct_table_components();
 	            left_raw_components[0][left_group_index] = $(left_raw_components[0][left_group_index]).attr('class', 'preview-select').prop('outerHTML');
+	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
 	            var right_group_index = grouped_table._as_label_index(args[0]);
 	            var right_raw_components = grouped_table.construct_table_components();
 	            right_raw_components[0][right_group_index] = $(right_raw_components[0][right_group_index]).attr('class', 'preview-select').prop('outerHTML');
-	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
 	            var right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
 	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
 	            $("#table-area-" + this._id).html(template);
 	        }
 	        else if (method_name == 'pivot') {
+	            var pivoted_table = eval("this.pivot(" + args + ")");
+	            args = eval("this._as_args(" + args + ")");
+	            var left_pivot_indices = this._as_label_indices(args[0], args[1], args[2]);
+	            var left_raw_components = this.construct_table_components();
+	            for (var i = 1; i < left_raw_components.length; i++) {
+	                left_raw_components[i][left_pivot_indices[0]] = $(left_raw_components[i][left_pivot_indices[0]]).attr('class', 'preview').prop('outerHTML');
+	            }
+	            left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
+	            var left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
+	            // let right_pivot_indices = pivoted_table._as_label_indices(args[0], args[1], args[2]);
+	            var right_raw_components = pivoted_table.construct_table_components();
+	            right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
+	            for (var i = 1; i < right_raw_components[0].length; i++) {
+	                right_raw_components[0][i] = $(right_raw_components[0][i]).attr('class', 'preview').prop('outerHTML');
+	            }
+	            var right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
+	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
+	            $("#table-area-" + this._id).html(template);
 	        }
 	        else if (method_name == 'join') {
 	        }
