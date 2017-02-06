@@ -394,59 +394,95 @@ export class Table {
         return copy;
     }
 
+
+
     group(column_or_label: any, collect?) {        
         let label = this._as_label(column_or_label);
-        let counts = {};
+        let group_t = {};
         this._t.forEach(function (row) {
-            if (row[label] in counts) {
-                counts[row[label]] += 1;
+            if (row[label] in group_t) {
+                group_t[row[label]].push(row);
             } else {
-                counts[row[label]] = 1;
+                group_t[row[label]] = [row];
             }
-        });        
-
-        let keys = Object.keys(counts);
-        keys.sort();        
-        let grouped = new Table(null, [label, 'count'], null, this._id);
-        keys.forEach(function (key) {
-            grouped._with_row({ [label]: key, 'count': counts[key] });
         });
 
-        console.log(grouped);
+        let keys = Object.keys(group_t);
+        keys.sort();
+        let grouped;
+        if (collect) {
+            let old_labels = this.labels();
+            old_labels.splice(old_labels.indexOf(label), 1);            
+            grouped = new Table(null, [label].concat(old_labels), null, this._id);
+            keys.forEach(function(k) {
+                let row = { [label]: k };
+                old_labels.forEach(function(l) {                    
+                    row[l] = collect(group_t[k].map(x => x[l]));
+                });
+                grouped._with_row(row);
+            });
+        } else {
+            grouped = new Table(null, [label, 'count'], null, this._id);
+            keys.forEach(function (key) {                
+                grouped._with_row({ [label]: key, 'count': group_t[key].length });
+            });
+        }
+        
+        // console.log(grouped);
         return grouped;
     }
 
     groups(columns_or_labels: any[], collect?) {
-        var labels = this._as_labels(columns_or_labels);
-        var counts = {};
-        var combinations = {};
+        let labels = this._as_labels(columns_or_labels);        
+        // console.log(labels);
+        let group_t = {};
+        let key_combinations = {};
         this._t.forEach(function (row) {
             var key = [];
             labels.forEach(function (label) {
                 key.push(row[label]);
             });
-            // console.log(String(key));
-            if (String(key) in counts) {
-                counts[String(key)] += 1;
+            let skey = String(key);
+            if (skey in group_t) {
+                group_t[skey].push(row);
             } else {
-                counts[String(key)] = 1;
+                group_t[skey] = [row];
             }
 
-            if (!(String(key) in combinations)) {
-                combinations[String(key)] = key;
+            if (!(skey in key_combinations)) {
+                key_combinations[skey] = key;
             }
         });
-
-        var grouped = new Table(null, labels.concat(['count']));
-        Object.keys(combinations).forEach(function (key) {
-            var row = {};
-            labels.forEach(function (label, i) {
-                row[label] = combinations[key][i];
+        let grouped;
+        if (collect) {
+            let old_labels = this.labels();
+            labels.forEach(function(l) {
+                old_labels.splice(old_labels.indexOf(l), 1);
             });
-            row['count'] = counts[key];
-            grouped.with_row(row);
-        });
+            grouped = new Table(null, labels.concat(old_labels), null, this._id);
+            Object.keys(key_combinations).forEach(function(skey) {
+                let row = {};
+                labels.forEach(function (l, i) {
+                    row[l] = key_combinations[skey][i];
+                });
+                old_labels.forEach(function(l) {
+                    row[l] = collect(group_t[skey].map(x => x[l]));
+                });
+                grouped._with_row(row);
+            });            
+        } else {
+            grouped = new Table(null, labels.concat(['count']));
+            Object.keys(key_combinations).forEach(function (skey) {
+                let row = {};
+                labels.forEach(function (l, i) {
+                    row[l] = key_combinations[skey][i];
+                });
+                row['count'] = group_t[skey].length;
+                grouped._with_row(row);
+            });
+        }        
 
+        // console.log(grouped);
         return grouped;
     }
 
@@ -474,18 +510,18 @@ export class Table {
         });
 
         var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null, this._id);
-        // console.log(pivot_t);
 
         row_labels.forEach(function (row_label: any) {
             var pivot_row = { [rows]: row_label };
             column_labels.forEach(function (column_label: any) {
                 // console.log(`${row_label} | ${column_label}`);
-                pivot_row[column_label] = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label].length : 0;
+                let l = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label] : [];
+                pivot_row[column_label] = collect ? collect(l) : l.length;
             });
             pivoted._with_row(pivot_row);
         });
 
-        console.log(pivoted);
+        // console.log(pivoted);
         return pivoted;
     }
 
@@ -512,12 +548,13 @@ export class Table {
             label = `${original}_${i}`;
             i += 1;
         }
+
         return label;
     }
 
     join(column_label, other: Table, other_label?) {
-        console.log('this'); console.log(this);
-        console.log('other'); console.log(other);
+        // console.log('this'); console.log(this);
+        // console.log('other'); console.log(other);
 
         let _this = this;
 
@@ -526,12 +563,8 @@ export class Table {
         }
 
         column_label = this._as_label(column_label);
-        let this_rows = this.index_by(column_label);
-        // console.log('this_rows');
-        // console.log(this_rows);
-        let other_rows = other.index_by(other_label);
-        // console.log('other_rows');
-        // console.log(other_rows);
+        let this_rows = this.index_by(column_label);        
+        let other_rows = other.index_by(other_label);        
         let joined_rows = [];
         Object.keys(this_rows).forEach(function (l) {
             if (l in other_rows) {
@@ -555,15 +588,13 @@ export class Table {
             if (l != other_label) {
                 joined_labels.push(_this._unused_label(l));
             }
-        });
-
-        // console.log(joined_rows);
+        });        
 
         let joined = new Table(null, joined_labels, null, this._id);
         joined._with_rows(joined_rows);
 
-        console.log('joined table');
-        console.log(joined);
+        // console.log('joined table');
+        // console.log(joined);
 
         return joined;
     }
@@ -856,7 +887,7 @@ export class Table {
             }
         } else {
             for (let i = 0; i < raw_components.length; i++) {
-                s += '<tr>';                
+                s += '<tr>';
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
@@ -870,9 +901,12 @@ export class Table {
     construct_html_table_peek(raw_components, peek_indices, label, hide_col) {
         let s = '<table class="ds-table">';
         let rown = peek_indices.length > 5 ? 5 : peek_indices.length;
-        if (raw_components.length < peek_indices.length) {
+        console.log('raw_components.length = ' + raw_components.length);
+        console.log('peek_indices.length = ' + peek_indices.length);
+        if (raw_components.length <= peek_indices.length) {
             rown = raw_components.length - 1;
-        }        
+        }
+        console.log('rown = ' + rown);
         let table_head = this.construct_html_row(raw_components[0], hide_col);
         s += '<tr>' + table_head.join('') + '</tr>';
         if (peek_indices[0] > 0) {
@@ -939,14 +973,11 @@ export class Table {
         return args;
     }
 
-    preview(method_call) {
-        console.log(method_call);
-
+    preview(method_call) {        
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
-        console.log(method_name);
-        // console.log(args);
+        console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
         // 1 call the actual mutation functions
         // 2 construct html partial tags
@@ -1009,7 +1040,7 @@ export class Table {
             let raw_components = sorted_table.construct_table_components();
             let label_loc = sorted_table._as_label_index(args[0]);
             // raw_components[0] is the table header
-            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-select">${args[0]} sorted</span>`).prop('outerHTML');
+            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`${args[0]} sorted`).attr('class', 'preview-select').prop('outerHTML');
             for (let i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
@@ -1065,19 +1096,30 @@ export class Table {
 
             $(`#table-area-${this._id}`).html(template);
         } else if (method_name == 'join') {
-            let joined_table = eval(`this.join(${args})`);
-            console.log(joined_table);
+            let joined_table = eval(`this.join(${args})`);            
             args = eval(`this._as_args(${args})`);
-            let left_raw_components = this.construct_table_components();
+            let left_raw_components = this.construct_table_components();            
             let left_join_index = this._as_label_index(args[0]);
+            left_raw_components[0][left_join_index] = $(left_raw_components[0][left_join_index]).attr('class', 'preview-select').prop('outerHTML');
+            for (let i = 1; i < left_raw_components.length; i++) {
+                left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
+            }
             let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
 
             let middle_raw_components = args[1].construct_table_components();
             let middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
+            middle_raw_components[0][middle_join_index] = $(middle_raw_components[0][middle_join_index]).attr('class', 'preview-select').prop('outerHTML');
+            for (let i = 1; i < middle_raw_components.length; i++) {
+                middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
+            }
             let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
 
             let right_raw_components = joined_table.construct_table_components();
-            console.log(right_raw_components);
+            let right_join_index = joined_table._as_label_index(args[0]);
+            right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(`${args[0]} - ${args.length == 3 ? args[2] : args[2]}`).attr('class', 'preview-select').prop('outerHTML');
+            for (let i = 1; i < right_raw_components.length; i++) {
+                right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
+            }
             let right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 
             let template = `

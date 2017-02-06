@@ -10552,13 +10552,10 @@ var Table =
 	        return this._t.length;
 	    };
 	    Table.prototype.labels = function () {
-	        // console.log(d3.keys(this._t[0]));
-	        // return d3.keys(this._t[0]);
 	        var labels_copy = $.extend([], this._labels);
 	        return labels_copy;
 	    };
 	    Table.prototype.num_columns = function () {
-	        // console.log(this._t[0]);
 	        return Object.keys(this._t[0]).length;
 	    };
 	    Table.prototype.column = function (index_or_label) {
@@ -10833,54 +10830,92 @@ var Table =
 	    };
 	    Table.prototype.group = function (column_or_label, collect) {
 	        var label = this._as_label(column_or_label);
-	        var counts = {};
+	        var group_t = {};
 	        this._t.forEach(function (row) {
-	            if (row[label] in counts) {
-	                counts[row[label]] += 1;
+	            if (row[label] in group_t) {
+	                group_t[row[label]].push(row);
 	            }
 	            else {
-	                counts[row[label]] = 1;
+	                group_t[row[label]] = [row];
 	            }
 	        });
-	        var keys = Object.keys(counts);
+	        var keys = Object.keys(group_t);
 	        keys.sort();
-	        var grouped = new Table(null, [label, 'count'], null, this._id);
-	        keys.forEach(function (key) {
-	            grouped._with_row((_a = {}, _a[label] = key, _a['count'] = counts[key], _a));
-	            var _a;
-	        });
-	        console.log(grouped);
+	        var grouped;
+	        if (collect) {
+	            var old_labels_1 = this.labels();
+	            old_labels_1.splice(old_labels_1.indexOf(label), 1);
+	            grouped = new Table(null, [label].concat(old_labels_1), null, this._id);
+	            keys.forEach(function (k) {
+	                var row = (_a = {}, _a[label] = k, _a);
+	                old_labels_1.forEach(function (l) {
+	                    row[l] = collect(group_t[k].map(function (x) { return x[l]; }));
+	                });
+	                grouped._with_row(row);
+	                var _a;
+	            });
+	        }
+	        else {
+	            grouped = new Table(null, [label, 'count'], null, this._id);
+	            keys.forEach(function (key) {
+	                grouped._with_row((_a = {}, _a[label] = key, _a['count'] = group_t[key].length, _a));
+	                var _a;
+	            });
+	        }
+	        // console.log(grouped);
 	        return grouped;
 	    };
 	    Table.prototype.groups = function (columns_or_labels, collect) {
 	        var labels = this._as_labels(columns_or_labels);
-	        var counts = {};
-	        var combinations = {};
+	        // console.log(labels);
+	        var group_t = {};
+	        var key_combinations = {};
 	        this._t.forEach(function (row) {
 	            var key = [];
 	            labels.forEach(function (label) {
 	                key.push(row[label]);
 	            });
-	            // console.log(String(key));
-	            if (String(key) in counts) {
-	                counts[String(key)] += 1;
+	            var skey = String(key);
+	            if (skey in group_t) {
+	                group_t[skey].push(row);
 	            }
 	            else {
-	                counts[String(key)] = 1;
+	                group_t[skey] = [row];
 	            }
-	            if (!(String(key) in combinations)) {
-	                combinations[String(key)] = key;
+	            if (!(skey in key_combinations)) {
+	                key_combinations[skey] = key;
 	            }
 	        });
-	        var grouped = new Table(null, labels.concat(['count']));
-	        Object.keys(combinations).forEach(function (key) {
-	            var row = {};
-	            labels.forEach(function (label, i) {
-	                row[label] = combinations[key][i];
+	        var grouped;
+	        if (collect) {
+	            var old_labels_2 = this.labels();
+	            labels.forEach(function (l) {
+	                old_labels_2.splice(old_labels_2.indexOf(l), 1);
 	            });
-	            row['count'] = counts[key];
-	            grouped.with_row(row);
-	        });
+	            grouped = new Table(null, labels.concat(old_labels_2), null, this._id);
+	            Object.keys(key_combinations).forEach(function (skey) {
+	                var row = {};
+	                labels.forEach(function (l, i) {
+	                    row[l] = key_combinations[skey][i];
+	                });
+	                old_labels_2.forEach(function (l) {
+	                    row[l] = collect(group_t[skey].map(function (x) { return x[l]; }));
+	                });
+	                grouped._with_row(row);
+	            });
+	        }
+	        else {
+	            grouped = new Table(null, labels.concat(['count']));
+	            Object.keys(key_combinations).forEach(function (skey) {
+	                var row = {};
+	                labels.forEach(function (l, i) {
+	                    row[l] = key_combinations[skey][i];
+	                });
+	                row['count'] = group_t[skey].length;
+	                grouped._with_row(row);
+	            });
+	        }
+	        // console.log(grouped);
 	        return grouped;
 	    };
 	    Table.prototype.pivot = function (columns, rows, values, collect, zero) {
@@ -10907,17 +10942,17 @@ var Table =
 	            }
 	        });
 	        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null, this._id);
-	        // console.log(pivot_t);
 	        row_labels.forEach(function (row_label) {
 	            var pivot_row = (_a = {}, _a[rows] = row_label, _a);
 	            column_labels.forEach(function (column_label) {
 	                // console.log(`${row_label} | ${column_label}`);
-	                pivot_row[column_label] = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label].length : 0;
+	                var l = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label] : [];
+	                pivot_row[column_label] = collect ? collect(l) : l.length;
 	            });
 	            pivoted._with_row(pivot_row);
 	            var _a;
 	        });
-	        console.log(pivoted);
+	        // console.log(pivoted);
 	        return pivoted;
 	    };
 	    Table.prototype.index_by = function (label) {
@@ -10945,21 +10980,15 @@ var Table =
 	        return label;
 	    };
 	    Table.prototype.join = function (column_label, other, other_label) {
-	        console.log('this');
-	        console.log(this);
-	        console.log('other');
-	        console.log(other);
+	        // console.log('this'); console.log(this);
+	        // console.log('other'); console.log(other);
 	        var _this = this;
 	        if (!other_label) {
 	            other_label = column_label;
 	        }
 	        column_label = this._as_label(column_label);
 	        var this_rows = this.index_by(column_label);
-	        // console.log('this_rows');
-	        // console.log(this_rows);
 	        var other_rows = other.index_by(other_label);
-	        // console.log('other_rows');
-	        // console.log(other_rows);
 	        var joined_rows = [];
 	        Object.keys(this_rows).forEach(function (l) {
 	            if (l in other_rows) {
@@ -10984,11 +11013,10 @@ var Table =
 	                joined_labels.push(_this._unused_label(l));
 	            }
 	        });
-	        // console.log(joined_rows);
 	        var joined = new Table(null, joined_labels, null, this._id);
 	        joined._with_rows(joined_rows);
-	        console.log('joined table');
-	        console.log(joined);
+	        // console.log('joined table');
+	        // console.log(joined);
 	        return joined;
 	    };
 	    Table.prototype.stats = function () {
@@ -11256,9 +11284,12 @@ var Table =
 	    Table.prototype.construct_html_table_peek = function (raw_components, peek_indices, label, hide_col) {
 	        var s = '<table class="ds-table">';
 	        var rown = peek_indices.length > 5 ? 5 : peek_indices.length;
-	        if (raw_components.length < peek_indices.length) {
+	        console.log('raw_components.length = ' + raw_components.length);
+	        console.log('peek_indices.length = ' + peek_indices.length);
+	        if (raw_components.length <= peek_indices.length) {
 	            rown = raw_components.length - 1;
 	        }
+	        console.log('rown = ' + rown);
 	        var table_head = this.construct_html_row(raw_components[0], hide_col);
 	        s += '<tr>' + table_head.join('') + '</tr>';
 	        if (peek_indices[0] > 0) {
@@ -11322,11 +11353,9 @@ var Table =
 	        return args;
 	    };
 	    Table.prototype.preview = function (method_call) {
-	        console.log(method_call);
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
-	        console.log(method_name);
-	        // console.log(args);
+	        console.log("method_call: " + method_call + ", method_name: " + method_name + ", args: " + args);
 	        // 1 call the actual mutation functions
 	        // 2 construct html partial tags
 	        // 3 do customization, use jquery if necessary
@@ -11390,7 +11419,7 @@ var Table =
 	            var raw_components = sorted_table.construct_table_components();
 	            var label_loc = sorted_table._as_label_index(args[0]);
 	            // raw_components[0] is the table header
-	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-select\">" + args[0] + " sorted</span>").prop('outerHTML');
+	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(args[0] + " sorted").attr('class', 'preview-select').prop('outerHTML');
 	            for (var i = 1; i < raw_components.length; i++) {
 	                raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
 	            }
@@ -11432,16 +11461,27 @@ var Table =
 	        }
 	        else if (method_name == 'join') {
 	            var joined_table = eval("this.join(" + args + ")");
-	            console.log(joined_table);
 	            args = eval("this._as_args(" + args + ")");
 	            var left_raw_components = this.construct_table_components();
 	            var left_join_index = this._as_label_index(args[0]);
+	            left_raw_components[0][left_join_index] = $(left_raw_components[0][left_join_index]).attr('class', 'preview-select').prop('outerHTML');
+	            for (var i = 1; i < left_raw_components.length; i++) {
+	                left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
+	            }
 	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
 	            var middle_raw_components = args[1].construct_table_components();
 	            var middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
+	            middle_raw_components[0][middle_join_index] = $(middle_raw_components[0][middle_join_index]).attr('class', 'preview-select').prop('outerHTML');
+	            for (var i = 1; i < middle_raw_components.length; i++) {
+	                middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
+	            }
 	            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
 	            var right_raw_components = joined_table.construct_table_components();
-	            console.log(right_raw_components);
+	            var right_join_index = joined_table._as_label_index(args[0]);
+	            right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(args[0] + " - " + (args.length == 3 ? args[2] : args[2])).attr('class', 'preview-select').prop('outerHTML');
+	            for (var i = 1; i < right_raw_components.length; i++) {
+	                right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
+	            }
 	            var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 	            var template = "\n                <div class=\"multi-table-preview\">                    \n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
 	            $("#table-area-" + this._id).html(template);
