@@ -302,7 +302,10 @@ export class Table {
         return new_labels;
     }
 
-    private _as_label_indices(...label_list) {
+    private _as_label_indices(...label_list) {        
+        if (label_list[0] instanceof Array) {
+            label_list = label_list[0];
+        }
         let indices = [];
         let _this = this;
         label_list.forEach(function(l) {
@@ -898,22 +901,22 @@ export class Table {
         return s;
     }    
 
-    construct_html_table_peek(raw_components, peek_indices, label, hide_col) {
+    construct_html_table_peek(raw_components, peek_indices, label, hide_col, kept_cols?: any[]) {
         let s = '<table class="ds-table">';
         let rown = peek_indices.length > 5 ? 5 : peek_indices.length;
-        console.log('raw_components.length = ' + raw_components.length);
-        console.log('peek_indices.length = ' + peek_indices.length);
+        // console.log('raw_components.length = ' + raw_components.length);
+        // console.log('peek_indices.length = ' + peek_indices.length);
         if (raw_components.length <= peek_indices.length) {
             rown = raw_components.length - 1;
         }
-        console.log('rown = ' + rown);
-        let table_head = this.construct_html_row(raw_components[0], hide_col);
+                
+        let table_head = this.construct_html_row(raw_components[0], hide_col, kept_cols);
         s += '<tr>' + table_head.join('') + '</tr>';
         if (peek_indices[0] > 0) {
             s += this.construct_blank_row(table_head.length);
         }
         for (let i = 0; i < rown; i++) {
-            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col).join('') + '</tr>';
+            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col, kept_cols).join('') + '</tr>';
         }
         s += this.construct_blank_row(table_head.length);
         s += '</table>';
@@ -973,7 +976,7 @@ export class Table {
         return args;
     }
 
-    preview(method_call) {        
+    preview(method_call) {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
@@ -987,7 +990,7 @@ export class Table {
         // this will also affect the actual show function
         // change impure (e.g. with_row) functions to pure functions
 
-        if (method_name == 'with_row') {            
+        if (method_name == 'with_row') {
             let new_table = eval(`this.with_row(${args})`);
             let raw_components = new_table.construct_table_components();
             for (let i = 0; i < raw_components[0].length; i++) {
@@ -1045,17 +1048,26 @@ export class Table {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
             $(`#table-area-${this._id}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
-        } else if (method_name == 'group') {
-            let grouped_table = eval(`this.group(${args})`);
+        } else if (method_name == 'group' || method_name == 'groups') {
+            let grouped_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
-            let left_group_index = this._as_label_index(args[0]);
+            let group_labels = method_name == 'group' ? [args[0]] : args[0];
+            let left_group_indices = this._as_label_indices(group_labels);
             let left_raw_components = this.construct_table_components();
-            left_raw_components[0][left_group_index] = $(left_raw_components[0][left_group_index]).attr('class', 'preview-select').prop('outerHTML');
-            let left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
+            for (let i = 0; i < left_raw_components.length; i++) {
+                left_group_indices.forEach(function(lgi) {
+                    left_raw_components[i][lgi] = $(left_raw_components[i][lgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
+                });
+            }
+            let left_table = this.construct_html_table(left_raw_components, true, true, left_group_indices);
 
-            let right_group_index = grouped_table._as_label_index(args[0]);
+            let right_group_indices = grouped_table._as_label_indices(group_labels);
             let right_raw_components = grouped_table.construct_table_components();
-            right_raw_components[0][right_group_index] = $(right_raw_components[0][right_group_index]).attr('class', 'preview-select').prop('outerHTML');
+            for (let i = 0; i < right_raw_components.length; i++) {
+                right_group_indices.forEach(function(rgi) {
+                    right_raw_components[i][rgi] = $(right_raw_components[i][rgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
+                });
+            }
             let right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
             
             let template = `
@@ -1064,6 +1076,7 @@ export class Table {
                     <div class="arrow">=></div>
                     <div class="right">${right_table}</div>
                 </div>
+                <div style="clear: both"></div>
             `;
 
             $(`#table-area-${this._id}`).html(template);

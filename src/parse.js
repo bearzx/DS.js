@@ -60,8 +60,8 @@ function env_init(_this, code) {
                     }
                     pre_eval_code += items.slice(0, items.length - 1).join('.');
                     let partial_result = eval(pre_eval_code);                    
-                    console.log('partial_result'); console.log(partial_result);
-                    console.log('method_call'); console.log(method_call);
+                    // console.log('partial_result'); console.log(partial_result);
+                    // console.log('method_call'); console.log(method_call);
                     eval(`partial_result.preview(\`${method_call}\`)`);
                 }    
             }

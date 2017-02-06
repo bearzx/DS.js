@@ -115,8 +115,8 @@ var Table =
 	                    }
 	                    pre_eval_code += items.slice(0, items.length - 1).join('.');
 	                    let partial_result = eval(pre_eval_code);                    
-	                    console.log('partial_result'); console.log(partial_result);
-	                    console.log('method_call'); console.log(method_call);
+	                    // console.log('partial_result'); console.log(partial_result);
+	                    // console.log('method_call'); console.log(method_call);
 	                    eval(`partial_result.preview(\`${method_call}\`)`);
 	                }    
 	            }
@@ -10737,6 +10737,9 @@ var Table =
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            label_list[_i - 0] = arguments[_i];
 	        }
+	        if (label_list[0] instanceof Array) {
+	            label_list = label_list[0];
+	        }
 	        var indices = [];
 	        var _this = this;
 	        label_list.forEach(function (l) {
@@ -11281,22 +11284,21 @@ var Table =
 	        s += '</table>';
 	        return s;
 	    };
-	    Table.prototype.construct_html_table_peek = function (raw_components, peek_indices, label, hide_col) {
+	    Table.prototype.construct_html_table_peek = function (raw_components, peek_indices, label, hide_col, kept_cols) {
 	        var s = '<table class="ds-table">';
 	        var rown = peek_indices.length > 5 ? 5 : peek_indices.length;
-	        console.log('raw_components.length = ' + raw_components.length);
-	        console.log('peek_indices.length = ' + peek_indices.length);
+	        // console.log('raw_components.length = ' + raw_components.length);
+	        // console.log('peek_indices.length = ' + peek_indices.length);
 	        if (raw_components.length <= peek_indices.length) {
 	            rown = raw_components.length - 1;
 	        }
-	        console.log('rown = ' + rown);
-	        var table_head = this.construct_html_row(raw_components[0], hide_col);
+	        var table_head = this.construct_html_row(raw_components[0], hide_col, kept_cols);
 	        s += '<tr>' + table_head.join('') + '</tr>';
 	        if (peek_indices[0] > 0) {
 	            s += this.construct_blank_row(table_head.length);
 	        }
 	        for (var i = 0; i < rown; i++) {
-	            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col).join('') + '</tr>';
+	            s += '<tr>' + this.construct_html_row(raw_components[peek_indices[i] + 1], hide_col, kept_cols).join('') + '</tr>';
 	        }
 	        s += this.construct_blank_row(table_head.length);
 	        s += '</table>';
@@ -11425,18 +11427,33 @@ var Table =
 	            }
 	            $("#table-area-" + this._id).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
-	        else if (method_name == 'group') {
-	            var grouped_table = eval("this.group(" + args + ")");
+	        else if (method_name == 'group' || method_name == 'groups') {
+	            var grouped_table = eval("this." + method_name + "(" + args + ")");
 	            args = eval("this._as_args(" + args + ")");
-	            var left_group_index = this._as_label_index(args[0]);
-	            var left_raw_components = this.construct_table_components();
-	            left_raw_components[0][left_group_index] = $(left_raw_components[0][left_group_index]).attr('class', 'preview-select').prop('outerHTML');
-	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_group_index]);
-	            var right_group_index = grouped_table._as_label_index(args[0]);
-	            var right_raw_components = grouped_table.construct_table_components();
-	            right_raw_components[0][right_group_index] = $(right_raw_components[0][right_group_index]).attr('class', 'preview-select').prop('outerHTML');
-	            var right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
-	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
+	            var group_labels = method_name == 'group' ? [args[0]] : args[0];
+	            var left_group_indices = this._as_label_indices(group_labels);
+	            var left_raw_components_1 = this.construct_table_components();
+	            var _loop_2 = function(i) {
+	                left_group_indices.forEach(function (lgi) {
+	                    left_raw_components_1[i][lgi] = $(left_raw_components_1[i][lgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
+	                });
+	            };
+	            for (var i = 0; i < left_raw_components_1.length; i++) {
+	                _loop_2(i);
+	            }
+	            var left_table = this.construct_html_table(left_raw_components_1, true, true, left_group_indices);
+	            var right_group_indices = grouped_table._as_label_indices(group_labels);
+	            var right_raw_components_1 = grouped_table.construct_table_components();
+	            var _loop_3 = function(i) {
+	                right_group_indices.forEach(function (rgi) {
+	                    right_raw_components_1[i][rgi] = $(right_raw_components_1[i][rgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
+	                });
+	            };
+	            for (var i = 0; i < right_raw_components_1.length; i++) {
+	                _loop_3(i);
+	            }
+	            var right_table = grouped_table.construct_html_table_peek(right_raw_components_1, [0, 1, 2, 3, 4], null, false);
+	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
 	            $("#table-area-" + this._id).html(template);
 	        }
 	        else if (method_name == 'pivot') {
