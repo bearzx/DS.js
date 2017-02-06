@@ -87,6 +87,9 @@ pre {
 .multi-table-preview .left {
   float: left;
 }
+.multi-table-preview .left .top {
+  margin-bottom: 20px;
+}
 .multi-table-preview .right {
   float: left;
 }

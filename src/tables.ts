@@ -4,7 +4,8 @@ declare var d3: any;
 declare var $: any;
 declare var vg: any;
 declare var ace: any;
-// declare var datai: any;
+// declare var _datai: any;
+declare var window: any;
 
 export class Table {
 
@@ -25,9 +26,15 @@ export class Table {
 
         if (url != null) {
             this.read_table_csv_sync(url);
-        }
+        }        
 
-        this._id = datai;
+        if (!datai) {
+            if (window._datai) {                
+                this._id = window._datai;
+            }
+        } else {
+            this._id = datai;
+        }        
     }
 
     public convert(cast: Function) {
@@ -98,14 +105,12 @@ export class Table {
         return this._t.length;
     }
 
-    public labels() {
-        // console.log(d3.keys(this._t[0]));
-        // return d3.keys(this._t[0]);
-        return this._labels;
+    public labels() {        
+        let labels_copy = $.extend([], this._labels);
+        return labels_copy;
     }
 
     public num_columns() {
-        // console.log(this._t[0]);
         return Object.keys(this._t[0]).length;
     }
 
@@ -165,23 +170,31 @@ export class Table {
         return this;
     }
 
-    with_rows(rows) {
+    _with_rows(rows) {
         var _this = this;
         rows.forEach(function (row) {
-            _this.with_row(row);
+            _this._with_row(row);
         });
 
         return this;
+    }
+
+    with_rows(rows) {
+        let copy = this.copy();
+        copy._with_rows(rows);
+
+        return copy;
     }
 
     with_column(label, values) {
         // [TODO] what if label is already in _labels?
         let copy = this.copy();
         copy._with_column(label, values);
+        
         return copy;
     }
 
-    private _with_column(label, values) {
+    _with_column(label, values) {
         if ((values.length == 1) && (this._t.length != 0)) {
             // insert a new column with all the same values
             for (var i = 0; i < this._t.length; i++) {
@@ -207,9 +220,16 @@ export class Table {
     }
 
     with_columns(...labels_and_values: any[]) {
+        let copy = this.copy();
+        copy._with_columns(labels_and_values);
+
+        return copy;
+    }
+
+    _with_columns(...labels_and_values: any[]) {
         if (labels_and_values.length % 2 == 0) {
             for (var i = 0; i < labels_and_values.length / 2; i++) {
-                this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+                this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
             }
         }
 
@@ -496,6 +516,9 @@ export class Table {
     }
 
     join(column_label, other: Table, other_label?) {
+        console.log('this'); console.log(this);
+        console.log('other'); console.log(other);
+
         let _this = this;
 
         if (!other_label) {
@@ -504,7 +527,11 @@ export class Table {
 
         column_label = this._as_label(column_label);
         let this_rows = this.index_by(column_label);
+        // console.log('this_rows');
+        // console.log(this_rows);
         let other_rows = other.index_by(other_label);
+        // console.log('other_rows');
+        // console.log(other_rows);
         let joined_rows = [];
         Object.keys(this_rows).forEach(function (l) {
             if (l in other_rows) {
@@ -523,15 +550,20 @@ export class Table {
             }
         });
 
-        let joined_labels = this._labels;
+        let joined_labels = this.labels();
         other.labels().forEach(function (l) {
             if (l != other_label) {
                 joined_labels.push(_this._unused_label(l));
             }
         });
 
-        let joined = new Table(null, joined_labels);
-        joined.with_rows(joined_rows);
+        // console.log(joined_rows);
+
+        let joined = new Table(null, joined_labels, null, this._id);
+        joined._with_rows(joined_rows);
+
+        console.log('joined table');
+        console.log(joined);
 
         return joined;
     }
@@ -838,6 +870,9 @@ export class Table {
     construct_html_table_peek(raw_components, peek_indices, label, hide_col) {
         let s = '<table class="ds-table">';
         let rown = peek_indices.length > 5 ? 5 : peek_indices.length;
+        if (raw_components.length < peek_indices.length) {
+            rown = raw_components.length - 1;
+        }        
         let table_head = this.construct_html_row(raw_components[0], hide_col);
         s += '<tr>' + table_head.join('') + '</tr>';
         if (peek_indices[0] > 0) {
@@ -1030,7 +1065,33 @@ export class Table {
 
             $(`#table-area-${this._id}`).html(template);
         } else if (method_name == 'join') {
+            let joined_table = eval(`this.join(${args})`);
+            console.log(joined_table);
+            args = eval(`this._as_args(${args})`);
+            let left_raw_components = this.construct_table_components();
+            let left_join_index = this._as_label_index(args[0]);
+            let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
 
+            let middle_raw_components = args[1].construct_table_components();
+            let middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
+            let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
+
+            let right_raw_components = joined_table.construct_table_components();
+            console.log(right_raw_components);
+            let right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
+
+            let template = `
+                <div class="multi-table-preview">                    
+                    <div class="left">${left_table}</div>
+                    <div class="arrow">join</div>
+                    <div class="left">${middle_table}</div>
+                    <div class="arrow">=></div>
+                    <div class="right">${right_table}</div>
+                </div>
+                <div style="clear: both"></div>
+            `;
+
+            $(`#table-area-${this._id}`).html(template);
         } else {
             
         }

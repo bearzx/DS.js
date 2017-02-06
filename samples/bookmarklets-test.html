@@ -85,13 +85,13 @@ census.group('SEX').show();
             
             <h4>Joining</h4>
             <pre>
-var table = new Table.Table();
-table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table = new Table.Table();
+table._with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
 // table.show();
-var other = new Table.Table();
-other.with_columns( 'a', [9, 1, 1, 1],'d', [1, 2, 2, 10],'e', [3, 4, 5, 6]);
+other = new Table.Table();
+other._with_columns( 'a', [9, 1, 1, 1],'d', [1, 2, 2, 10],'e', [3, 4, 5, 6]);
 // other.show();
-var joined = table.join('a', other).show();
+joined = table.join('a', other).show();
 // var joined = table.join('a', other, 'd').show();
             </pre>
             

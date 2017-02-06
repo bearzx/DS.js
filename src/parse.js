@@ -59,7 +59,9 @@ function env_init(_this, code) {
                         pre_eval_code += all_code[i] + '\n';
                     }
                     pre_eval_code += items.slice(0, items.length - 1).join('.');
-                    var partial_result = eval(pre_eval_code);
+                    let partial_result = eval(pre_eval_code);                    
+                    console.log('partial_result'); console.log(partial_result);
+                    console.log('method_call'); console.log(method_call);
                     eval(`partial_result.preview(\`${method_call}\`)`);
                 }    
             }
@@ -67,7 +69,7 @@ function env_init(_this, code) {
         
         let data_link = $(_this).attr('data-link');        
         $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
-        window.datai = datai;
+        window._datai = datai;
         // eval(code); // I used to keep it to run some specialized init code
         $(env_id).toggle();
     }
@@ -76,11 +78,11 @@ function env_init(_this, code) {
         var datai = $(this).attr('datai');
         $(`#vis-${datai}`).html('');
         $(`#table-area-${datai}`).html('');
-        var editor = ace.edit(`editor-${datai}`);                
-        var code = editor.getValue();            
+        var editor = ace.edit(`editor-${datai}`);
+        var code = editor.getValue();
         $(`#history-${datai}`).append(`<pre>${code}</pre>`);
         editor.setValue('');
-        window.datai = datai;            
+        window._datai = datai;
         eval(code);
     });
 }

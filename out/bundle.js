@@ -114,7 +114,9 @@ var Table =
 	                        pre_eval_code += all_code[i] + '\n';
 	                    }
 	                    pre_eval_code += items.slice(0, items.length - 1).join('.');
-	                    var partial_result = eval(pre_eval_code);
+	                    let partial_result = eval(pre_eval_code);                    
+	                    console.log('partial_result'); console.log(partial_result);
+	                    console.log('method_call'); console.log(method_call);
 	                    eval(`partial_result.preview(\`${method_call}\`)`);
 	                }    
 	            }
@@ -122,7 +124,7 @@ var Table =
 	        
 	        let data_link = $(_this).attr('data-link');        
 	        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
-	        window.datai = datai;
+	        window._datai = datai;
 	        // eval(code); // I used to keep it to run some specialized init code
 	        $(env_id).toggle();
 	    }
@@ -131,11 +133,11 @@ var Table =
 	        var datai = $(this).attr('datai');
 	        $(`#vis-${datai}`).html('');
 	        $(`#table-area-${datai}`).html('');
-	        var editor = ace.edit(`editor-${datai}`);                
-	        var code = editor.getValue();            
+	        var editor = ace.edit(`editor-${datai}`);
+	        var code = editor.getValue();
 	        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
 	        editor.setValue('');
-	        window.datai = datai;            
+	        window._datai = datai;
 	        eval(code);
 	    });
 	}
@@ -10468,7 +10470,6 @@ var Table =
 
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
 	var vgt = __webpack_require__(5);
-	// declare var datai: any;
 	var Table = (function () {
 	    function Table(t, l, url, datai) {
 	        this._t = [];
@@ -10483,7 +10484,14 @@ var Table =
 	        if (url != null) {
 	            this.read_table_csv_sync(url);
 	        }
-	        this._id = datai;
+	        if (!datai) {
+	            if (window._datai) {
+	                this._id = window._datai;
+	            }
+	        }
+	        else {
+	            this._id = datai;
+	        }
 	    }
 	    Table.prototype.convert = function (cast) {
 	        var _this = this;
@@ -10546,7 +10554,8 @@ var Table =
 	    Table.prototype.labels = function () {
 	        // console.log(d3.keys(this._t[0]));
 	        // return d3.keys(this._t[0]);
-	        return this._labels;
+	        var labels_copy = $.extend([], this._labels);
+	        return labels_copy;
 	    };
 	    Table.prototype.num_columns = function () {
 	        // console.log(this._t[0]);
@@ -10589,6 +10598,7 @@ var Table =
 	        return copy;
 	    };
 	    Table.prototype._with_row = function (row) {
+	        // [TODO] what if row doesn't have enough elements? e.g. lack of values for some columns
 	        if (row instanceof Array) {
 	            var o_row = {};
 	            this._labels.forEach(function (label, index) {
@@ -10601,12 +10611,17 @@ var Table =
 	        }
 	        return this;
 	    };
-	    Table.prototype.with_rows = function (rows) {
+	    Table.prototype._with_rows = function (rows) {
 	        var _this = this;
 	        rows.forEach(function (row) {
-	            _this.with_row(row);
+	            _this._with_row(row);
 	        });
 	        return this;
+	    };
+	    Table.prototype.with_rows = function (rows) {
+	        var copy = this.copy();
+	        copy._with_rows(rows);
+	        return copy;
 	    };
 	    Table.prototype.with_column = function (label, values) {
 	        // [TODO] what if label is already in _labels?
@@ -10644,9 +10659,18 @@ var Table =
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            labels_and_values[_i - 0] = arguments[_i];
 	        }
+	        var copy = this.copy();
+	        copy._with_columns(labels_and_values);
+	        return copy;
+	    };
+	    Table.prototype._with_columns = function () {
+	        var labels_and_values = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            labels_and_values[_i - 0] = arguments[_i];
+	        }
 	        if (labels_and_values.length % 2 == 0) {
 	            for (var i = 0; i < labels_and_values.length / 2; i++) {
-	                this.with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+	                this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
 	            }
 	        }
 	        return this;
@@ -10921,13 +10945,21 @@ var Table =
 	        return label;
 	    };
 	    Table.prototype.join = function (column_label, other, other_label) {
+	        console.log('this');
+	        console.log(this);
+	        console.log('other');
+	        console.log(other);
 	        var _this = this;
 	        if (!other_label) {
 	            other_label = column_label;
 	        }
 	        column_label = this._as_label(column_label);
 	        var this_rows = this.index_by(column_label);
+	        // console.log('this_rows');
+	        // console.log(this_rows);
 	        var other_rows = other.index_by(other_label);
+	        // console.log('other_rows');
+	        // console.log(other_rows);
 	        var joined_rows = [];
 	        Object.keys(this_rows).forEach(function (l) {
 	            if (l in other_rows) {
@@ -10946,14 +10978,17 @@ var Table =
 	                });
 	            }
 	        });
-	        var joined_labels = this._labels;
+	        var joined_labels = this.labels();
 	        other.labels().forEach(function (l) {
 	            if (l != other_label) {
 	                joined_labels.push(_this._unused_label(l));
 	            }
 	        });
-	        var joined = new Table(null, joined_labels);
-	        joined.with_rows(joined_rows);
+	        // console.log(joined_rows);
+	        var joined = new Table(null, joined_labels, null, this._id);
+	        joined._with_rows(joined_rows);
+	        console.log('joined table');
+	        console.log(joined);
 	        return joined;
 	    };
 	    Table.prototype.stats = function () {
@@ -11221,6 +11256,9 @@ var Table =
 	    Table.prototype.construct_html_table_peek = function (raw_components, peek_indices, label, hide_col) {
 	        var s = '<table class="ds-table">';
 	        var rown = peek_indices.length > 5 ? 5 : peek_indices.length;
+	        if (raw_components.length < peek_indices.length) {
+	            rown = raw_components.length - 1;
+	        }
 	        var table_head = this.construct_html_row(raw_components[0], hide_col);
 	        s += '<tr>' + table_head.join('') + '</tr>';
 	        if (peek_indices[0] > 0) {
@@ -11393,6 +11431,20 @@ var Table =
 	            $("#table-area-" + this._id).html(template);
 	        }
 	        else if (method_name == 'join') {
+	            var joined_table = eval("this.join(" + args + ")");
+	            console.log(joined_table);
+	            args = eval("this._as_args(" + args + ")");
+	            var left_raw_components = this.construct_table_components();
+	            var left_join_index = this._as_label_index(args[0]);
+	            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
+	            var middle_raw_components = args[1].construct_table_components();
+	            var middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
+	            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
+	            var right_raw_components = joined_table.construct_table_components();
+	            console.log(right_raw_components);
+	            var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
+	            var template = "\n                <div class=\"multi-table-preview\">                    \n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+	            $("#table-area-" + this._id).html(template);
 	        }
 	        else {
 	        }
