@@ -1,4 +1,5 @@
 window.$ = window.jQuery = require('jquery');
+window.esprima = require('esprima');
 require('../libs/jquery.tableparser.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
@@ -20,6 +21,7 @@ function env_init(_this, code) {
                     <div class="inputs">
                         <div id="${editor_id}" class="editor"></div>
                         <button datai="${datai}" class="run">Run</button>
+                        <button datai="${datai}">Preview</button>
                     </div>
                 </div>
                 <div class="show-panel">
@@ -45,7 +47,8 @@ function env_init(_this, code) {
         editor.commands.addCommand({
             name: 'preview',
             bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
-            exec: function(_editor) {                
+            exec: function(_editor) {
+                console.log(esprima.parse(_editor.getValue(), { loc: true }));
                 let row = _editor.getCursorPosition().row;
                 let col = _editor.getCursorPosition().col;
                 let line = _editor.getSession().getLine(row);
@@ -74,7 +77,7 @@ function env_init(_this, code) {
         $(env_id).toggle();
     }
 
-    $('.run').click(function() {
+    $('.run').click(function() {        
         var datai = $(this).attr('datai');
         $(`#vis-${datai}`).html('');
         $(`#table-area-${datai}`).html('');

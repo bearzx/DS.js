@@ -6,6 +6,7 @@ declare var vg: any;
 declare var ace: any;
 // declare var _datai: any;
 declare var window: any;
+declare var esprima: any;
 
 export class Table {
 
@@ -34,7 +35,7 @@ export class Table {
             }
         } else {
             this._id = datai;
-        }        
+        }
     }
 
     public convert(cast: Function) {
@@ -976,19 +977,19 @@ export class Table {
         return args;
     }
 
+    // basic procedures for previewing
+    // 1 call the actual mutation functions
+    // 2 construct html partial tags
+    // 3 do customization, use jquery if necessary
+    // 4 combine them into the real table
+    // 5 show the table
+    // this will also affect the actual show function
+    // change impure (e.g. with_row) functions to pure functions    
     preview(method_call) {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
         console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
-
-        // 1 call the actual mutation functions
-        // 2 construct html partial tags
-        // 3 do customization, use jquery if necessary
-        // 4 combine them into the real table
-        // 5 show the table
-        // this will also affect the actual show function
-        // change impure (e.g. with_row) functions to pure functions
 
         if (method_name == 'with_row') {
             let new_table = eval(`this.with_row(${args})`);
@@ -1091,7 +1092,6 @@ export class Table {
             left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
             let left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
 
-            // let right_pivot_indices = pivoted_table._as_label_indices(args[0], args[1], args[2]);
             let right_raw_components = pivoted_table.construct_table_components();
             right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
             for (let i = 1; i < right_raw_components[0].length; i++) {
@@ -1129,7 +1129,7 @@ export class Table {
 
             let right_raw_components = joined_table.construct_table_components();
             let right_join_index = joined_table._as_label_index(args[0]);
-            right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(`${args[0]} - ${args.length == 3 ? args[2] : args[2]}`).attr('class', 'preview-select').prop('outerHTML');
+            right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(`${args[0]} - ${args.length == 3 ? args[2] : args[0]}`).attr('class', 'preview-select').prop('outerHTML');
             for (let i = 1; i < right_raw_components.length; i++) {
                 right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
             }
