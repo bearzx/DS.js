@@ -93,7 +93,7 @@ var Table =
 	            cur = $(cur).parent();
 	        }        
 	        $(cur).after(ds_env);
-	        var editor = ace.edit(editor_id);
+	        var editor = ace.edit(editor_id);        
 	        editor.setTheme("ace/theme/chrome");
 	        // editor.setBehavioursEnabled(false);
 	        editor.getSession().setMode("ace/mode/javascript");
@@ -104,9 +104,11 @@ var Table =
 	            bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
 	            exec: function(_editor) {
 	                console.log(esprima.parse(_editor.getValue(), { loc: true }));
+	                let Range = ace.require('ace/range').Range;
 	                let row = _editor.getCursorPosition().row;
-	                let col = _editor.getCursorPosition().col;
-	                let line = _editor.getSession().getLine(row);
+	                // let col = _editor.getCursorPosition().column;
+	                let line = editor.getSession().getLine(row);                
+	                _editor.getSession().addMarker(new Range(3, 0, 3, 200), "preview-hl", "line");
 	                if (line.trim().endsWith(')') || line.trim().endsWith(');')) {
 	                    let items = line.trim().split('.');
 	                    let variable_name = items[0];                    
@@ -121,8 +123,15 @@ var Table =
 	                    // console.log('partial_result'); console.log(partial_result);
 	                    // console.log('method_call'); console.log(method_call);
 	                    eval(`partial_result.preview(\`${method_call}\`)`);
-	                }    
+	                }
 	            }
+	        });
+	
+	        editor.on('click', function(e) {
+	            let _editor = e.editor;
+	            let row = _editor.getCursorPosition().row;
+	            let col = _editor.getCursorPosition().column;
+	            console.log(`row: ${row} col: ${col}`);
 	        });
 	        
 	        let data_link = $(_this).attr('data-link');        

@@ -106,3 +106,8 @@ pre {
 .blank td {
   border: none;
 }
+.preview-hl {
+  position: absolute;
+  background: #5bc0de;
+  z-index: 40;
+}
