@@ -1148,7 +1148,7 @@ export class Table {
 
             $(`#table-area-${this._id}`).html(template);
         } else {
-            
+            console.warn('Method call not supported: ${method_call}');
         }
     }
 }

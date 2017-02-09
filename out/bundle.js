@@ -60,7 +60,7 @@ var Table =
 	// window.vg = require('script!../libs/vega/vega.js');
 	window.datai = '';
 	
-	function env_init(_this, code) {    
+	function env_init(_this, code) {
 	    var datai = $(_this).attr('datai');
 	    var env_id = '#env-' + datai;
 	    var editor_id = `editor-${datai}`;
@@ -82,10 +82,10 @@ var Table =
 	                <div class="show-panel">
 	                    <div id="vis-${datai}" class="vis"></div>
 	                    <div id="table-area-${datai}" class="table-area"></div>
-	                </div>                    
+	                </div>
 	            </div>
 	            <div style="clear: both"></div>
-	        `;            
+	        `;
 	        
 	        let cur = _this;
 	        let block_styles = ['block', 'inline-block'];
@@ -116,23 +116,14 @@ var Table =
 	                        let last_expr;
 	                        let expr_level = 0;
 	                        while (expr && ('object' in expr)) {
+	                            let method_name = expr.property.name;
 	                            let method_start = expr.loc.end.column - expr.property.name.length;
-	                            let method_end = expr.loc.end.column;
-	                            // console.log(`method range: ${method_start} ${method_end}, col: ${col}`);
-	                            if (col >= method_start && col <= method_end) {
-	                                console.log(`method ${expr.property.name} found`);
-	                                let method_call;
+	                            let method_end = expr.loc.end.column;                            
+	                            if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
+	                                // console.log(`method ${expr.property.name} found`);
+	                                let method_call;                                
 	
-	                                // if (expr && ('object' in expr)) { 
-	                                //     console.log(expr);
-	                                //     let next_expr = expr.object.callee;        
-	                                //     let next_method_start = next_expr.loc.end.column - next_expr.property.name.length;
-	                                //     method_call = line.slice(method_start, next_method_start);
-	                                // } else {
-	                                //     method_call = line.slice(method_start, line.length);
-	                                // }
-	
-	                                console.log(expr.object.callee);
+	                                // console.log(expr.object.callee);
 	                                if (expr.object.callee && (expr_level == 0)) {
 	                                    method_call = line.slice(method_start, line.length);
 	                                } else {
@@ -140,7 +131,7 @@ var Table =
 	                                    method_call = line.slice(method_start, last_method_start - 1);
 	                                }
 	
-	                                console.log(`method_call: ${method_call}`);
+	                                // console.log(`method_call: ${method_call}`);
 	                                let all_code = _editor.getValue().split('\n');
 	                                let pre_eval_code = '';
 	                                for (let i = 0; i < row; i++) {
@@ -159,25 +150,27 @@ var Table =
 	                        }
 	                        break;
 	                    }
-	                }
-	
-	                // if (line.trim().endsWith(')') || line.trim().endsWith(');')) {
-	                //     let items = line.trim().split('.');
-	                //     let variable_name = items[0];
-	                //     let method_call = items[items.length - 1];
-	                //     let pre_eval_code = '';
-	                //     let all_code = _editor.getValue().split('\n');
-	                //     for (let i = 0; i < row; i++) {
-	                //         pre_eval_code += all_code[i] + '\n';
-	                //     }
-	                //     pre_eval_code += items.slice(0, items.length - 1).join('.');
-	                //     let partial_result = eval(pre_eval_code);
-	                //     // console.log('partial_result'); console.log(partial_result);
-	                //     // console.log('method_call'); console.log(method_call);
-	                //     eval(`partial_result.preview(\`${method_call}\`)`);
-	                // }
-	            }
+	                }                
+	            }            
 	        });
+	
+	        function is_supported_preview(func_name) {
+	            let supported_functions = new Set([
+	                'with_row',
+	                'with_column',
+	                'select',
+	                'drop',
+	                'relabeled',
+	                'where',
+	                'sorted',
+	                'group',
+	                'groups',
+	                'pivot',
+	                'join'
+	            ]);
+	
+	            return supported_functions.has(func_name);
+	        }
 	
 	        editor.commands.addCommand({
 	            name: 'hl-preview-methods',
@@ -186,14 +179,16 @@ var Table =
 	                let Range = ace.require('ace/range').Range;
 	                let ast = esprima.parse(_editor.getValue(), { loc: true });
 	                ast.body.forEach(function(stmt) {
-	                    console.log(stmt);
+	                    // console.log(stmt);
 	                    if (stmt.expression.type == 'CallExpression') {
 	                        let expr = stmt.expression.callee;
 	                        while (expr && ('object' in expr)) {
 	                            // console.log(expr.property.name);
 	                            // console.log(expr.loc);
-	                            let r = new Range(expr.loc.start.line - 1, expr.loc.end.column - expr.property.name.length, expr.loc.end.line - 1, expr.loc.end.column);
-	                            _editor.getSession().addMarker(r, "preview-hl", "line");
+	                            if (is_supported_preview(expr.property.name)) {
+	                                let r = new Range(expr.loc.start.line - 1, expr.loc.end.column - expr.property.name.length, expr.loc.end.line - 1, expr.loc.end.column);
+	                                _editor.getSession().addMarker(r, "preview-hl", "line");
+	                            }
 	                            expr = expr.object.callee;
 	                        }
 	                    }
@@ -17997,6 +17992,7 @@ var Table =
 	            $("#table-area-" + this._id).html(template);
 	        }
 	        else {
+	            console.warn('Method call not supported: ${method_call}');
 	        }
 	    };
 	    return Table;
