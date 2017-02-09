@@ -31,14 +31,14 @@ function env_init(_this, code) {
             </div>
             <div style="clear: both"></div>
         `;
-        
+
         let cur = _this;
         let block_styles = ['block', 'inline-block'];
-        while (!block_styles.includes($(cur).css('display'))) {            
+        while (!block_styles.includes($(cur).css('display'))) {
             cur = $(cur).parent();
-        }        
+        }
         $(cur).after(ds_env);
-        var editor = ace.edit(editor_id);        
+        var editor = ace.edit(editor_id);
         editor.setTheme("ace/theme/chrome");
         // editor.setBehavioursEnabled(false);
         editor.getSession().setMode("ace/mode/javascript");
@@ -52,10 +52,10 @@ function env_init(_this, code) {
                 let Range = ace.require('ace/range').Range;
                 let row = _editor.getCursorPosition().row;
                 let col = _editor.getCursorPosition().column;
-                let line = editor.getSession().getLine(row);                
+                let line = editor.getSession().getLine(row);
 
                 for (let i = 0; i < ast.body.length; i++) {
-                    let stmt = ast.body[i];                    
+                    let stmt = ast.body[i];
                     if (row == (stmt.loc.start.line - 1)) {
                         let expr = stmt.expression.callee;
                         let last_expr;
@@ -63,13 +63,14 @@ function env_init(_this, code) {
                         while (expr && ('object' in expr)) {
                             let method_name = expr.property.name;
                             let method_start = expr.loc.end.column - expr.property.name.length;
-                            let method_end = expr.loc.end.column;                            
+                            let method_end = expr.loc.end.column;
                             if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
                                 // console.log(`method ${expr.property.name} found`);
-                                let method_call;                                
+                                let method_call;
 
-                                // console.log(expr.object.callee);
-                                if (expr.object.callee && (expr_level == 0)) {
+                                console.log(expr.object.callee);
+                                console.log(`expr_level = ${expr_level}`);
+                                if ((!expr.object.callee) && (expr_level == 0)) {
                                     method_call = line.slice(method_start, line.length);
                                 } else {
                                     let last_method_start = last_expr.loc.end.column - last_expr.property.name.length;
@@ -84,7 +85,7 @@ function env_init(_this, code) {
                                 }
                                 let cur_line_partial = line.slice(0, method_start - 1);
                                 pre_eval_code += cur_line_partial;
-                                let partial_result = eval(pre_eval_code);     
+                                let partial_result = eval(pre_eval_code);
                                 eval(`partial_result.preview(\`${method_call}\`)`);
                                 break;
                             } else {
@@ -95,14 +96,16 @@ function env_init(_this, code) {
                         }
                         break;
                     }
-                }                
-            }            
+                }
+            }
         });
 
         function is_supported_preview(func_name) {
             let supported_functions = new Set([
                 'with_row',
+                'with_rows',
                 'with_column',
+                'with_columns',
                 'select',
                 'drop',
                 'relabeled',
@@ -147,15 +150,15 @@ function env_init(_this, code) {
             // let col = _editor.getCursorPosition().column;
             // console.log(`row: ${row} col: ${col}`);
         });
-        
-        let data_link = $(_this).attr('data-link');        
+
+        let data_link = $(_this).attr('data-link');
         $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
         window._datai = datai;
         // eval(code); // I used to keep it to run some specialized init code
         $(env_id).toggle();
     }
 
-    $('.run').click(function() {        
+    $('.run').click(function() {
         var datai = $(this).attr('datai');
         $(`#vis-${datai}`).html('');
         $(`#table-area-${datai}`).html('');
@@ -174,7 +177,7 @@ $(document).ready(function() {
     // csv detection
     $('a').each(function(i) {
         let data_link = $(this).attr('href');
-        if (data_link && data_link.endsWith('.csv')) {            
+        if (data_link && data_link.endsWith('.csv')) {
             $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
             eval(`
                 t${datai} = new Table.Table(null, null, '${data_link}', ${datai})
@@ -186,21 +189,21 @@ $(document).ready(function() {
     // html table detection
     $('table').each(function(i) {
         $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
-        $(this).addClass(`dsjs-htable-${datai}`);        
+        $(this).addClass(`dsjs-htable-${datai}`);
         eval(`
             t${datai} = new Table.Table(null, null, null, ${datai});
             t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
         `);
         datai += 1;
-    });    
+    });
 
     $(".open-dsjs-htable").click(function() {
-        let datai = $(this).attr('datai');        
+        let datai = $(this).attr('datai');
         env_init(this, '');
     });
 
     $(".open-dsjs").click(function() {
-        let datai = $(this).attr('datai');        
+        let datai = $(this).attr('datai');
         env_init(this, '');
     });
 });

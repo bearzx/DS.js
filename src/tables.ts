@@ -27,13 +27,13 @@ export class Table {
 
         if (url != null) {
             this.read_table_csv_sync(url);
-        }        
-        
+        }
+
         if (datai == undefined) {
             if (window._datai) {
                 this._id = window._datai;
             }
-        } else {            
+        } else {
             this._id = datai;
         }
     }
@@ -45,7 +45,7 @@ export class Table {
                 row[l] = cast(row[l]);
             });
         });
-        
+
         return this;
     }
 
@@ -76,7 +76,7 @@ export class Table {
         });
     }
 
-    public read_table_csv_sync(url: string) {        
+    public read_table_csv_sync(url: string) {
         var _this = this;
         $.ajax({
             dataType: "text",
@@ -106,7 +106,7 @@ export class Table {
         return this._t.length;
     }
 
-    public labels() {        
+    public labels() {
         let labels_copy = $.extend([], this._labels);
         return labels_copy;
     }
@@ -152,7 +152,7 @@ export class Table {
     with_row(row) {
         let copy = this.copy();
         copy._with_row(row);
-        
+
         return copy;
     }
 
@@ -191,7 +191,7 @@ export class Table {
         // [TODO] what if label is already in _labels?
         let copy = this.copy();
         copy._with_column(label, values);
-        
+
         return copy;
     }
 
@@ -223,11 +223,15 @@ export class Table {
     with_columns(...labels_and_values: any[]) {
         let copy = this.copy();
         copy._with_columns(labels_and_values);
-
+        console.log(copy);
         return copy;
     }
 
     _with_columns(...labels_and_values: any[]) {
+        if (labels_and_values[0] instanceof Array) {
+            labels_and_values = labels_and_values[0];
+        }
+
         if (labels_and_values.length % 2 == 0) {
             for (var i = 0; i < labels_and_values.length / 2; i++) {
                 this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
@@ -291,19 +295,19 @@ export class Table {
         // console.log(table);
 
         return table;
-    }    
+    }
 
     private _as_labels(label_list) {
         var new_labels = [];
         var _this = this;
-        label_list.forEach(function (l) {            
-            new_labels.push(_this._as_label(l));            
+        label_list.forEach(function (l) {
+            new_labels.push(_this._as_label(l));
         });
 
         return new_labels;
     }
 
-    private _as_label_indices(...label_list) {        
+    private _as_label_indices(...label_list) {
         if (label_list[0] instanceof Array) {
             label_list = label_list[0];
         }
@@ -400,7 +404,7 @@ export class Table {
 
 
 
-    group(column_or_label: any, collect?) {        
+    group(column_or_label: any, collect?) {
         let label = this._as_label(column_or_label);
         let group_t = {};
         this._t.forEach(function (row) {
@@ -416,28 +420,28 @@ export class Table {
         let grouped;
         if (collect) {
             let old_labels = this.labels();
-            old_labels.splice(old_labels.indexOf(label), 1);            
+            old_labels.splice(old_labels.indexOf(label), 1);
             grouped = new Table(null, [label].concat(old_labels), null, this._id);
             keys.forEach(function(k) {
                 let row = { [label]: k };
-                old_labels.forEach(function(l) {                    
+                old_labels.forEach(function(l) {
                     row[l] = collect(group_t[k].map(x => x[l]));
                 });
                 grouped._with_row(row);
             });
         } else {
             grouped = new Table(null, [label, 'count'], null, this._id);
-            keys.forEach(function (key) {                
+            keys.forEach(function (key) {
                 grouped._with_row({ [label]: key, 'count': group_t[key].length });
             });
         }
-        
+
         // console.log(grouped);
         return grouped;
     }
 
     groups(columns_or_labels: any[], collect?) {
-        let labels = this._as_labels(columns_or_labels);        
+        let labels = this._as_labels(columns_or_labels);
         // console.log(labels);
         let group_t = {};
         let key_combinations = {};
@@ -473,7 +477,7 @@ export class Table {
                     row[l] = collect(group_t[skey].map(x => x[l]));
                 });
                 grouped._with_row(row);
-            });            
+            });
         } else {
             grouped = new Table(null, labels.concat(['count']));
             Object.keys(key_combinations).forEach(function (skey) {
@@ -484,7 +488,7 @@ export class Table {
                 row['count'] = group_t[skey].length;
                 grouped._with_row(row);
             });
-        }        
+        }
 
         // console.log(grouped);
         return grouped;
@@ -567,8 +571,8 @@ export class Table {
         }
 
         column_label = this._as_label(column_label);
-        let this_rows = this.index_by(column_label);        
-        let other_rows = other.index_by(other_label);        
+        let this_rows = this.index_by(column_label);
+        let other_rows = other.index_by(other_label);
         let joined_rows = [];
         Object.keys(this_rows).forEach(function (l) {
             if (l in other_rows) {
@@ -592,7 +596,7 @@ export class Table {
             if (l != other_label) {
                 joined_labels.push(_this._unused_label(l));
             }
-        });        
+        });
 
         let joined = new Table(null, joined_labels, null, this._id);
         joined._with_rows(joined_rows);
@@ -864,7 +868,7 @@ export class Table {
         let dot_counts;
         if (raw_components.length > 10 && hide_row) {
             for (let i = 0; i < 5; i++) {
-                s += '<tr>';                
+                s += '<tr>';
                 let row = this.construct_html_row(raw_components[i], hide_col, kept_cols);
                 dot_counts = row.length;
                 s += row.join('');
@@ -877,7 +881,7 @@ export class Table {
                 blank_row_cols_count = kept_cols ? dot_counts : 11;
             } else {
                 blank_row_cols_count = kept_cols ? dot_counts : raw_components[0].length;
-            }            
+            }
 
             for (let i = 0; i < blank_row_cols_count; i++) {
                 s += `<td>...</td>`;
@@ -885,7 +889,7 @@ export class Table {
             s += '</tr>';
 
             for (let i = raw_components.length - 5; i < raw_components.length; i++) {
-                s += '<tr>';                
+                s += '<tr>';
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
@@ -898,9 +902,9 @@ export class Table {
         }
 
         s += '</table>';
-        
+
         return s;
-    }    
+    }
 
     construct_html_table_peek(raw_components, peek_indices, label, hide_col, kept_cols?: any[]) {
         let s = '<table class="ds-table">';
@@ -910,7 +914,7 @@ export class Table {
         if (raw_components.length <= peek_indices.length) {
             rown = raw_components.length - 1;
         }
-                
+
         let table_head = this.construct_html_row(raw_components[0], hide_col, kept_cols);
         s += '<tr>' + table_head.join('') + '</tr>';
         if (peek_indices[0] > 0) {
@@ -940,18 +944,18 @@ export class Table {
             if (kept_cols[0] > 0) {
                 row.push('<td class="blank">...</td>');
             }
-            
-            for (let i = 0; i < kept_cols.length - 1; i++) {                
+
+            for (let i = 0; i < kept_cols.length - 1; i++) {
                 row.push(components[kept_cols[i]]);
                 if (kept_cols[i] + 1 != kept_cols[i + 1]) {
                     row.push('<td class="blank">...</td>');
                 }
             }
-            
-            row.push(components[kept_cols[kept_cols.length - 1]]);            
+
+            row.push(components[kept_cols[kept_cols.length - 1]]);
             if (kept_cols[kept_cols.length - 1] < (this._labels.length - 1)) {
                 row.push('<td class="blank">...</td>');
-            }            
+            }
 
             return row;
         } else {
@@ -965,12 +969,12 @@ export class Table {
                 for (let i = components.length - 5; i < components.length; i++) {
                     row.push(components[i]);
                 }
-                
+
                 return row;
             } else {
                 return components;
             }
-        }        
+        }
     }
 
     _as_args(...args) {
@@ -984,51 +988,57 @@ export class Table {
     // 4 combine them into the real table
     // 5 show the table
     // this will also affect the actual show function
-    // change impure (e.g. with_row) functions to pure functions    
+    // change impure (e.g. with_row) functions to pure functions
     preview(method_call) {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 
         console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
-        if (method_name == 'with_row') {
-            let new_table = eval(`this.with_row(${args})`);
+        if (method_name == 'with_row' || method_name == 'with_rows') {
+            let new_table = eval(`this.${method_name}(${args})`);
+            args = method_name == 'with_row' ? [eval(`this._as_args(${args})`)] : eval(`this._as_args(${args})`)[0];
             let raw_components = new_table.construct_table_components();
-            for (let i = 0; i < raw_components[0].length; i++) {
-                raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
+            for (let row = 1; row <= args.length; row++) {
+                for (let i = 0; i < raw_components[0].length; i++) {
+                    raw_components[raw_components.length - row][i] = $(raw_components[raw_components.length - row][i]).attr('class', 'preview').prop('outerHTML');
+                }
             }
-            
+
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
-        } else if (method_name == 'with_column') {
-            let new_table = eval(`this.with_column(${args})`);
+        } else if (method_name == 'with_column' || method_name == 'with_columns') {
+            let new_table = eval(`this.${method_name}(${args})`);
+            args = eval(`this._as_args(${args})`);
             let raw_components = new_table.construct_table_components();
-            for (let i = 0; i < raw_components.length; i++) {
-                raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
+            for (let col = 1; col <= args.length / 2; col++) {
+                for (let i = 0; i < raw_components.length; i++) {
+                    raw_components[i][raw_components[i].length - col] = $(raw_components[i][raw_components[i].length - col]).attr('class', 'preview').prop('outerHTML');
+                }
             }
-            
+
             $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
-                label_locs.forEach(function(loc) {                    
+                label_locs.forEach(function(loc) {
                     raw_components[i][loc] = $(raw_components[i][loc]).attr('class', method_name == 'select' ? 'preview' : 'preview-del').prop('outerHTML');
                 });
             }
-                        
+
             $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
         } else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
-            args = eval(`this._as_args(${args})`);            
+            args = eval(`this._as_args(${args})`);
             let raw_components = this.construct_table_components();
-            let label_loc = this._as_label_index(args[0]);            
-            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');            
+            let label_loc = this._as_label_index(args[0]);
+            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');
 
             $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
-            let res = eval(`this.iwhere(${args})`);            
+            let res = eval(`this.iwhere(${args})`);
             let raw_components = this.construct_table_components();
             raw_components[0][res.label] = $(raw_components[0][res.label]).attr('class', 'preview-select').prop('outerHTML');
             res.index.forEach(function(i) {
@@ -1070,7 +1080,7 @@ export class Table {
                 });
             }
             let right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
-            
+
             let template = `
                 <div class="multi-table-preview">
                     <div class="left">${left_table}</div>
@@ -1109,9 +1119,9 @@ export class Table {
 
             $(`#table-area-${this._id}`).html(template);
         } else if (method_name == 'join') {
-            let joined_table = eval(`this.join(${args})`);            
+            let joined_table = eval(`this.join(${args})`);
             args = eval(`this._as_args(${args})`);
-            let left_raw_components = this.construct_table_components();            
+            let left_raw_components = this.construct_table_components();
             let left_join_index = this._as_label_index(args[0]);
             left_raw_components[0][left_join_index] = $(left_raw_components[0][left_join_index]).attr('class', 'preview-select').prop('outerHTML');
             for (let i = 1; i < left_raw_components.length; i++) {
@@ -1136,7 +1146,7 @@ export class Table {
             let right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 
             let template = `
-                <div class="multi-table-preview">                    
+                <div class="multi-table-preview">
                     <div class="left">${left_table}</div>
                     <div class="arrow">join</div>
                     <div class="left">${middle_table}</div>

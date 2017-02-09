@@ -86,14 +86,14 @@ var Table =
 	            </div>
 	            <div style="clear: both"></div>
 	        `;
-	        
+	
 	        let cur = _this;
 	        let block_styles = ['block', 'inline-block'];
-	        while (!block_styles.includes($(cur).css('display'))) {            
+	        while (!block_styles.includes($(cur).css('display'))) {
 	            cur = $(cur).parent();
-	        }        
+	        }
 	        $(cur).after(ds_env);
-	        var editor = ace.edit(editor_id);        
+	        var editor = ace.edit(editor_id);
 	        editor.setTheme("ace/theme/chrome");
 	        // editor.setBehavioursEnabled(false);
 	        editor.getSession().setMode("ace/mode/javascript");
@@ -107,10 +107,10 @@ var Table =
 	                let Range = ace.require('ace/range').Range;
 	                let row = _editor.getCursorPosition().row;
 	                let col = _editor.getCursorPosition().column;
-	                let line = editor.getSession().getLine(row);                
+	                let line = editor.getSession().getLine(row);
 	
 	                for (let i = 0; i < ast.body.length; i++) {
-	                    let stmt = ast.body[i];                    
+	                    let stmt = ast.body[i];
 	                    if (row == (stmt.loc.start.line - 1)) {
 	                        let expr = stmt.expression.callee;
 	                        let last_expr;
@@ -118,13 +118,14 @@ var Table =
 	                        while (expr && ('object' in expr)) {
 	                            let method_name = expr.property.name;
 	                            let method_start = expr.loc.end.column - expr.property.name.length;
-	                            let method_end = expr.loc.end.column;                            
+	                            let method_end = expr.loc.end.column;
 	                            if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
 	                                // console.log(`method ${expr.property.name} found`);
-	                                let method_call;                                
+	                                let method_call;
 	
-	                                // console.log(expr.object.callee);
-	                                if (expr.object.callee && (expr_level == 0)) {
+	                                console.log(expr.object.callee);
+	                                console.log(`expr_level = ${expr_level}`);
+	                                if ((!expr.object.callee) && (expr_level == 0)) {
 	                                    method_call = line.slice(method_start, line.length);
 	                                } else {
 	                                    let last_method_start = last_expr.loc.end.column - last_expr.property.name.length;
@@ -139,7 +140,7 @@ var Table =
 	                                }
 	                                let cur_line_partial = line.slice(0, method_start - 1);
 	                                pre_eval_code += cur_line_partial;
-	                                let partial_result = eval(pre_eval_code);     
+	                                let partial_result = eval(pre_eval_code);
 	                                eval(`partial_result.preview(\`${method_call}\`)`);
 	                                break;
 	                            } else {
@@ -150,14 +151,16 @@ var Table =
 	                        }
 	                        break;
 	                    }
-	                }                
-	            }            
+	                }
+	            }
 	        });
 	
 	        function is_supported_preview(func_name) {
 	            let supported_functions = new Set([
 	                'with_row',
+	                'with_rows',
 	                'with_column',
+	                'with_columns',
 	                'select',
 	                'drop',
 	                'relabeled',
@@ -202,15 +205,15 @@ var Table =
 	            // let col = _editor.getCursorPosition().column;
 	            // console.log(`row: ${row} col: ${col}`);
 	        });
-	        
-	        let data_link = $(_this).attr('data-link');        
+	
+	        let data_link = $(_this).attr('data-link');
 	        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
 	        window._datai = datai;
 	        // eval(code); // I used to keep it to run some specialized init code
 	        $(env_id).toggle();
 	    }
 	
-	    $('.run').click(function() {        
+	    $('.run').click(function() {
 	        var datai = $(this).attr('datai');
 	        $(`#vis-${datai}`).html('');
 	        $(`#table-area-${datai}`).html('');
@@ -229,7 +232,7 @@ var Table =
 	    // csv detection
 	    $('a').each(function(i) {
 	        let data_link = $(this).attr('href');
-	        if (data_link && data_link.endsWith('.csv')) {            
+	        if (data_link && data_link.endsWith('.csv')) {
 	            $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
 	            eval(`
 	                t${datai} = new Table.Table(null, null, '${data_link}', ${datai})
@@ -241,21 +244,21 @@ var Table =
 	    // html table detection
 	    $('table').each(function(i) {
 	        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
-	        $(this).addClass(`dsjs-htable-${datai}`);        
+	        $(this).addClass(`dsjs-htable-${datai}`);
 	        eval(`
 	            t${datai} = new Table.Table(null, null, null, ${datai});
 	            t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
 	        `);
 	        datai += 1;
-	    });    
+	    });
 	
 	    $(".open-dsjs-htable").click(function() {
-	        let datai = $(this).attr('datai');        
+	        let datai = $(this).attr('datai');
 	        env_init(this, '');
 	    });
 	
 	    $(".open-dsjs").click(function() {
-	        let datai = $(this).attr('datai');        
+	        let datai = $(this).attr('datai');
 	        env_init(this, '');
 	    });
 	});
@@ -17146,12 +17149,16 @@ var Table =
 	        }
 	        var copy = this.copy();
 	        copy._with_columns(labels_and_values);
+	        console.log(copy);
 	        return copy;
 	    };
 	    Table.prototype._with_columns = function () {
 	        var labels_and_values = [];
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            labels_and_values[_i - 0] = arguments[_i];
+	        }
+	        if (labels_and_values[0] instanceof Array) {
+	            labels_and_values = labels_and_values[0];
 	        }
 	        if (labels_and_values.length % 2 == 0) {
 	            for (var i = 0; i < labels_and_values.length / 2; i++) {
@@ -17849,24 +17856,30 @@ var Table =
 	    // 4 combine them into the real table
 	    // 5 show the table
 	    // this will also affect the actual show function
-	    // change impure (e.g. with_row) functions to pure functions    
+	    // change impure (e.g. with_row) functions to pure functions
 	    Table.prototype.preview = function (method_call) {
 	        var method_name = method_call.slice(0, method_call.indexOf('('));
 	        var args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
 	        console.log("method_call: " + method_call + ", method_name: " + method_name + ", args: " + args);
-	        if (method_name == 'with_row') {
-	            var new_table = eval("this.with_row(" + args + ")");
+	        if (method_name == 'with_row' || method_name == 'with_rows') {
+	            var new_table = eval("this." + method_name + "(" + args + ")");
+	            args = method_name == 'with_row' ? [eval("this._as_args(" + args + ")")] : eval("this._as_args(" + args + ")")[0];
 	            var raw_components = new_table.construct_table_components();
-	            for (var i = 0; i < raw_components[0].length; i++) {
-	                raw_components[raw_components.length - 1][i] = $(raw_components[raw_components.length - 1][i]).attr('class', 'preview').prop('outerHTML');
+	            for (var row = 1; row <= args.length; row++) {
+	                for (var i = 0; i < raw_components[0].length; i++) {
+	                    raw_components[raw_components.length - row][i] = $(raw_components[raw_components.length - row][i]).attr('class', 'preview').prop('outerHTML');
+	                }
 	            }
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
-	        else if (method_name == 'with_column') {
-	            var new_table = eval("this.with_column(" + args + ")");
+	        else if (method_name == 'with_column' || method_name == 'with_columns') {
+	            var new_table = eval("this." + method_name + "(" + args + ")");
+	            args = eval("this._as_args(" + args + ")");
 	            var raw_components = new_table.construct_table_components();
-	            for (var i = 0; i < raw_components.length; i++) {
-	                raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'preview').prop('outerHTML');
+	            for (var col = 1; col <= args.length / 2; col++) {
+	                for (var i = 0; i < raw_components.length; i++) {
+	                    raw_components[i][raw_components[i].length - col] = $(raw_components[i][raw_components[i].length - col]).attr('class', 'preview').prop('outerHTML');
+	                }
 	            }
 	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
@@ -17988,7 +18001,7 @@ var Table =
 	                right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
 	            }
 	            var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
-	            var template = "\n                <div class=\"multi-table-preview\">                    \n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
 	            $("#table-area-" + this._id).html(template);
 	        }
 	        else {
