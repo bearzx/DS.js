@@ -28,12 +28,12 @@ export class Table {
         if (url != null) {
             this.read_table_csv_sync(url);
         }        
-
-        if (!datai) {
-            if (window._datai) {                
+        
+        if (datai == undefined) {
+            if (window._datai) {
                 this._id = window._datai;
             }
-        } else {
+        } else {            
             this._id = datai;
         }
     }
@@ -76,7 +76,7 @@ export class Table {
         });
     }
 
-    public read_table_csv_sync(url: string) {
+    public read_table_csv_sync(url: string) {        
         var _this = this;
         $.ajax({
             dataType: "text",
@@ -245,7 +245,7 @@ export class Table {
                 node.innerHTML = s;
                 column[i] = node.textContent || node.innerText || '';
             });
-            _this.with_column(column[0], column.slice(1, column.length));
+            _this._with_column(column[0], column.slice(1, column.length));
         });
 
         return this;
