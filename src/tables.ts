@@ -7,6 +7,7 @@ declare var ace: any;
 // declare var _datai: any;
 declare var window: any;
 declare var esprima: any;
+declare var numeral: any;
 
 export class Table {
 
@@ -36,6 +37,8 @@ export class Table {
         } else {
             this._id = datai;
         }
+
+        this.auto_convert();
     }
 
     public convert(cast: Function) {
@@ -53,6 +56,16 @@ export class Table {
         let copy = this.copy();
         copy.convert(cast);
         return copy;
+    }
+
+    auto_convert() {
+        let _this = this;
+        this._t.forEach(function(row) {
+            _this._labels.forEach(function(l) {
+                let n = numeral(row[l]);
+                row[l] =  n._value ? n._value : row[l];
+            });
+        });
     }
 
     public copy_from(t: Table) {
@@ -671,7 +684,7 @@ export class Table {
         return { 'first': first, 'rest': rest };
     }
 
-    show() {
+    _show() {
         var _this = this;
         var s = `<table class="ds-table">`;
         s += "<tr>";
@@ -695,6 +708,11 @@ export class Table {
 
         console.log(`#table-area-${this._id}`);
         $(`#table-area-${this._id}`).html(s);
+    }
+
+    show(hide = false) {
+        let raw_components = this.construct_table_components();
+        $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
     }
 
     plot(xlabel, ylabel) {

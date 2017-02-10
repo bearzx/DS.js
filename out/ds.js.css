@@ -1,4 +1,9 @@
-pre {
+.dsjs-env {
+  min-width: 2000px;
+  min-height: 600px;
+  display: none;
+}
+.dsjs-env pre {
   display: block;
   padding: 9.5px;
   margin: 0 0 10px;
@@ -13,23 +18,23 @@ pre {
   border-radius: 4px;
   overflow: auto;
 }
-.ds-table th,
-.preview-table th,
-.ds-table td,
-.preview-table td {
+.dsjs-env .ds-table th,
+.dsjs-env .preview-table th,
+.dsjs-env .ds-table td,
+.dsjs-env .preview-table td {
   border: 1px solid;
 }
-.open-dsjs {
+.dsjs-env .open-dsjs {
   margin-left: 2px;
 }
-.repl {
+.dsjs-env .repl {
   float: left;
   min-width: 400px;
   min-height: 300px;
   /*border: 1px dashed;*/
   padding: 5px;
 }
-.show-panel {
+.dsjs-env .show-panel {
   float: left;
   margin-left: 20px;
   min-width: 600px;
@@ -37,77 +42,74 @@ pre {
   border: 1px dashed;
   padding: 5px;
 }
-.history {
+.dsjs-env .history {
   float: left;
   width: 400px;
   min-height: 300px;
   padding: 5px;
   border: 1px dashed;
 }
-.vis {
+.dsjs-env .vis {
   min-height: 300px;
   border: 1px dashed;
 }
-.table-area {
+.dsjs-env .table-area {
   min-height: 300px;
   border: 1px dashed;
   padding-top: 5px;
   padding-left: 5px;
 }
-.submitted {
+.dsjs-env .submitted {
   min-height: 580px;
 }
-.inputs {
+.dsjs-env .inputs {
   text-align: center;
 }
-.editor {
+.dsjs-env .editor {
   position: relative;
   top: 5px;
   right: 0;
   bottom: 0;
-  margin-bottom: 10px;
   width: 400px;
   height: 300px;
   border: 1px dashed;
 }
-.env {
-  min-width: 2000px;
-  min-height: 600px;
-  display: none;
-}
-.preview {
+.dsjs-env .preview {
   background-color: #5cb85c;
 }
-.preview-select {
+.dsjs-env .preview-select {
   background-color: #f0ad4e;
 }
-.preview-del {
+.dsjs-env .preview-del {
   text-decoration: line-through;
 }
-.multi-table-preview .left {
+.dsjs-env .multi-table-preview .left {
   float: left;
 }
-.multi-table-preview .left .top {
+.dsjs-env .multi-table-preview .left .top {
   margin-bottom: 20px;
 }
-.multi-table-preview .right {
+.dsjs-env .multi-table-preview .right {
   float: left;
 }
-.multi-table-preview .arrow {
+.dsjs-env .multi-table-preview .arrow {
   float: left;
   margin-left: 20px;
   margin-right: 20px;
 }
-.blank {
+.dsjs-env .blank {
   height: 10px;
   background-color: #eee;
   border: 1px solid;
 }
-.blank td {
+.dsjs-env .blank td {
   border: none;
 }
-.preview-hl {
+.dsjs-env .preview-hl {
   position: absolute;
   background: #5bc0de;
   z-index: 40;
+}
+.dsjs-env .buttons {
+  margin-top: 10px;
 }

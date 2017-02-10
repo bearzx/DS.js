@@ -1,5 +1,6 @@
 window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
+window.numeral = require('numeral');
 require('../libs/jquery.tableparser.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
@@ -15,13 +16,15 @@ function env_init(_this, code) {
     } else {
         // create new environment
         var ds_env = `
-            <div id="env-${datai}" class="env">
+            <div id="env-${datai}" class="dsjs-env">
                 <div class="repl">
                     <div class="history" id="history-${datai}"></div>
                     <div class="inputs">
                         <div id="${editor_id}" class="editor"></div>
-                        <button datai="${datai}" class="run">Run</button>
-                        <button datai="${datai}">Preview</button>
+                        <div class="buttons">
+                            <button datai="${datai}" class="run">Run</button>
+                            <button datai="${datai}">Preview</button>
+                        </div>
                     </div>
                 </div>
                 <div class="show-panel">
@@ -56,22 +59,22 @@ function env_init(_this, code) {
                 for (let i = 0; i < ast.body.length; i++) {
                     let stmt = ast.body[i];
                     if (row == (stmt.loc.start.line - 1)) {
-                        find_and_preview(stmt.expression, _editor, line, row, col, line.length);
+                        find_and_preview(stmt.expression, _editor, line, row, col, 0, line.length);
                         break;
                     }
                 }
             }
         });
 
-        function find_and_preview(expr, editor, line, row, col, cur_end) {
+        function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
             let callee;
             if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
                 if (expr.type == 'CallExpression') {
-                    // if (expr.arguments) {
-                    //     expr.arguments.forEach(function(arg) {
-                    //         find_and_preview(arg, editor, line, row, col, arg.loc.end.column);
-                    //     });
-                    // }
+                    if (expr.arguments) {
+                        expr.arguments.forEach(function(arg) {
+                            find_and_preview(arg, editor, line, row, col, arg.loc.start.column, arg.loc.end.column);
+                        });
+                    }
                     callee = expr.callee;
                 } else if (expr.type == 'AssignmentExpression') {
                     callee = expr.right.callee;
@@ -101,7 +104,8 @@ function env_init(_this, code) {
                         for (let i = 0; i < row; i++) {
                             pre_eval_code += all_code[i] + '\n';
                         }
-                        let cur_line_partial = line.slice(0, method_start - 1);
+                        let cur_line_partial = line.slice(cur_start, method_start - 1);
+                        // console.log(`cur_line_partial: ${cur_line_partial}`);
                         pre_eval_code += cur_line_partial;
                         let partial_result = eval(pre_eval_code);
                         eval(`partial_result.preview(\`${method_call}\`)`);
@@ -154,12 +158,12 @@ function env_init(_this, code) {
             let callee;
             if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
                 if (expr.type == 'CallExpression') {
-                    // if (expr.arguments) {
-                    //     expr.arguments.forEach(function(arg) {
-                    //         console.log(arg);
-                    //         find_and_mark(arg, editor);
-                    //     });
-                    // }
+                    if (expr.arguments) {
+                        expr.arguments.forEach(function(arg) {
+                            // console.log(arg);
+                            find_and_mark(arg, editor);
+                        });
+                    }
                     callee = expr.callee;
                 } else if (expr.type == 'AssignmentExpression') {
                     callee = expr.right.callee;
@@ -195,7 +199,7 @@ function env_init(_this, code) {
         $(`#table-area-${datai}`).html('');
         var editor = ace.edit(`editor-${datai}`);
         var code = editor.getValue();
-        console.log(code);
+        // console.log(code);
         $(`#history-${datai}`).append(`<pre>${code}</pre>`);
         editor.setValue('');
         window._datai = datai;
