@@ -49,7 +49,6 @@ function env_init(_this, code) {
             bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
             exec: function(_editor) {
                 let ast = esprima.parse(_editor.getValue(), { loc: true });
-                let Range = ace.require('ace/range').Range;
                 let row = _editor.getCursorPosition().row;
                 let col = _editor.getCursorPosition().column;
                 let line = editor.getSession().getLine(row);
@@ -57,48 +56,64 @@ function env_init(_this, code) {
                 for (let i = 0; i < ast.body.length; i++) {
                     let stmt = ast.body[i];
                     if (row == (stmt.loc.start.line - 1)) {
-                        let expr = stmt.expression.callee;
-                        let last_expr;
-                        let expr_level = 0;
-                        while (expr && ('object' in expr)) {
-                            let method_name = expr.property.name;
-                            let method_start = expr.loc.end.column - expr.property.name.length;
-                            let method_end = expr.loc.end.column;
-                            if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
-                                // console.log(`method ${expr.property.name} found`);
-                                let method_call;
-
-                                console.log(expr.object.callee);
-                                console.log(`expr_level = ${expr_level}`);
-                                if ((!expr.object.callee) && (expr_level == 0)) {
-                                    method_call = line.slice(method_start, line.length);
-                                } else {
-                                    let last_method_start = last_expr.loc.end.column - last_expr.property.name.length;
-                                    method_call = line.slice(method_start, last_method_start - 1);
-                                }
-
-                                // console.log(`method_call: ${method_call}`);
-                                let all_code = _editor.getValue().split('\n');
-                                let pre_eval_code = '';
-                                for (let i = 0; i < row; i++) {
-                                   pre_eval_code += all_code[i] + '\n';
-                                }
-                                let cur_line_partial = line.slice(0, method_start - 1);
-                                pre_eval_code += cur_line_partial;
-                                let partial_result = eval(pre_eval_code);
-                                eval(`partial_result.preview(\`${method_call}\`)`);
-                                break;
-                            } else {
-                                last_expr = expr;
-                                expr_level += 1;
-                                expr = expr.object.callee;
-                            }
-                        }
+                        find_and_preview(stmt.expression, _editor, line, row, col, line.length);
                         break;
                     }
                 }
             }
         });
+
+        function find_and_preview(expr, editor, line, row, col, cur_end) {
+            let callee;
+            if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
+                if (expr.type == 'CallExpression') {
+                    // if (expr.arguments) {
+                    //     expr.arguments.forEach(function(arg) {
+                    //         find_and_preview(arg, editor, line, row, col, arg.loc.end.column);
+                    //     });
+                    // }
+                    callee = expr.callee;
+                } else if (expr.type == 'AssignmentExpression') {
+                    callee = expr.right.callee;
+                }
+                let last_callee;
+                let callee_level = 0;
+                while (callee && ('object' in callee)) {
+                    let method_name = callee.property.name;
+                    let method_start = callee.loc.end.column - callee.property.name.length;
+                    let method_end = callee.loc.end.column;
+                    if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
+                        // console.log(`method ${callee.property.name} found`);
+                        let method_call;
+
+                        // console.log(callee.object.callee);
+                        // console.log(`callee_level = ${callee_level}`);
+                        if (callee_level == 0) {
+                            method_call = line.slice(method_start, cur_end);
+                        } else {
+                            let last_method_start = last_callee.loc.end.column - last_callee.property.name.length;
+                            method_call = line.slice(method_start, last_method_start - 1);
+                        }
+
+                        // console.log(`method_call: ${method_call}`);
+                        let all_code = editor.getValue().split('\n');
+                        let pre_eval_code = '';
+                        for (let i = 0; i < row; i++) {
+                            pre_eval_code += all_code[i] + '\n';
+                        }
+                        let cur_line_partial = line.slice(0, method_start - 1);
+                        pre_eval_code += cur_line_partial;
+                        let partial_result = eval(pre_eval_code);
+                        eval(`partial_result.preview(\`${method_call}\`)`);
+                        break;
+                    } else {
+                        last_callee = callee;
+                        callee_level += 1;
+                        callee = callee.object.callee;
+                    }
+                }
+            }
+        }
 
         function is_supported_preview(func_name) {
             let supported_functions = new Set([
@@ -124,25 +139,41 @@ function env_init(_this, code) {
             name: 'hl-preview-methods',
             bindKey: { win: 'Ctrl-G',  mac: 'Command-G' },
             exec: function(_editor) {
-                let Range = ace.require('ace/range').Range;
                 let ast = esprima.parse(_editor.getValue(), { loc: true });
                 ast.body.forEach(function(stmt) {
                     // console.log(stmt);
-                    if (stmt.expression.type == 'CallExpression') {
-                        let expr = stmt.expression.callee;
-                        while (expr && ('object' in expr)) {
-                            // console.log(expr.property.name);
-                            // console.log(expr.loc);
-                            if (is_supported_preview(expr.property.name)) {
-                                let r = new Range(expr.loc.start.line - 1, expr.loc.end.column - expr.property.name.length, expr.loc.end.line - 1, expr.loc.end.column);
-                                _editor.getSession().addMarker(r, "preview-hl", "line");
-                            }
-                            expr = expr.object.callee;
-                        }
-                    }
+                    find_and_mark(stmt.expression, _editor);
                 });
             }
         });
+
+        function find_and_mark(expr, editor) {
+            // [TODO] mark-ups are messed-up after we change the code
+            // console.log(expr);
+            let Range = ace.require('ace/range').Range;
+            let callee;
+            if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
+                if (expr.type == 'CallExpression') {
+                    // if (expr.arguments) {
+                    //     expr.arguments.forEach(function(arg) {
+                    //         console.log(arg);
+                    //         find_and_mark(arg, editor);
+                    //     });
+                    // }
+                    callee = expr.callee;
+                } else if (expr.type == 'AssignmentExpression') {
+                    callee = expr.right.callee;
+                }
+
+                while (callee && ('object' in callee)) {
+                    if (is_supported_preview(callee.property.name)) {
+                        let r = new Range(callee.loc.start.line - 1, callee.loc.end.column - callee.property.name.length, callee.loc.end.line - 1, callee.loc.end.column);
+                        editor.getSession().addMarker(r, "preview-hl", "line");
+                    }
+                    callee = callee.object.callee;
+                }
+            }
+        }
 
         editor.on('click', function(e) {
             // let _editor = e.editor;

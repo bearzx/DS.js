@@ -991,7 +991,7 @@ export class Table {
     // change impure (e.g. with_row) functions to pure functions
     preview(method_call) {
         let method_name = method_call.slice(0, method_call.indexOf('('));
-        let args = method_call.slice(method_call.indexOf('(') + 1, method_call.indexOf(')'));
+        let args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
 
         console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
