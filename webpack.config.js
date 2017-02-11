@@ -27,6 +27,7 @@ module.exports = {
     loaders: [
       { test: /\.ts$/, loader: 'ts' },
       { test: /\.less$/, loader: 'style!css!less' },
+      { test: /\.css$/, loader: "style-loader!css-loader" },
       {
         test: require.resolve('./libs/vega'),
         loaders: [
@@ -37,7 +38,7 @@ module.exports = {
         test: /\.json$/,
         loader: 'json-loader'
       }
-    ]    
+    ]
   }
 }
 

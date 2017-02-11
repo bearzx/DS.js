@@ -261,6 +261,8 @@ export class Table {
                 let node = document.createElement('div');
                 node.innerHTML = s;
                 column[i] = node.textContent || node.innerText || '';
+                let n = numeral(column[i]);
+                column[i] = n._value ? n._value : column[i];
             });
             _this._with_column(column[0], column.slice(1, column.length));
         });
@@ -684,6 +686,7 @@ export class Table {
         return { 'first': first, 'rest': rest };
     }
 
+    // @deprecated
     _show() {
         var _this = this;
         var s = `<table class="ds-table">`;
@@ -713,6 +716,10 @@ export class Table {
     show(hide = false) {
         let raw_components = this.construct_table_components();
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
+    }
+
+    peek() {
+        this.show(true);
     }
 
     plot(xlabel, ylabel) {

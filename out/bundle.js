@@ -56,6 +56,8 @@ var Table =
 	/* WEBPACK VAR INJECTION */(function($) {window.$ = window.jQuery = __webpack_require__(2);
 	window.esprima = __webpack_require__(3);
 	window.numeral = __webpack_require__(4);
+	// require('../libs/jquery.qtip.min.js');
+	// require('css!../libs/jquery.qtip.min.css');
 	__webpack_require__(5);
 	// window.d3 = require('script!../libs/d3.v3.min.js');
 	// window.vg = require('script!../libs/vega/vega.js');
@@ -73,7 +75,7 @@ var Table =
 	        var ds_env = `
 	            <div id="env-${datai}" class="dsjs-env">
 	                <div class="repl">
-	                    <div class="history" id="history-${datai}"></div>
+	                    <!-- <div class="history" id="history-${datai}"></div> -->
 	                    <div class="inputs">
 	                        <div id="${editor_id}" class="editor"></div>
 	                        <div class="buttons">
@@ -101,6 +103,7 @@ var Table =
 	        // editor.setBehavioursEnabled(false);
 	        editor.getSession().setMode("ace/mode/javascript");
 	        editor.getSession().setUseWrapMode(true);
+	        editor.setValue(`// This table is denoted as t${datai}`);
 	
 	        editor.commands.addCommand({
 	            name: 'preview',
@@ -198,6 +201,12 @@ var Table =
 	            name: 'hl-preview-methods',
 	            bindKey: { win: 'Ctrl-G',  mac: 'Command-G' },
 	            exec: function(_editor) {
+	                let markers = _editor.getSession().getMarkers();
+	                Object.keys(markers).forEach(function(mk) {
+	                    if (markers[mk].clazz == 'preview-hl') {
+	                        _editor.getSession().removeMarker(mk);
+	                    }
+	                });
 	                let ast = esprima.parse(_editor.getValue(), { loc: true });
 	                ast.body.forEach(function(stmt) {
 	                    // console.log(stmt);
@@ -242,7 +251,7 @@ var Table =
 	        });
 	
 	        let data_link = $(_this).attr('data-link');
-	        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
+	        // $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
 	        window._datai = datai;
 	        // eval(code); // I used to keep it to run some specialized init code
 	        $(env_id).toggle();
@@ -255,7 +264,7 @@ var Table =
 	        var editor = ace.edit(`editor-${datai}`);
 	        var code = editor.getValue();
 	        // console.log(code);
-	        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+	        // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
 	        editor.setValue('');
 	        window._datai = datai;
 	        eval(code);
@@ -18180,6 +18189,8 @@ var Table =
 	                var node = document.createElement('div');
 	                node.innerHTML = s;
 	                column[i] = node.textContent || node.innerText || '';
+	                var n = numeral(column[i]);
+	                column[i] = n._value ? n._value : column[i];
 	            });
 	            _this._with_column(column[0], column.slice(1, column.length));
 	        });
@@ -18576,6 +18587,7 @@ var Table =
 	        }
 	        return { 'first': first, 'rest': rest };
 	    };
+	    // @deprecated
 	    Table.prototype._show = function () {
 	        var _this = this;
 	        var s = "<table class=\"ds-table\">";
@@ -18604,6 +18616,9 @@ var Table =
 	        if (hide === void 0) { hide = false; }
 	        var raw_components = this.construct_table_components();
 	        $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
+	    };
+	    Table.prototype.peek = function () {
+	        this.show(true);
 	    };
 	    Table.prototype.plot = function (xlabel, ylabel) {
 	        var id = this._id;

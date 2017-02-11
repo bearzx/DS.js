@@ -1,6 +1,8 @@
 window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
+// require('../libs/jquery.qtip.min.js');
+// require('css!../libs/jquery.qtip.min.css');
 require('../libs/jquery.tableparser.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
@@ -18,7 +20,7 @@ function env_init(_this, code) {
         var ds_env = `
             <div id="env-${datai}" class="dsjs-env">
                 <div class="repl">
-                    <div class="history" id="history-${datai}"></div>
+                    <!-- <div class="history" id="history-${datai}"></div> -->
                     <div class="inputs">
                         <div id="${editor_id}" class="editor"></div>
                         <div class="buttons">
@@ -46,6 +48,7 @@ function env_init(_this, code) {
         // editor.setBehavioursEnabled(false);
         editor.getSession().setMode("ace/mode/javascript");
         editor.getSession().setUseWrapMode(true);
+        editor.setValue(`// This table is denoted as t${datai}`);
 
         editor.commands.addCommand({
             name: 'preview',
@@ -143,6 +146,12 @@ function env_init(_this, code) {
             name: 'hl-preview-methods',
             bindKey: { win: 'Ctrl-G',  mac: 'Command-G' },
             exec: function(_editor) {
+                let markers = _editor.getSession().getMarkers();
+                Object.keys(markers).forEach(function(mk) {
+                    if (markers[mk].clazz == 'preview-hl') {
+                        _editor.getSession().removeMarker(mk);
+                    }
+                });
                 let ast = esprima.parse(_editor.getValue(), { loc: true });
                 ast.body.forEach(function(stmt) {
                     // console.log(stmt);
@@ -187,7 +196,7 @@ function env_init(_this, code) {
         });
 
         let data_link = $(_this).attr('data-link');
-        $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
+        // $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
         window._datai = datai;
         // eval(code); // I used to keep it to run some specialized init code
         $(env_id).toggle();
@@ -200,7 +209,7 @@ function env_init(_this, code) {
         var editor = ace.edit(`editor-${datai}`);
         var code = editor.getValue();
         // console.log(code);
-        $(`#history-${datai}`).append(`<pre>${code}</pre>`);
+        // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
         editor.setValue('');
         window._datai = datai;
         eval(code);
