@@ -77,12 +77,15 @@ var Table =
 	                <div class="repl">
 	                    <!-- <div class="history" id="history-${datai}"></div> -->
 	                    <div class="inputs">
-	                        <div id="${editor_id}" class="editor"></div>
+	                        <div id="preview-${datai}" class="preview-panel"></div>
+	                        <div id="${editor_id}" class="editor">
+	                        </div>
 	                        <div class="buttons">
 	                            <button datai="${datai}" class="run">Run</button>
 	                            <button datai="${datai}">Preview</button>
 	                        </div>
 	                    </div>
+	
 	                </div>
 	                <div class="show-panel">
 	                    <div id="vis-${datai}" class="vis"></div>
@@ -99,6 +102,7 @@ var Table =
 	        }
 	        $(cur).after(ds_env);
 	        var editor = ace.edit(editor_id);
+	        editor.datai = datai;
 	        editor.setTheme("ace/theme/chrome");
 	        // editor.setBehavioursEnabled(false);
 	        editor.getSession().setMode("ace/mode/javascript");
@@ -125,6 +129,7 @@ var Table =
 	        });
 	
 	        function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
+	            let datai = editor.datai;
 	            let callee;
 	            if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
 	                if (expr.type == 'CallExpression') {
@@ -167,6 +172,11 @@ var Table =
 	                        pre_eval_code += cur_line_partial;
 	                        let partial_result = eval(pre_eval_code);
 	                        eval(`partial_result.preview(\`${method_call}\`)`);
+	                        let pos = $(`#env-${datai} .ace_cursor`).position();
+	                        $(`#env-${datai} .preview-panel`).css({
+	                            left: pos.left + 50,
+	                            top: pos.top + 30
+	                        }).toggle();
 	                        break;
 	                    } else {
 	                        last_callee = callee;
@@ -215,6 +225,21 @@ var Table =
 	            }
 	        });
 	
+	        editor.commands.addCommand({
+	            name: 'show-preview-panel',
+	            bindKey: { win: 'Ctrl-J',  mac: 'Command-J' },
+	            exec: function(_editor) {
+	                // console.log(_editor);
+	                let datai = _editor.datai;
+	                let pos = $(`#env-${datai} .ace_cursor`).position();
+	                console.log(pos);
+	                $(`#env-${datai} .preview-panel`).css({
+	                    left: pos.left + 50,
+	                    top: pos.top + 30
+	                }).toggle();
+	            }
+	        });
+	
 	        function find_and_mark(expr, editor) {
 	            // [TODO] mark-ups are messed-up after we change the code
 	            // console.log(expr);
@@ -250,6 +275,14 @@ var Table =
 	            // console.log(`row: ${row} col: ${col}`);
 	        });
 	
+	        editor.session.on('change', function(e) {
+	            $('.preview-panel').each(function() {
+	                if ($(this).css('display') != 'none') {
+	                    $(this).hide();
+	                }
+	            });
+	        });
+	
 	        let data_link = $(_this).attr('data-link');
 	        // $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
 	        window._datai = datai;
@@ -265,7 +298,7 @@ var Table =
 	        var code = editor.getValue();
 	        // console.log(code);
 	        // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
-	        editor.setValue('');
+	        // editor.setValue('');
 	        window._datai = datai;
 	        eval(code);
 	    });
@@ -18896,7 +18929,7 @@ var Table =
 	                    raw_components[raw_components.length - row][i] = $(raw_components[raw_components.length - row][i]).attr('class', 'preview').prop('outerHTML');
 	                }
 	            }
-	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
+	            $("#preview-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'with_column' || method_name == 'with_columns') {
 	            var new_table = eval("this." + method_name + "(" + args + ")");
@@ -18907,7 +18940,7 @@ var Table =
 	                    raw_components[i][raw_components[i].length - col] = $(raw_components[i][raw_components[i].length - col]).attr('class', 'preview').prop('outerHTML');
 	                }
 	            }
-	            $("#table-area-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
+	            $("#preview-" + this._id).html(new_table.construct_html_table(raw_components, true, true));
 	        }
 	        else if (method_name == 'select' || method_name == 'drop') {
 	            // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
@@ -18921,7 +18954,7 @@ var Table =
 	            for (var i = 0; i < raw_components_1.length; i++) {
 	                _loop_1(i);
 	            }
-	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
+	            $("#preview-" + this._id).html(this.construct_html_table(raw_components_1, true, true, label_locs));
 	        }
 	        else if (method_name == 'relabeled') {
 	            // [bug] what if we give it a non-existing label name?
@@ -18929,7 +18962,7 @@ var Table =
 	            var raw_components = this.construct_table_components();
 	            var label_loc = this._as_label_index(args[0]);
 	            raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-del\">" + args[0] + "</span> <span class=\"preview-select\">" + args[1] + "</span>").attr('class', 'preview').prop('outerHTML');
-	            $("#table-area-" + this._id).html(this.construct_html_table(raw_components, true, true, [label_loc]));
+	            $("#preview-" + this._id).html(this.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'where') {
 	            // [TODO] hide_col strategies on this
@@ -18941,7 +18974,7 @@ var Table =
 	                    raw_components_2[i + 1][j] = $(raw_components_2[i + 1][j]).attr('class', 'preview').prop('outerHTML');
 	                }
 	            });
-	            $("#table-area-" + this._id).html(this.construct_html_table_peek(raw_components_2, res.index, res.label, false));
+	            $("#preview-" + this._id).html(this.construct_html_table_peek(raw_components_2, res.index, res.label, false));
 	        }
 	        else if (method_name == 'sorted') {
 	            var sorted_table = eval("this.sorted(" + args + ")");
@@ -18953,7 +18986,7 @@ var Table =
 	            for (var i = 1; i < raw_components.length; i++) {
 	                raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
 	            }
-	            $("#table-area-" + this._id).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
+	            $("#preview-" + this._id).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
 	        }
 	        else if (method_name == 'group' || method_name == 'groups') {
 	            var grouped_table = eval("this." + method_name + "(" + args + ")");
@@ -18982,7 +19015,7 @@ var Table =
 	            }
 	            var right_table = grouped_table.construct_html_table_peek(right_raw_components_1, [0, 1, 2, 3, 4], null, false);
 	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
-	            $("#table-area-" + this._id).html(template);
+	            $("#preview-" + this._id).html(template);
 	        }
 	        else if (method_name == 'pivot') {
 	            var pivoted_table = eval("this.pivot(" + args + ")");
@@ -19001,7 +19034,7 @@ var Table =
 	            }
 	            var right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
-	            $("#table-area-" + this._id).html(template);
+	            $("#preview-" + this._id).html(template);
 	        }
 	        else if (method_name == 'join') {
 	            var joined_table = eval("this.join(" + args + ")");
@@ -19028,7 +19061,7 @@ var Table =
 	            }
 	            var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 	            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
-	            $("#table-area-" + this._id).html(template);
+	            $("#preview-" + this._id).html(template);
 	        }
 	        else {
 	            console.warn('Method call not supported: ${method_call}');

@@ -22,12 +22,15 @@ function env_init(_this, code) {
                 <div class="repl">
                     <!-- <div class="history" id="history-${datai}"></div> -->
                     <div class="inputs">
-                        <div id="${editor_id}" class="editor"></div>
+                        <div id="preview-${datai}" class="preview-panel"></div>
+                        <div id="${editor_id}" class="editor">
+                        </div>
                         <div class="buttons">
                             <button datai="${datai}" class="run">Run</button>
                             <button datai="${datai}">Preview</button>
                         </div>
                     </div>
+
                 </div>
                 <div class="show-panel">
                     <div id="vis-${datai}" class="vis"></div>
@@ -44,6 +47,7 @@ function env_init(_this, code) {
         }
         $(cur).after(ds_env);
         var editor = ace.edit(editor_id);
+        editor.datai = datai;
         editor.setTheme("ace/theme/chrome");
         // editor.setBehavioursEnabled(false);
         editor.getSession().setMode("ace/mode/javascript");
@@ -70,6 +74,7 @@ function env_init(_this, code) {
         });
 
         function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
+            let datai = editor.datai;
             let callee;
             if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
                 if (expr.type == 'CallExpression') {
@@ -112,6 +117,11 @@ function env_init(_this, code) {
                         pre_eval_code += cur_line_partial;
                         let partial_result = eval(pre_eval_code);
                         eval(`partial_result.preview(\`${method_call}\`)`);
+                        let pos = $(`#env-${datai} .ace_cursor`).position();
+                        $(`#env-${datai} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
                         break;
                     } else {
                         last_callee = callee;
@@ -160,6 +170,21 @@ function env_init(_this, code) {
             }
         });
 
+        editor.commands.addCommand({
+            name: 'show-preview-panel',
+            bindKey: { win: 'Ctrl-J',  mac: 'Command-J' },
+            exec: function(_editor) {
+                // console.log(_editor);
+                let datai = _editor.datai;
+                let pos = $(`#env-${datai} .ace_cursor`).position();
+                console.log(pos);
+                $(`#env-${datai} .preview-panel`).css({
+                    left: pos.left + 50,
+                    top: pos.top + 30
+                }).toggle();
+            }
+        });
+
         function find_and_mark(expr, editor) {
             // [TODO] mark-ups are messed-up after we change the code
             // console.log(expr);
@@ -195,6 +220,14 @@ function env_init(_this, code) {
             // console.log(`row: ${row} col: ${col}`);
         });
 
+        editor.session.on('change', function(e) {
+            $('.preview-panel').each(function() {
+                if ($(this).css('display') != 'none') {
+                    $(this).hide();
+                }
+            });
+        });
+
         let data_link = $(_this).attr('data-link');
         // $(`#history-${datai}`).append(`<b>This table is denoted as t${datai}</b>`);
         window._datai = datai;
@@ -210,7 +243,7 @@ function env_init(_this, code) {
         var code = editor.getValue();
         // console.log(code);
         // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
-        editor.setValue('');
+        // editor.setValue('');
         window._datai = datai;
         eval(code);
     });

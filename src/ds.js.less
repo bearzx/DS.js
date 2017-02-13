@@ -72,6 +72,7 @@
     }
 
     .inputs {
+        position: relative;
         text-align: center;
     }
 
@@ -142,5 +143,17 @@
 
     .buttons {
         margin-top: 10px;
+    }
+
+    .preview-panel {
+        position: absolute;
+        display: none;
+        width: 400px;
+        height: 300px;
+        float: left;
+        z-index: 999;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 15px;
     }
 }

@@ -1030,7 +1030,7 @@ export class Table {
                 }
             }
 
-            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
+            $(`#preview-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'with_column' || method_name == 'with_columns') {
             let new_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1041,7 +1041,7 @@ export class Table {
                 }
             }
 
-            $(`#table-area-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
+            $(`#preview-${this._id}`).html(new_table.construct_html_table(raw_components, true, true));
         } else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
@@ -1052,7 +1052,7 @@ export class Table {
                 });
             }
 
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
+            $(`#preview-${this._id}`).html(this.construct_html_table(raw_components, true, true, label_locs));
         } else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
             args = eval(`this._as_args(${args})`);
@@ -1060,7 +1060,7 @@ export class Table {
             let label_loc = this._as_label_index(args[0]);
             raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');
 
-            $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
+            $(`#preview-${this._id}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
             let res = eval(`this.iwhere(${args})`);
@@ -1072,7 +1072,7 @@ export class Table {
                 }
             });
 
-            $(`#table-area-${this._id}`).html(this.construct_html_table_peek(raw_components, res.index, res.label, false));
+            $(`#preview-${this._id}`).html(this.construct_html_table_peek(raw_components, res.index, res.label, false));
         } else if (method_name == 'sorted') {
             let sorted_table = eval(`this.sorted(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1083,7 +1083,7 @@ export class Table {
             for (let i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
-            $(`#table-area-${this._id}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
+            $(`#preview-${this._id}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
         } else if (method_name == 'group' || method_name == 'groups') {
             let grouped_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1115,7 +1115,7 @@ export class Table {
                 <div style="clear: both"></div>
             `;
 
-            $(`#table-area-${this._id}`).html(template);
+            $(`#preview-${this._id}`).html(template);
         } else if (method_name == 'pivot') {
             let pivoted_table = eval(`this.pivot(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1142,7 +1142,7 @@ export class Table {
                 </div>
             `;
 
-            $(`#table-area-${this._id}`).html(template);
+            $(`#preview-${this._id}`).html(template);
         } else if (method_name == 'join') {
             let joined_table = eval(`this.join(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1181,7 +1181,7 @@ export class Table {
                 <div style="clear: both"></div>
             `;
 
-            $(`#table-area-${this._id}`).html(template);
+            $(`#preview-${this._id}`).html(template);
         } else {
             console.warn('Method call not supported: ${method_call}');
         }
