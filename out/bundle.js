@@ -46,7 +46,7 @@ var Table =
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(1);
-	module.exports = __webpack_require__(6);
+	module.exports = __webpack_require__(7);
 
 
 /***/ },
@@ -56,9 +56,8 @@ var Table =
 	/* WEBPACK VAR INJECTION */(function($) {window.$ = window.jQuery = __webpack_require__(2);
 	window.esprima = __webpack_require__(3);
 	window.numeral = __webpack_require__(4);
-	// require('../libs/jquery.qtip.min.js');
-	// require('css!../libs/jquery.qtip.min.css');
 	__webpack_require__(5);
+	__webpack_require__(6);
 	// window.d3 = require('script!../libs/d3.v3.min.js');
 	// window.vg = require('script!../libs/vega/vega.js');
 	window.datai = '';
@@ -85,11 +84,11 @@ var Table =
 	                            <button datai="${datai}">Preview</button>
 	                        </div>
 	                    </div>
-	
 	                </div>
 	                <div class="show-panel">
 	                    <div id="vis-${datai}" class="vis"></div>
 	                    <div id="table-area-${datai}" class="table-area"></div>
+	                    <div id="suggestion-${datai}" class="suggestion-panel"></div>
 	                </div>
 	            </div>
 	            <div style="clear: both"></div>
@@ -232,7 +231,7 @@ var Table =
 	                // console.log(_editor);
 	                let datai = _editor.datai;
 	                let pos = $(`#env-${datai} .ace_cursor`).position();
-	                console.log(pos);
+	                // console.log(pos);
 	                $(`#env-${datai} .preview-panel`).css({
 	                    left: pos.left + 50,
 	                    top: pos.top + 30
@@ -17995,10 +17994,20 @@ var Table =
 
 /***/ },
 /* 6 */
+/***/ function(module, exports) {
+
+	if (!Array.prototype.last) {
+	    Array.prototype.last = function() {
+	        return this[this.length - 1];
+	    };
+	};
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function($) {"use strict";
-	var vgt = __webpack_require__(7);
+	var vgt = __webpack_require__(8);
 	var Table = (function () {
 	    function Table(t, l, url, datai) {
 	        this._t = [];
@@ -18648,7 +18657,28 @@ var Table =
 	    Table.prototype.show = function (hide) {
 	        if (hide === void 0) { hide = false; }
 	        var raw_components = this.construct_table_components();
+	        for (var i = 0; i < raw_components.length; i++) {
+	            raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
+	        }
 	        $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
+	        var datai = this._id;
+	        // event binding
+	        $('.last-col').click(function () {
+	            // console.log($(this).text());
+	            var pos = $(this).position();
+	            var suggestions = "\n                <ul>\n                    <li class=\"suggestion-item\">with_column(label, values)</li>\n                    <li class=\"suggestion-item\">with_columns(label1, values1, label2, values2, ...)</li>\n                </ul>\n            ";
+	            $("#suggestion-" + datai).html(suggestions).css({
+	                left: pos.left + 50,
+	                top: pos.top + 30
+	            }).toggle();
+	            $(".suggestion-item").click(function () {
+	                var editor = ace.edit("editor-" + datai);
+	                editor.setValue(editor.getValue() + '\n' + $(this).text());
+	            });
+	        });
+	        $('.last-row').click(function () {
+	            // console.log($(this).text());
+	        });
 	    };
 	    Table.prototype.peek = function () {
 	        this.show(true);
@@ -18829,11 +18859,13 @@ var Table =
 	            }
 	        }
 	        else {
-	            for (var i = 0; i < raw_components.length; i++) {
+	            for (var i = 0; i < raw_components.length - 1; i++) {
 	                s += '<tr>';
 	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
+	            var row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
+	            s += $(row).attr('class', 'last-row').prop('outerHTML');
 	        }
 	        s += '</table>';
 	        return s;
@@ -19074,7 +19106,7 @@ var Table =
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";

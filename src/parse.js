@@ -1,9 +1,8 @@
 window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
-// require('../libs/jquery.qtip.min.js');
-// require('css!../libs/jquery.qtip.min.css');
 require('../libs/jquery.tableparser.js');
+require('./array_last.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
 window.datai = '';
@@ -30,11 +29,11 @@ function env_init(_this, code) {
                             <button datai="${datai}">Preview</button>
                         </div>
                     </div>
-
                 </div>
                 <div class="show-panel">
                     <div id="vis-${datai}" class="vis"></div>
                     <div id="table-area-${datai}" class="table-area"></div>
+                    <div id="suggestion-${datai}" class="suggestion-panel"></div>
                 </div>
             </div>
             <div style="clear: both"></div>
@@ -177,7 +176,7 @@ function env_init(_this, code) {
                 // console.log(_editor);
                 let datai = _editor.datai;
                 let pos = $(`#env-${datai} .ace_cursor`).position();
-                console.log(pos);
+                // console.log(pos);
                 $(`#env-${datai} .preview-panel`).css({
                     left: pos.left + 50,
                     top: pos.top + 30

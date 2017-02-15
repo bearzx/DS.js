@@ -715,7 +715,37 @@ export class Table {
 
     show(hide = false) {
         let raw_components = this.construct_table_components();
+        for (let i = 0; i < raw_components.length; i++) {
+            raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
+        }
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
+
+        let datai = this._id;
+        // event binding
+        $('.last-col').click(function() {
+            // console.log($(this).text());
+            let pos = $(this).position();
+            let suggestions = `
+                <ul>
+                    <li class="suggestion-item">with_column(label, values)</li>
+                    <li class="suggestion-item">with_columns(label1, values1, label2, values2, ...)</li>
+                </ul>
+            `;
+
+            $(`#suggestion-${datai}`).html(suggestions).css({
+                left: pos.left + 50,
+                top: pos.top + 30
+            }).toggle();
+
+            $(`.suggestion-item`).click(function() {
+                let editor = ace.edit(`editor-${datai}`);
+                editor.setValue(editor.getValue() + '\n' + $(this).text());
+            });
+        });
+
+        $('.last-row').click(function() {
+            // console.log($(this).text());
+        });
     }
 
     peek() {
@@ -919,11 +949,15 @@ export class Table {
                 s += '</tr>';
             }
         } else {
-            for (let i = 0; i < raw_components.length; i++) {
+            for (let i = 0; i < raw_components.length - 1; i++) {
                 s += '<tr>';
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
+
+            let row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
+
+            s += $(row).attr('class', 'last-row').prop('outerHTML');
         }
 
         s += '</table>';

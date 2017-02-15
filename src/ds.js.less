@@ -20,6 +20,8 @@
     }
 
     .ds-table, .preview-table {
+        overflow: hidden;
+
         th, td {
             border: 1px solid;
         }
@@ -155,5 +157,43 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         background-color: rgba(255, 255, 255, 0.7);
         padding: 15px;
+    }
+
+    .suggestion-panel {
+        position: absolute;
+        display: none;
+        width: 400px;
+        // min-height: 100px;
+        float: left;
+        z-index: 999;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 15px;
+
+        .suggestion-item:hover {
+            cursor: pointer;
+            background-color: #a6bddb;
+        }
+    }
+
+    td.last-col:hover::after {
+        content: "";
+        position: absolute;
+        background-color: #ffa;
+        left: 0;
+        top: -5000px;
+        height: 10000px;
+        width: 100%;
+        z-index: -1;
+        transition-duration: 0.5s;
+    }
+
+    td.last-col {
+        position: relative;
+    }
+
+    tr.last-row:hover {
+        background-color: #ffa;
+        transition-duration: 0.5s;
     }
 }

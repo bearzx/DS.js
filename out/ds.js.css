@@ -18,6 +18,10 @@
   border-radius: 4px;
   overflow: auto;
 }
+.dsjs-env .ds-table,
+.dsjs-env .preview-table {
+  overflow: hidden;
+}
 .dsjs-env .ds-table th,
 .dsjs-env .preview-table th,
 .dsjs-env .ds-table td,
@@ -124,4 +128,36 @@
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   background-color: rgba(255, 255, 255, 0.7);
   padding: 15px;
+}
+.dsjs-env .suggestion-panel {
+  position: absolute;
+  display: none;
+  width: 400px;
+  float: left;
+  z-index: 999;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 15px;
+}
+.dsjs-env .suggestion-panel .suggestion-item:hover {
+  cursor: pointer;
+  background-color: #a6bddb;
+}
+.dsjs-env td.last-col:hover::after {
+  content: "";
+  position: absolute;
+  background-color: #ffa;
+  left: 0;
+  top: -5000px;
+  height: 10000px;
+  width: 100%;
+  z-index: -1;
+  transition-duration: 0.5s;
+}
+.dsjs-env td.last-col {
+  position: relative;
+}
+.dsjs-env tr.last-row:hover {
+  background-color: #ffa;
+  transition-duration: 0.5s;
 }
