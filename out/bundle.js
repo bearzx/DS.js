@@ -82,8 +82,8 @@ var Table =
 	                        </div>
 	                        <div class="buttons">
 	                            <button datai="${datai}" class="run">Run</button>
-	                            <button datai="${datai}">Preview</button>
-	                            <button class="toggle-sg">Toggle SG</button>
+	                            <!-- <button datai="${datai}">Preview</button> -->
+	                            <button datai="${datai}" class="toggle-sg">Toggle SG</button>
 	                        </div>
 	                    </div>
 	                </div>
@@ -305,8 +305,8 @@ var Table =
 	    });
 	
 	    $('.toggle-sg').click(function() {
-	        console.log('yo');
-	        SelectorGadget.toggle();
+	        let datai = $(this).attr('datai');
+	        SelectorGadget.toggle(datai);
 	    });
 	}
 	
@@ -346,9 +346,12 @@ var Table =
 	    });
 	
 	    window.sg_prediction = function(prediction) {
-	        $(prediction).each(function() {
-	            console.log($(this).text());
-	        });
+	        // let selected = [];
+	        // $(prediction).each(function() {
+	        //     selected.push($(this).text());
+	        // });
+	        // console.log(selected);
+	        window.last_prediction = prediction;
 	    };
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))

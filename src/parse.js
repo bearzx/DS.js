@@ -27,8 +27,8 @@ function env_init(_this, code) {
                         </div>
                         <div class="buttons">
                             <button datai="${datai}" class="run">Run</button>
-                            <button datai="${datai}">Preview</button>
-                            <button class="toggle-sg">Toggle SG</button>
+                            <!-- <button datai="${datai}">Preview</button> -->
+                            <button datai="${datai}" class="toggle-sg">Toggle SG</button>
                         </div>
                     </div>
                 </div>
@@ -250,7 +250,8 @@ function env_init(_this, code) {
     });
 
     $('.toggle-sg').click(function() {
-        SelectorGadget.toggle();
+        let datai = $(this).attr('datai');
+        SelectorGadget.toggle(datai);
     });
 }
 
@@ -290,8 +291,6 @@ $(document).ready(function() {
     });
 
     window.sg_prediction = function(prediction) {
-        $(prediction).each(function() {
-            console.log($(this).text());
-        });
+        window.last_prediction = prediction;
     };
 });
