@@ -54,6 +54,7 @@ var Table =
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function($) {window.$ = window.jQuery = __webpack_require__(2);
+	// window.$ = window.jQuerySG;
 	window.esprima = __webpack_require__(3);
 	window.numeral = __webpack_require__(4);
 	__webpack_require__(5);
@@ -82,6 +83,7 @@ var Table =
 	                        <div class="buttons">
 	                            <button datai="${datai}" class="run">Run</button>
 	                            <button datai="${datai}">Preview</button>
+	                            <button class="toggle-sg">Toggle SG</button>
 	                        </div>
 	                    </div>
 	                </div>
@@ -301,6 +303,11 @@ var Table =
 	        window._datai = datai;
 	        eval(code);
 	    });
+	
+	    $('.toggle-sg').click(function() {
+	        console.log('yo');
+	        SelectorGadget.toggle();
+	    });
 	}
 	
 	$(document).ready(function() {
@@ -337,6 +344,12 @@ var Table =
 	        let datai = $(this).attr('datai');
 	        env_init(this, '');
 	    });
+	
+	    window.sg_prediction = function(prediction) {
+	        $(prediction).each(function() {
+	            console.log($(this).text());
+	        });
+	    };
 	});
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
@@ -18657,27 +18670,62 @@ var Table =
 	    Table.prototype.show = function (hide) {
 	        if (hide === void 0) { hide = false; }
 	        var raw_components = this.construct_table_components();
-	        for (var i = 0; i < raw_components.length; i++) {
+	        for (var i = 0; i < raw_components[0].length; i++) {
+	            raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
+	        }
+	        for (var i = 1; i < raw_components.length; i++) {
 	            raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
 	        }
 	        $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
-	        var datai = this._id;
-	        // event binding
+	        var _this = this;
+	        // events binding for table header
+	        $('.table-header-col').click(function () {
+	            // console.log($(this).text());
+	            var col_label = $(this).text();
+	            var pos = $(this).position();
+	            var suggestions = [
+	                ("select('" + col_label + "')"),
+	                ("drop('" + col_label + "')"),
+	                ("relabeled('" + col_label + "', new_label)"),
+	                ("where('" + col_label + "', predicate)"),
+	                ("sorted('" + col_label + "')"),
+	                ("group('" + col_label + "')"),
+	                ("groups('" + col_label + "', label2, label3, ...)"),
+	                ("pivot('" + col_label + "', row_label, value_label, collect_function?)"),
+	                ("join('" + col_label + "', other_table, other_label?)")
+	            ];
+	            _this.construct_html_suggestions(suggestions, pos);
+	        });
+	        // events binding for last column
 	        $('.last-col').click(function () {
 	            // console.log($(this).text());
 	            var pos = $(this).position();
-	            var suggestions = "\n                <ul>\n                    <li class=\"suggestion-item\">with_column(label, values)</li>\n                    <li class=\"suggestion-item\">with_columns(label1, values1, label2, values2, ...)</li>\n                </ul>\n            ";
-	            $("#suggestion-" + datai).html(suggestions).css({
-	                left: pos.left + 50,
-	                top: pos.top + 30
-	            }).toggle();
-	            $(".suggestion-item").click(function () {
-	                var editor = ace.edit("editor-" + datai);
-	                editor.setValue(editor.getValue() + '\n' + $(this).text());
-	            });
+	            var suggestions = ['with_column(label, values)', 'with_columns(label1, values1, label2, values2, ...)'];
+	            _this.construct_html_suggestions(suggestions, pos);
 	        });
+	        // events binding for last row
 	        $('.last-row').click(function () {
 	            // console.log($(this).text());
+	            var pos = $(this).position();
+	            var suggestions = ['with_row(row)', 'with_rows(rows)'];
+	            _this.construct_html_suggestions(suggestions, pos);
+	        });
+	    };
+	    Table.prototype.construct_html_suggestions = function (suggestions, pos) {
+	        var datai = this._id;
+	        var template = '<ul>';
+	        suggestions.forEach(function (s) {
+	            template += "<li class=\"suggestion-item\">" + s + "</li>";
+	        });
+	        template += '</ul>';
+	        $("#suggestion-" + datai).html(template).css({
+	            left: pos.left + 50,
+	            top: pos.top + 30
+	        }).toggle();
+	        $(".suggestion-item").click(function () {
+	            var editor = ace.edit("editor-" + datai);
+	            var new_code = ("t" + datai + ".") + $(this).text() + ';';
+	            editor.setValue(editor.getValue() + '\n' + new_code);
 	        });
 	    };
 	    Table.prototype.peek = function () {
@@ -18859,12 +18907,16 @@ var Table =
 	            }
 	        }
 	        else {
-	            for (var i = 0; i < raw_components.length - 1; i++) {
+	            // first row
+	            var row = '<tr>' + this.construct_html_row(raw_components[0], hide_col, kept_cols).join('') + '</tr>';
+	            s += $(row).attr('class', 'table-header').prop('outerHTML');
+	            for (var i = 1; i < raw_components.length - 1; i++) {
 	                s += '<tr>';
 	                s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
 	                s += '</tr>';
 	            }
-	            var row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
+	            // last row
+	            row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
 	            s += $(row).attr('class', 'last-row').prop('outerHTML');
 	        }
 	        s += '</table>';

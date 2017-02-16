@@ -715,36 +715,68 @@ export class Table {
 
     show(hide = false) {
         let raw_components = this.construct_table_components();
-        for (let i = 0; i < raw_components.length; i++) {
+        for (let i = 0; i < raw_components[0].length; i++) {
+            raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
+        }
+        for (let i = 1; i < raw_components.length; i++) {
             raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
         }
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
 
-        let datai = this._id;
-        // event binding
+        let _this = this;
+        // events binding for table header
+        $('.table-header-col').click(function() {
+            // console.log($(this).text());
+            let col_label = $(this).text();
+            let pos = $(this).position();
+            let suggestions = [
+                `select('${col_label}')`,
+                `drop('${col_label}')`,
+                `relabeled('${col_label}', new_label)`,
+                `where('${col_label}', predicate)`,
+                `sorted('${col_label}')`,
+                `group('${col_label}')`,
+                `groups('${col_label}', label2, label3, ...)`,
+                `pivot('${col_label}', row_label, value_label, collect_function?)`,
+                `join('${col_label}', other_table, other_label?)`
+            ];
+            _this.construct_html_suggestions(suggestions, pos);
+        });
+
+        // events binding for last column
         $('.last-col').click(function() {
             // console.log($(this).text());
             let pos = $(this).position();
-            let suggestions = `
-                <ul>
-                    <li class="suggestion-item">with_column(label, values)</li>
-                    <li class="suggestion-item">with_columns(label1, values1, label2, values2, ...)</li>
-                </ul>
-            `;
-
-            $(`#suggestion-${datai}`).html(suggestions).css({
-                left: pos.left + 50,
-                top: pos.top + 30
-            }).toggle();
-
-            $(`.suggestion-item`).click(function() {
-                let editor = ace.edit(`editor-${datai}`);
-                editor.setValue(editor.getValue() + '\n' + $(this).text());
-            });
+            let suggestions = ['with_column(label, values)', 'with_columns(label1, values1, label2, values2, ...)'];
+            _this.construct_html_suggestions(suggestions, pos);
         });
 
+        // events binding for last row
         $('.last-row').click(function() {
             // console.log($(this).text());
+            let pos = $(this).position();
+            let suggestions = ['with_row(row)', 'with_rows(rows)'];
+            _this.construct_html_suggestions(suggestions, pos);
+        });
+    }
+
+    construct_html_suggestions(suggestions, pos) {
+        let datai = this._id;
+        let template = '<ul>';
+        suggestions.forEach(function(s) {
+            template += `<li class="suggestion-item">${s}</li>`;
+        });
+        template += '</ul>';
+
+        $(`#suggestion-${datai}`).html(template).css({
+            left: pos.left + 50,
+            top: pos.top + 30
+        }).toggle();
+
+        $(`.suggestion-item`).click(function() {
+            let editor = ace.edit(`editor-${datai}`);
+            let new_code = `t${datai}.` + $(this).text() + ';';
+            editor.setValue(editor.getValue() + '\n' + new_code);
         });
     }
 
@@ -949,14 +981,18 @@ export class Table {
                 s += '</tr>';
             }
         } else {
-            for (let i = 0; i < raw_components.length - 1; i++) {
+            // first row
+            let row = '<tr>' + this.construct_html_row(raw_components[0], hide_col, kept_cols).join('') + '</tr>';
+            s += $(row).attr('class', 'table-header').prop('outerHTML');
+
+            for (let i = 1; i < raw_components.length - 1; i++) {
                 s += '<tr>';
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
 
-            let row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
-
+            // last row
+            row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
             s += $(row).attr('class', 'last-row').prop('outerHTML');
         }
 

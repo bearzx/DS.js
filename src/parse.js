@@ -1,4 +1,5 @@
 window.$ = window.jQuery = require('jquery');
+// window.$ = window.jQuerySG;
 window.esprima = require('esprima');
 window.numeral = require('numeral');
 require('../libs/jquery.tableparser.js');
@@ -27,6 +28,7 @@ function env_init(_this, code) {
                         <div class="buttons">
                             <button datai="${datai}" class="run">Run</button>
                             <button datai="${datai}">Preview</button>
+                            <button class="toggle-sg">Toggle SG</button>
                         </div>
                     </div>
                 </div>
@@ -246,6 +248,10 @@ function env_init(_this, code) {
         window._datai = datai;
         eval(code);
     });
+
+    $('.toggle-sg').click(function() {
+        SelectorGadget.toggle();
+    });
 }
 
 $(document).ready(function() {
@@ -282,4 +288,10 @@ $(document).ready(function() {
         let datai = $(this).attr('datai');
         env_init(this, '');
     });
+
+    window.sg_prediction = function(prediction) {
+        $(prediction).each(function() {
+            console.log($(this).text());
+        });
+    };
 });

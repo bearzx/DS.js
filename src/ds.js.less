@@ -170,6 +170,10 @@
         background-color: rgba(255, 255, 255, 0.7);
         padding: 15px;
 
+        .suggestion-item {
+            font-family: Consolas;
+        }
+
         .suggestion-item:hover {
             cursor: pointer;
             background-color: #a6bddb;
@@ -192,7 +196,7 @@
         position: relative;
     }
 
-    tr.last-row:hover {
+    tr.last-row:hover, tr.table-header:hover {
         background-color: #ffa;
         transition-duration: 0.5s;
     }

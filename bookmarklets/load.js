@@ -2,17 +2,30 @@ javascript: (
     function () {
         function bundle_load() {
             var css = document.createElement('link');
-            /*css.setAttribute('href', 'http://cs.rochester.edu/~xzhang92/ds.js/out/ds.js.css');*/
-            /* css.setAttribute('href', 'http://localhost/~bearzx/ds.js/out/ds.js.css'); */
-            css.setAttribute('href', 'https://www.bearzx.com/ds.js/out/ds.js.css');
+            /* css.setAttribute('href', 'http://cs.rochester.edu/~xzhang92/ds.js/out/ds.js.css'); */
+            css.setAttribute('href', 'http://localhost/~bearzx/ds.js/out/ds.js.css');
+            /* css.setAttribute('href', 'https://www.bearzx.com/ds.js/out/ds.js.css'); */
             css.setAttribute('rel', 'stylesheet');
             document.head.appendChild(css);
 
             var bundlejs = document.createElement('script');
             /*bundlejs.setAttribute('src', 'http://cs.rochester.edu/~xzhang92/ds.js/out/bundle.js');*/
-            /* bundlejs.setAttribute('src', 'http://localhost/~bearzx/ds.js/out/bundle.js'); */
-            bundlejs.setAttribute('src', 'https://www.bearzx.com/ds.js/out/bundle.js');
+            bundlejs.setAttribute('src', 'http://localhost/~bearzx/ds.js/out/bundle.js');
+            /* bundlejs.setAttribute('src', 'https://www.bearzx.com/ds.js/out/bundle.js'); */
+            bundlejs.onload = sg_load;
             document.body.appendChild(bundlejs);
+        }
+
+        function sg_load() {
+            var sgcss = document.createElement('link');
+            sgcss.setAttribute('href', 'http://localhost/~bearzx/ds.js/libs/selector-gadget/selectorgadget_combined.css');
+            sgcss.setAttribute('rel', 'stylesheet');
+            document.head.appendChild(sgcss);
+
+            var sgjs = document.createElement('script');
+            sgjs.setAttribute('src', 'http://localhost/~bearzx/ds.js/libs/selector-gadget/selectorgadget_combined.js');
+            /* sgjs.onload = bundle_load; */
+            document.body.appendChild(sgjs);
         }
 
         function vega_load() {

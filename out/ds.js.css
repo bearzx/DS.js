@@ -139,6 +139,9 @@
   background-color: rgba(255, 255, 255, 0.7);
   padding: 15px;
 }
+.dsjs-env .suggestion-panel .suggestion-item {
+  font-family: Consolas;
+}
 .dsjs-env .suggestion-panel .suggestion-item:hover {
   cursor: pointer;
   background-color: #a6bddb;
@@ -157,7 +160,8 @@
 .dsjs-env td.last-col {
   position: relative;
 }
-.dsjs-env tr.last-row:hover {
+.dsjs-env tr.last-row:hover,
+.dsjs-env tr.table-header:hover {
   background-color: #ffa;
   transition-duration: 0.5s;
 }
