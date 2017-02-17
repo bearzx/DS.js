@@ -346,11 +346,6 @@ var Table =
 	    });
 	
 	    window.sg_prediction = function(prediction) {
-	        // let selected = [];
-	        // $(prediction).each(function() {
-	        //     selected.push($(this).text());
-	        // });
-	        // console.log(selected);
 	        window.last_prediction = prediction;
 	    };
 	});
@@ -18716,7 +18711,7 @@ var Table =
 	    };
 	    Table.prototype.construct_html_suggestions = function (suggestions, pos) {
 	        var datai = this._id;
-	        var template = '<ul>';
+	        var template = "\n            <h5>Operation Suggestions</h5>\n            <ul>\n        ";
 	        suggestions.forEach(function (s) {
 	            template += "<li class=\"suggestion-item\">" + s + "</li>";
 	        });

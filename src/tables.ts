@@ -16,6 +16,11 @@ export class Table {
     private _column_order: any = {};
     private _id: string;
 
+    // constructor of the class
+    // t? - make this table a copy of t
+    // l? - pre-alllocated labels
+    // url? - a data url to load from
+    // datai? - environment id to refer to certain editor/show-panels
     constructor(t?: Table, l?: any[], url?, datai?) {
         // types of column variables, especially in the cases when we want to do sorting
         if (t != null) {
@@ -41,6 +46,9 @@ export class Table {
         this.auto_convert();
     }
 
+    // convert all the elements with a cast function (e.g. parseInt)
+    // cast - converion function
+    // side-effects: yes
     public convert(cast: Function) {
         let _this = this;
         this._t.forEach(function(row) {
@@ -52,13 +60,16 @@ export class Table {
         return this;
     }
 
+    // pure function version of "convert"
     public converted(cast: Function) {
         let copy = this.copy();
         copy.convert(cast);
         return copy;
     }
 
-    auto_convert() {
+    // try to convert each element of the table to a number by employing
+    // the numeral.js library
+    public auto_convert() {
         let _this = this;
         this._t.forEach(function(row) {
             _this._labels.forEach(function(l) {
@@ -68,9 +79,11 @@ export class Table {
         });
     }
 
+    // unimplemented
     public copy_from(t: Table) {
         return this;
     }
+
 
     private table_init() {
         this._labels = d3.keys(this._t[0]);
@@ -80,6 +93,8 @@ export class Table {
         // console.log(this._column_order);
     }
 
+    // read a csv asynchronous-ly, users need to wrap their code
+    // into a callback function
     public read_table_csv_async(url: string, callback: any) {
         var _this = this;
         d3.csv(url, function (data) {
@@ -89,6 +104,7 @@ export class Table {
         });
     }
 
+    // read a csv synchronous-ly
     public read_table_csv_sync(url: string) {
         var _this = this;
         $.ajax({
@@ -102,6 +118,8 @@ export class Table {
         });
     }
 
+    // change values in a column
+    // using a user-defined mapping function
     public set(column_or_label, f) {
         let l = this._as_label(column_or_label);
         this._t.forEach(function(row) {
@@ -111,23 +129,28 @@ export class Table {
         return this;
     }
 
+    // return an element at [row, col]
     public elem(row, col) {
         return this._t[row][col];
     }
 
+    // return the number of rows
     public num_rows() {
         return this._t.length;
     }
 
+    // return a list of all the labels
     public labels() {
         let labels_copy = $.extend([], this._labels);
         return labels_copy;
     }
 
+    // return the number of columns
     public num_columns() {
         return Object.keys(this._t[0]).length;
     }
 
+    // return a certain column
     public column(index_or_label) {
         var col = [];
         if (typeof index_or_label === 'number') {
@@ -144,7 +167,8 @@ export class Table {
         }
     }
 
-    columns() {
+    // return all the columns in a list
+    public columns() {
         var _this = this;
         var cols = [];
         this._labels.forEach(function (label) {
@@ -153,6 +177,7 @@ export class Table {
         return cols;
     }
 
+    // return a certain row
     row(index: number) {
         return this._t[index];
     }
@@ -162,6 +187,7 @@ export class Table {
         return this._t;
     }
 
+    // add one row to the end of the table
     with_row(row) {
         let copy = this.copy();
         copy._with_row(row);
@@ -169,6 +195,7 @@ export class Table {
         return copy;
     }
 
+    // add one row to the end of the table
     _with_row(row) {
         // [TODO] what if row doesn't have enough elements? e.g. lack of values for some columns
         if (row instanceof Array) {
@@ -184,6 +211,7 @@ export class Table {
         return this;
     }
 
+    // [impure] add multiple rows to the end of the table
     _with_rows(rows) {
         var _this = this;
         rows.forEach(function (row) {
@@ -193,6 +221,7 @@ export class Table {
         return this;
     }
 
+    // [pure] add multiple rows to the end of the table
     with_rows(rows) {
         let copy = this.copy();
         copy._with_rows(rows);
@@ -200,6 +229,7 @@ export class Table {
         return copy;
     }
 
+    // [pure] add a column to the end of the table
     with_column(label, values) {
         // [TODO] what if label is already in _labels?
         let copy = this.copy();
@@ -208,6 +238,7 @@ export class Table {
         return copy;
     }
 
+    // [impure] add a column to the end of the table
     _with_column(label, values) {
         if ((values.length == 1) && (this._t.length != 0)) {
             // insert a new column with all the same values
@@ -233,6 +264,7 @@ export class Table {
         return this;
     }
 
+    // [pure] add multiple columns to the end of the table
     with_columns(...labels_and_values: any[]) {
         let copy = this.copy();
         copy._with_columns(labels_and_values);
@@ -240,6 +272,7 @@ export class Table {
         return copy;
     }
 
+    // [impure] add multiple columns to the end of the table
     _with_columns(...labels_and_values: any[]) {
         if (labels_and_values[0] instanceof Array) {
             labels_and_values = labels_and_values[0];
@@ -270,6 +303,7 @@ export class Table {
         return this;
     }
 
+    // [impure] relabel a column name
     relabel(label, new_label) {
         label = this._as_label(label);
         var index = this._labels.indexOf(label);
@@ -285,16 +319,19 @@ export class Table {
         return this;
     }
 
+    // [pure] relabel a column name
     relabeled(label, new_label) {
         var copy = $.extend(true, {}, this);
         copy.relabel(label, new_label);
         return copy;
     }
 
+    // copy a table
     copy() {
         return $.extend(true, {}, this);
     }
 
+    // [pure] select a column
     select(...column_label_or_labels: any[]) {
         // /console.log(column_label_or_labels);
         var _this = this;
@@ -352,6 +389,7 @@ export class Table {
         }
     }
 
+    // [pure] drop a column/columns
     drop(...column_label_or_labels: any[]) {
         var left_columns = this._labels.filter(function (c) {
             return column_label_or_labels.indexOf(c) == -1;
@@ -360,6 +398,7 @@ export class Table {
         return this.select.apply(this, left_columns);
     }
 
+    // [pure] filter rows based on the judging function
     where(column_or_label, value_or_predicate) {
         return this._where(column_or_label, value_or_predicate, false);
     }
@@ -387,6 +426,7 @@ export class Table {
         return keep_index ? { table: table, index: indices, label: this._as_label_index(column_or_label) } : table;
     }
 
+    // [impure] sort all rows based on a column
     sort(column_or_label, descending = false, distinct = false) {
         var compare = function (a, b) {
             if (a[column_or_label] > b[column_or_label]) {
@@ -411,14 +451,14 @@ export class Table {
         return this;
     }
 
+    // [pure] sort all rows based on a column
     sorted(column_or_label, descending = false, distinct = false) {
         let copy = this.copy();
         copy.sort(column_or_label, descending, distinct);
         return copy;
     }
 
-
-
+    // [pure] grouping rows based on a label
     group(column_or_label: any, collect?) {
         let label = this._as_label(column_or_label);
         let group_t = {};
@@ -455,6 +495,7 @@ export class Table {
         return grouped;
     }
 
+    // [pure] group rows based on labels
     groups(columns_or_labels: any[], collect?) {
         let labels = this._as_labels(columns_or_labels);
         // console.log(labels);
@@ -509,6 +550,7 @@ export class Table {
         return grouped;
     }
 
+    // [pure] generate a pivot table
     pivot(columns, rows, values, collect?, zero?) {
         // [TODO] implement more optional arguments
         let column_labels = new Set();
@@ -575,6 +617,7 @@ export class Table {
         return label;
     }
 
+    // [pure] join this table with another table
     join(column_label, other: Table, other_label?) {
         // console.log('this'); console.log(this);
         // console.log('other'); console.log(other);
@@ -622,6 +665,7 @@ export class Table {
         return joined;
     }
 
+    // [pure] generate a table a few statistics information: min, max, median, sum
     stats() {
         let _this = this;
         let stats_table = new Table(null, ['statistics'].concat(this._labels));
@@ -643,6 +687,7 @@ export class Table {
         return stats_table;
     }
 
+    // [pure] generate the rows (sorted) under a certain percentile
     percentile(p) {
         let pt = new Table(null, this._labels);
         let _this = this;
@@ -657,6 +702,7 @@ export class Table {
         return pt;
     }
 
+    // [pure] sample k rows from this table
     sample(k) {
         let sampled = new Table(null, this._labels);
         let n = this._t.length;
@@ -672,6 +718,7 @@ export class Table {
     }
 
 
+    // split the current table into two: first k rows and the last n - k rows
     split(k) {
         let shuffled_indices = d3.shuffle(d3.range(this._t.length));
         let first = new Table(null, this._labels);
@@ -713,6 +760,7 @@ export class Table {
         $(`#table-area-${this._id}`).html(s);
     }
 
+    // show the table in the show-panel
     show(hide = false) {
         let raw_components = this.construct_table_components();
         for (let i = 0; i < raw_components[0].length; i++) {
@@ -762,7 +810,10 @@ export class Table {
 
     construct_html_suggestions(suggestions, pos) {
         let datai = this._id;
-        let template = '<ul>';
+        let template = `
+            <h5>Operation Suggestions</h5>
+            <ul>
+        `;
         suggestions.forEach(function(s) {
             template += `<li class="suggestion-item">${s}</li>`;
         });
@@ -784,6 +835,7 @@ export class Table {
         this.show(true);
     }
 
+    // plot a ylabel-xlabel figure
     plot(xlabel, ylabel) {
         let id = this._id;
         let values = [];
@@ -794,6 +846,7 @@ export class Table {
         vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
     }
 
+    // create a ylabel-xlabel bar chart
     bar(xlabel, ylabel) {
         let id = this._id;
         let templates = new vgt.VGTemplate();
@@ -804,6 +857,7 @@ export class Table {
         vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
     }
 
+    // create a ylabel-xlabel bar chart
     scatter(xlabel, ylabel) {
         let id = this._id;
         let values = [];
@@ -875,6 +929,7 @@ export class Table {
             .attr("r", 8);
     }
 
+    // create a histogram on a certain column
     hist(column: string) {
         var bins = {};
         this._t.forEach(function (row) {
@@ -910,6 +965,7 @@ export class Table {
         });
     }
 
+    // create box-plots for each column
     boxplot() {
         let id = this._id;
         let templates = new vgt.VGTemplate();
