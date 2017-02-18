@@ -1038,6 +1038,7 @@ export class Table {
             }
         } else {
             // first row
+            console.log(raw_components[0]);
             let row = '<tr>' + this.construct_html_row(raw_components[0], hide_col, kept_cols).join('') + '</tr>';
             s += $(row).attr('class', 'table-header').prop('outerHTML');
 

@@ -180,7 +180,8 @@
         }
     }
 
-    td.last-col:hover::after {
+    // td.last-col:hover::after {
+    th:hover::after {
         content: "";
         position: absolute;
         background-color: #ffa;
@@ -190,6 +191,10 @@
         width: 100%;
         z-index: -1;
         transition-duration: 0.5s;
+    }
+
+    th {
+        position: relative;
     }
 
     td.last-col {

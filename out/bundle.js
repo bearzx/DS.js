@@ -11242,6 +11242,7 @@ var Table = (function () {
         }
         else {
             // first row
+            console.log(raw_components[0]);
             var row = '<tr>' + this.construct_html_row(raw_components[0], hide_col, kept_cols).join('') + '</tr>';
             s += $(row).attr('class', 'table-header').prop('outerHTML');
             for (var i = 1; i < raw_components.length - 1; i++) {
