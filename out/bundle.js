@@ -10963,10 +10963,10 @@ var Table = (function () {
         var first = new Table(null, this._labels);
         var rest = new Table(null, this._labels);
         for (var i = 0; i < k; i++) {
-            first.with_row(this.row(shuffled_indices[i]));
+            first._with_row(this.row(shuffled_indices[i]));
         }
         for (var i = k; i < this._t.length; i++) {
-            rest.with_row(this.row(shuffled_indices[i]));
+            rest._with_row(this.row(shuffled_indices[i]));
         }
         return { 'first': first, 'rest': rest };
     };
@@ -11002,21 +11002,25 @@ var Table = (function () {
         for (var i = 0; i < raw_components[0].length; i++) {
             raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
         }
-        for (var i = 1; i < raw_components.length; i++) {
-            raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
-        }
+        // add last-col class to last columns
+        // for (let i = 1; i < raw_components.length; i++) {
+        //     raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
+        // }
         $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
         var _this = this;
         // events binding for table header
         $('.table-header-col').click(function () {
-            // console.log($(this).text());
             var col_label = $(this).text();
             var pos = $(this).position();
             var suggestions = [
+                "set('" + col_label + "', f)",
+                "column('" + col_label + "')",
                 "select('" + col_label + "')",
                 "drop('" + col_label + "')",
+                "relabel('" + col_label + "', new_label)",
                 "relabeled('" + col_label + "', new_label)",
                 "where('" + col_label + "', predicate)",
+                "sort('" + col_label + "')",
                 "sorted('" + col_label + "')",
                 "group('" + col_label + "')",
                 "groups('" + col_label + "', label2, label3, ...)",
@@ -11026,17 +11030,26 @@ var Table = (function () {
             _this.construct_html_suggestions(suggestions, pos);
         });
         // events binding for last column
-        $('.last-col').click(function () {
-            // console.log($(this).text());
-            var pos = $(this).position();
-            var suggestions = ['with_column(label, values)', 'with_columns(label1, values1, label2, values2, ...)'];
-            _this.construct_html_suggestions(suggestions, pos);
-        });
+        // $('.last-col').click(function() {
+        //     let pos = $(this).position();
+        //     let suggestions = ['with_column(label, values)', 'with_columns(label1, values1, label2, values2, ...)'];
+        //     _this.construct_html_suggestions(suggestions, pos);
+        // });
         // events binding for last row
-        $('.last-row').click(function () {
-            // console.log($(this).text());
+        // $('.last-row').click(function() {
+        //     let pos = $(this).position();
+        //     let suggestions = ['with_row(row)', 'with_rows(rows)'];
+        //     _this.construct_html_suggestions(suggestions, pos);
+        // });
+        $('td').click(function () {
             var pos = $(this).position();
-            var suggestions = ['with_row(row)', 'with_rows(rows)'];
+            var row = $(this).attr('row');
+            var col = $(this).attr('col');
+            var suggestions = [
+                "elem(" + row + ", '" + col + "')",
+                "row(" + row + ")",
+                "split(" + row + ")"
+            ];
             _this.construct_html_suggestions(suggestions, pos);
         });
     };
@@ -11197,13 +11210,13 @@ var Table = (function () {
         var _this = this;
         var ths = [];
         _this._labels.forEach(function (label) {
-            ths.push("<th>" + label + "</th>");
+            ths.push("<th data=\"" + label + "\">" + label + "</th>");
         });
         components.push(ths);
-        _this._t.forEach(function (row) {
+        _this._t.forEach(function (row, i) {
             var tds = [];
             _this._labels.forEach(function (label) {
-                tds.push("<td>" + row[label] + "</td>");
+                tds.push("<td data=\"" + row[label] + "\" row=\"" + i + "\" col=\"" + label + "\">" + row[label] + "</td>");
             });
             components.push(tds);
         });
@@ -11242,17 +11255,13 @@ var Table = (function () {
         }
         else {
             // first row
-            console.log(raw_components[0]);
             var row = '<tr>' + this.construct_html_row(raw_components[0], hide_col, kept_cols).join('') + '</tr>';
             s += $(row).attr('class', 'table-header').prop('outerHTML');
-            for (var i = 1; i < raw_components.length - 1; i++) {
+            for (var i = 1; i < raw_components.length; i++) {
                 s += '<tr>';
                 s += this.construct_html_row(raw_components[i], hide_col, kept_cols).join('');
                 s += '</tr>';
             }
-            // last row
-            row = '<tr>' + this.construct_html_row(raw_components[raw_components.length - 1], hide_col, kept_cols).join('') + '</tr>';
-            s += $(row).attr('class', 'last-row').prop('outerHTML');
         }
         s += '</table>';
         return s;

@@ -23,7 +23,47 @@
         overflow: hidden;
 
         th, td {
+            // border: 1px solid;
+            border: none;
+        }
+
+        tr {
             border: 1px solid;
+        }
+    }
+
+    .ds-table {
+        th:hover::after {
+            content: "";
+            position: absolute;
+            background-color: #ffa;
+            left: 0;
+            top: -5000px;
+            height: 10000px;
+            width: 99%;
+            z-index: -1;
+            transition-duration: 0.5s;
+        }
+
+        td, th {
+            padding: 1px;
+        }
+
+        th {
+            position: relative;
+        }
+
+        td.last-col {
+            position: relative;
+        }
+
+        tr:not(.table-header):hover {
+            background-color: #ffa;
+            transition-duration: 0.5s;
+        }
+
+        td:hover {
+            background-color: #99d8c9;
         }
     }
 
@@ -171,38 +211,12 @@
         padding: 15px;
 
         .suggestion-item {
-            font-family: Consolas;
+            font-family: Consolas, Monaco;
         }
 
         .suggestion-item:hover {
             cursor: pointer;
             background-color: #a6bddb;
         }
-    }
-
-    // td.last-col:hover::after {
-    th:hover::after {
-        content: "";
-        position: absolute;
-        background-color: #ffa;
-        left: 0;
-        top: -5000px;
-        height: 10000px;
-        width: 100%;
-        z-index: -1;
-        transition-duration: 0.5s;
-    }
-
-    th {
-        position: relative;
-    }
-
-    td.last-col {
-        position: relative;
-    }
-
-    tr.last-row:hover, tr.table-header:hover {
-        background-color: #ffa;
-        transition-duration: 0.5s;
     }
 }

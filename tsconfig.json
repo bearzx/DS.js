@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // "target": "es5",
+    // "target": "ES6",
     "module": "commonjs",
     "sourceMap": true
   },
@@ -11,5 +11,9 @@
     // "demo.ts",
     "./src/tables.ts",
     "./src/vgtemplates.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "typings"
   ]
 }
