@@ -11031,11 +11031,15 @@ var Table = (function () {
                 _this.construct_html_suggestions(suggestions, pos);
             }
         });
+        // multi-column selection
+        // set a "global" variable after each selection
+        // and pop out suggestions based on the # of selections
         $('.table-header-col').click(function () {
             if ($(this).hasClass('table-header-selected')) {
                 $(this).removeClass('table-header-selected');
                 var index = window.selected_columns.indexOf($(this).attr('data'));
                 window.selected_columns.splice(index, 1);
+                $("#suggestion-" + _this._id).hide();
             }
             else {
                 $(this).addClass('table-header-selected');
@@ -11078,6 +11082,9 @@ var Table = (function () {
             var pos = $(this).position();
             _this.construct_html_suggestions(suggestions, pos);
         });
+        $('.ds-table').mouseout(function () {
+            // $(`#suggestion-${_this._id}`).hide();
+        });
         // events binding for last column
         // $('.last-col').click(function() {
         //     let pos = $(this).position();
@@ -11101,9 +11108,6 @@ var Table = (function () {
             ];
             _this.construct_html_suggestions(suggestions, pos);
         });
-        // [TODO] multi-column selection
-        // set a "global" variable after each selection
-        // and pop out suggestions based on the # of selections
     };
     Table.prototype.construct_html_suggestions = function (suggestions, pos) {
         var datai = this._id;
@@ -11113,13 +11117,14 @@ var Table = (function () {
         });
         template += '</ul>';
         $("#suggestion-" + datai).html(template).css({
-            left: pos.left + 30,
-            top: pos.top + 10
+            left: pos.left + 25,
+            top: pos.top
         }).show();
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
             var new_code = "t" + datai + "." + $(this).text() + ';';
             editor.setValue(editor.getValue() + '\n' + new_code);
+            $("#suggestion-" + datai).hide();
         });
     };
     Table.prototype.peek = function () {

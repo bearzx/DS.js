@@ -60,6 +60,7 @@
 }
 .dsjs-env .ds-table th {
   position: relative;
+  cursor: pointer;
 }
 .dsjs-env .ds-table td.last-col {
   position: relative;
