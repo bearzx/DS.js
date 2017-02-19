@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Super-simple SelectorGadget test by Philip Guo</title>
+
+  <script type="text/javascript" src="selectorgadget_combined.js"></script>
+  <link rel="stylesheet" type="text/css" href="selectorgadget_combined.css">
+
+<script type="text/javascript">
+// jQuerySG is the alias for jQuery that SelectorGadget uses:
+jQuerySG(document).ready(function() {
+  console.log("Hello world");
+
+  // whenever SelectorGadget makes a prediction, it will call this
+  // function; customize to do whatever you want with it, such as
+  // putting the CSS selector into your code editor
+  window.sg_prediction = function(prediction) {
+    console.log("PREDICTED CSS:", prediction);
+    jQuerySG(prediction).each(function(x) {
+      console.log(jQuerySG(this).text());
+    });
+  }
+
+  jQuerySG("#sg_toggle_btn").click(function() {
+    SelectorGadget.toggle(); // to turn on SelectorGadget, call this method
+                             // call it again to turn off the SelectorGadget
+  });
+});
+</script>
+
+</head>
+<body>
+
+<ul class="foo">
+  <li>one</li>
+  <li>two</li>
+  <li>three</li>
+</ul>
+
+<ul class="bar">
+  <li>four</li>
+  <li>five</li>
+  <li>six</li>
+</ul>
+
+<ul class="baz">
+  <li>seven</li>
+  <li>eight</li>
+  <li>nine</li>
+</ul>
+
+<input type="button" id="sg_toggle_btn" value="Toggle SelectorGadget"></input>
+
+</body>
+</html>
