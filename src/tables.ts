@@ -772,29 +772,77 @@ export class Table {
         //     raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
         // }
 
+        window.selected_columns = [];
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
 
         let _this = this;
         // events binding for table header
+        $('.table-header-col').hover(function() {
+            if (window.selected_columns.length == 0) {
+                let col_label = $(this).text();
+                let pos = $(this).position();
+                let suggestions = [
+                    `set('${col_label}', f)`,
+                    `column('${col_label}')`,
+                    `select('${col_label}')`,
+                    `drop('${col_label}')`,
+                    `relabel('${col_label}', new_label)`,
+                    `relabeled('${col_label}', new_label)`,
+                    `where('${col_label}', predicate)`,
+                    `sort('${col_label}')`,
+                    `sorted('${col_label}')`,
+                    `group('${col_label}')`,
+                    `join('${col_label}', other_table, other_label?)`,
+                    `hist('${col_label}')`
+                ];
+                _this.construct_html_suggestions(suggestions, pos);
+            }
+        });
+
         $('.table-header-col').click(function() {
-            let col_label = $(this).text();
+            if ($(this).hasClass('table-header-selected')) {
+                $(this).removeClass('table-header-selected');
+                let index = window.selected_columns.indexOf($(this).attr('data'));
+                window.selected_columns.splice(index, 1);
+            } else {
+                $(this).addClass('table-header-selected');
+                window.selected_columns.push($(this).attr('data'));
+            }
+
+            let suggestions;
+            if (window.selected_columns.length == 2) {
+                let col1 = window.selected_columns[0];
+                let col2 = window.selected_columns[1];
+                let parameters = `('${col1}', '${col2}')`;
+                suggestions = [
+                    `select` + parameters,
+                    `drop` + parameters,
+                    `groups` + parameters,
+                    `plot` + parameters,
+                    `bar` + parameters,
+                    `scatter` + parameters
+                ];
+            } else if (window.selected_columns.length == 3) {
+                let col1 = window.selected_columns[0];
+                let col2 = window.selected_columns[1];
+                let col3 = window.selected_columns[2];
+                let parameters = `('${col1}', '${col2}', '${col3}')`;
+                suggestions = [
+                    `select` + parameters,
+                    `drop` + parameters,
+                    `groups` + parameters,
+                    `pivot('${col1}', '${col2}', ${col3}, collect_function?)`
+                ];
+            } else {
+                let parameters = '(' + window.selected_columns.map(x => `'${x}'`).join(', ') + ')';
+                suggestions = [
+                    `select` + parameters,
+                    `drop` + parameters,
+                    `groups` + parameters
+                ];
+            }
             let pos = $(this).position();
-            let suggestions = [
-                `set('${col_label}', f)`,
-                `column('${col_label}')`,
-                `select('${col_label}')`,
-                `drop('${col_label}')`,
-                `relabel('${col_label}', new_label)`,
-                `relabeled('${col_label}', new_label)`,
-                `where('${col_label}', predicate)`,
-                `sort('${col_label}')`,
-                `sorted('${col_label}')`,
-                `group('${col_label}')`,
-                `groups('${col_label}', label2, label3, ...)`,
-                `pivot('${col_label}', row_label, value_label, collect_function?)`,
-                `join('${col_label}', other_table, other_label?)`
-            ];
-            _this.construct_html_suggestions(suggestions, pos);
+           _this.construct_html_suggestions(suggestions, pos);
         });
 
         // events binding for last column
@@ -811,7 +859,7 @@ export class Table {
         //     _this.construct_html_suggestions(suggestions, pos);
         // });
 
-        $('td').click(function() {
+        $('td').hover(function() {
             let pos = $(this).position();
             let row = $(this).attr('row');
             let col = $(this).attr('col');
@@ -822,6 +870,10 @@ export class Table {
             ];
             _this.construct_html_suggestions(suggestions, pos);
         });
+
+        // [TODO] multi-column selection
+        // set a "global" variable after each selection
+        // and pop out suggestions based on the # of selections
     }
 
     construct_html_suggestions(suggestions, pos) {
@@ -836,9 +888,9 @@ export class Table {
         template += '</ul>';
 
         $(`#suggestion-${datai}`).html(template).css({
-            left: pos.left + 50,
-            top: pos.top + 30
-        }).toggle();
+            left: pos.left + 25,
+            top: pos.top + 10
+        }).show();
 
         $(`.suggestion-item`).click(function() {
             let editor = ace.edit(`editor-${datai}`);

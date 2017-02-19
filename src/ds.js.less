@@ -45,6 +45,18 @@
             transition-duration: 0.5s;
         }
 
+        th.table-header-selected::after {
+            content: "";
+            position: absolute;
+            background-color: #99d8c9;
+            left: 0;
+            top: -5000px;
+            height: 10000px;
+            width: 99%;
+            z-index: -1;
+            transition-duration: 0.5s;
+        }
+
         td, th {
             padding: 1px;
         }
