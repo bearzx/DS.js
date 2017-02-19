@@ -11067,7 +11067,7 @@ var Table = (function () {
                     "pivot('" + col1 + "', '" + col2 + "', " + col3 + ", collect_function?)"
                 ];
             }
-            else {
+            else if (window.selected_columns.length > 3) {
                 var parameters = '(' + window.selected_columns.map(function (x) { return "'" + x + "'"; }).join(', ') + ')';
                 suggestions = [
                     "select" + parameters,
@@ -11113,7 +11113,7 @@ var Table = (function () {
         });
         template += '</ul>';
         $("#suggestion-" + datai).html(template).css({
-            left: pos.left + 25,
+            left: pos.left + 30,
             top: pos.top + 10
         }).show();
         $(".suggestion-item").click(function () {

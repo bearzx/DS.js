@@ -833,7 +833,7 @@ export class Table {
                     `groups` + parameters,
                     `pivot('${col1}', '${col2}', ${col3}, collect_function?)`
                 ];
-            } else {
+            } else if (window.selected_columns.length > 3) {
                 let parameters = '(' + window.selected_columns.map(x => `'${x}'`).join(', ') + ')';
                 suggestions = [
                     `select` + parameters,
@@ -888,7 +888,7 @@ export class Table {
         template += '</ul>';
 
         $(`#suggestion-${datai}`).html(template).css({
-            left: pos.left + 25,
+            left: pos.left + 30,
             top: pos.top + 10
         }).show();
 
