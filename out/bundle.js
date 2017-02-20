@@ -10311,6 +10311,7 @@ var Table = (function () {
         this._t = [];
         this._labels = [];
         this._column_order = {};
+        this.__showable__ = true;
         // types of column variables, especially in the cases when we want to do sorting
         if (t != null) {
         }
@@ -11810,7 +11811,10 @@ function env_init(_this, code) {
         // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
         // editor.setValue('');
         window._datai = datai;
-        eval(code);
+        let res = eval(code);
+        if (res.__showable__) {
+            res.show();
+        }
     });
 
     $('.toggle-sg').click(function() {

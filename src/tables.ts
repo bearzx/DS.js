@@ -15,6 +15,7 @@ export class Table {
     private _labels: any = [];
     private _column_order: any = {};
     private _id: string;
+    public __showable__ = true;
 
     // constructor of the class
     // t? - make this table a copy of t

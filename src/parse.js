@@ -242,11 +242,15 @@ function env_init(_this, code) {
         $(`#table-area-${datai}`).html('');
         var editor = ace.edit(`editor-${datai}`);
         var code = editor.getValue();
-        // console.log(code);
+        // This is the legacy code for storing history code
+        // not use it for now
         // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
-        // editor.setValue('');
         window._datai = datai;
-        eval(code);
+        // [TODO] use esprima to detect table variable name
+        let res = eval(code);
+        if (res.__showable__) {
+            res.show();
+        }
     });
 
     $('.toggle-sg').click(function() {
