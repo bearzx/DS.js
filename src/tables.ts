@@ -1382,8 +1382,11 @@ export class Table {
             `;
 
             $(`#preview-${this._id}`).html(template);
+        } else if (method_name == 'self') {
+            let raw_components = this.construct_table_components();
+            $(`#preview-${this._id}`).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
         } else {
-            console.warn('Method call not supported: ${method_call}');
+            console.warn(`Method call not supported: ${method_call}`);
         }
     }
 }

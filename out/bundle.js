@@ -11549,8 +11549,12 @@ var Table = (function () {
             var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
             $("#preview-" + this._id).html(template);
         }
+        else if (method_name == 'self') {
+            var raw_components = this.construct_table_components();
+            $("#preview-" + this._id).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
+        }
         else {
-            console.warn('Method call not supported: ${method_call}');
+            console.warn("Method call not supported: " + method_call);
         }
     };
     return Table;
@@ -11643,6 +11647,9 @@ function env_init(_this, code) {
         function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
             let datai = editor.datai;
             let callee;
+            // console.log(expr);
+            // console.log(expr.callee.object.name);
+            // console.log(eval(`${expr.callee.object.name}.__showable__`));
             if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
                 if (expr.type == 'CallExpression') {
                     if (expr.arguments) {
@@ -11657,15 +11664,32 @@ function env_init(_this, code) {
                 let last_callee;
                 let callee_level = 0;
                 while (callee && ('object' in callee)) {
+                    let identifier_name = callee.object.name;
+                    let identifier_start = callee.object.loc.start.column;
+                    let identifier_end = callee.object.loc.end.column;
+                    console.log(`${identifier_name} ${identifier_start} ${identifier_end} ${col}`);
                     let method_name = callee.property.name;
                     let method_start = callee.loc.end.column - callee.property.name.length;
                     let method_end = callee.loc.end.column;
-                    if (is_supported_preview(method_name) && (col >= method_start && col <= method_end)) {
+                    if (between(col, identifier_start, identifier_end) && (eval(`${identifier_name}.__showable__`))) {
+                        // here we preview an identifier
+                        let all_code = editor.getValue().split('\n');
+                        let pre_eval_code = '';
+                        for (let i = 0; i < row; i++) {
+                            pre_eval_code += all_code[i] + '\n';
+                        }
+                        eval(pre_eval_code);
+                        eval(`${identifier_name}.preview('self()')`);
+                        let pos = $(`#env-${datai} .ace_cursor`).position();
+                        $(`#env-${datai} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
+                        break;
+                    } else if (is_supported_preview(method_name) && between(col, method_start, method_end)) {
+                        // here we preview a method call
                         // console.log(`method ${callee.property.name} found`);
                         let method_call;
-
-                        // console.log(callee.object.callee);
-                        // console.log(`callee_level = ${callee_level}`);
                         if (callee_level == 0) {
                             method_call = line.slice(method_start, cur_end);
                         } else {
@@ -11697,6 +11721,10 @@ function env_init(_this, code) {
                     }
                 }
             }
+        }
+
+        function between(i, start, end) {
+            return ((i >= start) && (i <= end))
         }
 
         function is_supported_preview(func_name) {
@@ -11831,6 +11859,7 @@ function env_init(_this, code) {
         // $(`#history-${datai}`).append(`<pre>${code}</pre>`);
         window._datai = datai;
         // [TODO] use esprima to detect table variable name
+        // [TODO] we should also use the current line to decide which table to show
         let res = eval(code);
         if (res && res.__showable__) {
             res.show();
@@ -11838,14 +11867,10 @@ function env_init(_this, code) {
     });
 
     $('.table-area').click(function(e) {
-        // $('.suggestion-panel').hide();
         let pos = $(this).position();
         let table_pos = $(this).children('.ds-table').position();
         let width = $(this).children('.ds-table').width();
         let height = $(this).children('.ds-table').height();
-        console.log('table size'); console.log(width + ' ' + height);
-        console.log('cursor pos'); console.log(e.pageX + ' ' + e.pageY);
-        console.log('table corner'); console.log(`${table_pos.left + width}  ${table_pos.top + height}`);
         if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
             $(this).siblings('.suggestion-panel').hide();
         }
