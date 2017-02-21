@@ -49,6 +49,7 @@ function env_init(_this, code) {
         $(cur).after(ds_env);
         var editor = ace.edit(editor_id);
         editor.datai = datai;
+        editor.cursor_rowno = 0;
         editor.setTheme("ace/theme/chrome");
         // editor.setBehavioursEnabled(false);
         editor.getSession().setMode("ace/mode/javascript");
@@ -221,6 +222,24 @@ function env_init(_this, code) {
             // console.log(`row: ${row} col: ${col}`);
         });
 
+        editor.selection.on('changeCursor', function() {
+            let new_rowno = editor.getCursorPosition().row;
+            if (new_rowno != editor.cursor_rowno) {
+                // cursor changes to a new line, we evaluate the code again
+                // and get the result
+                editor.cursor_rowno = new_rowno;
+                let all_code = editor.getValue().split('\n');
+                let code = '';
+                for (let i = 0; i <= new_rowno; i++) {
+                    code += all_code[i] + '\n';
+                }
+                let res = eval(code);
+                if (res && res.__showable__) {
+                    res.show();
+                }
+            }
+        });
+
         editor.session.on('change', function(e) {
             $('.preview-panel').each(function() {
                 if ($(this).css('display') != 'none') {
@@ -248,7 +267,7 @@ function env_init(_this, code) {
         window._datai = datai;
         // [TODO] use esprima to detect table variable name
         let res = eval(code);
-        if (res.__showable__) {
+        if (res && res.__showable__) {
             res.show();
         }
     });
