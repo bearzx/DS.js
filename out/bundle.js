@@ -11837,6 +11837,20 @@ function env_init(_this, code) {
         }
     });
 
+    $('.table-area').click(function(e) {
+        // $('.suggestion-panel').hide();
+        let pos = $(this).position();
+        let table_pos = $(this).children('.ds-table').position();
+        let width = $(this).children('.ds-table').width();
+        let height = $(this).children('.ds-table').height();
+        console.log('table size'); console.log(width + ' ' + height);
+        console.log('cursor pos'); console.log(e.pageX + ' ' + e.pageY);
+        console.log('table corner'); console.log(`${table_pos.left + width}  ${table_pos.top + height}`);
+        if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
+            $(this).siblings('.suggestion-panel').hide();
+        }
+    });
+
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
         SelectorGadget.toggle(datai);

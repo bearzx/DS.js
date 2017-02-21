@@ -272,6 +272,16 @@ function env_init(_this, code) {
         }
     });
 
+    $('.table-area').click(function(e) {
+        let pos = $(this).position();
+        let table_pos = $(this).children('.ds-table').position();
+        let width = $(this).children('.ds-table').width();
+        let height = $(this).children('.ds-table').height();
+        if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
+            $(this).siblings('.suggestion-panel').hide();
+        }
+    });
+
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
         SelectorGadget.toggle(datai);
