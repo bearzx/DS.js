@@ -11012,21 +11012,24 @@ var Table = (function () {
             table_expr = "t" + this._id;
         }
         $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
-        $('.suggestion-item').hide();
+        $('.suggestion-panel').hide();
         var _this = this;
         // events binding for table header
+        // [TODO] here for undecided parameters, instead of random names we should
+        // put some real working (and) safe parameters, this is really to make the
+        // live rendering working (they need real parameters)
         $('.table-header-col').hover(function () {
             if (window.selected_columns.length == 0) {
                 var col_label = $(this).text();
                 var pos = $(this).position();
                 var suggestions = [
-                    "set('" + col_label + "', f)",
+                    "set('" + col_label + "', x => x)",
                     "column('" + col_label + "')",
                     "select('" + col_label + "')",
                     "drop('" + col_label + "')",
-                    "relabel('" + col_label + "', new_label)",
-                    "relabeled('" + col_label + "', new_label)",
-                    "where('" + col_label + "', predicate)",
+                    "relabel('" + col_label + "', 'new_label')",
+                    "relabeled('" + col_label + "', 'new_label')",
+                    "where('" + col_label + "', x => true)",
                     "sort('" + col_label + "')",
                     "sorted('" + col_label + "')",
                     "group('" + col_label + "')",
@@ -11075,7 +11078,7 @@ var Table = (function () {
                     "select" + parameters,
                     "drop" + parameters,
                     "groups" + parameters,
-                    "pivot('" + col1 + "', '" + col2 + "', " + col3 + ", collect_function?)"
+                    "pivot('" + col1 + "', '" + col2 + "', " + col3 + ", d3.sum)"
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
@@ -11126,10 +11129,12 @@ var Table = (function () {
         }).show();
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
-            console.log(table_expr);
-            console.log($(this).text());
             var new_code = table_expr + '.' + $(this).text() + ';';
-            editor.setValue(editor.getValue() + '\n' + new_code);
+            var rown = editor.getCursorPosition().row;
+            editor.getSession().getDocument().insertLines(rown + 1, [new_code]);
+            editor.selection.moveCursorToPosition({ row: rown + 1, column: 0 });
+            editor.selection.selectLineEnd();
+            editor.focus();
             $("#suggestion-" + datai).hide();
         });
     };

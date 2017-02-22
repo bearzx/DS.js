@@ -779,7 +779,7 @@ export class Table {
         }
 
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
-        $('.suggestion-item').hide();
+        $('.suggestion-panel').hide();
 
         let _this = this;
         // events binding for table header
@@ -791,17 +791,17 @@ export class Table {
                 let col_label = $(this).text();
                 let pos = $(this).position();
                 let suggestions = [
-                    `set('${col_label}', f)`,
+                    `set('${col_label}', x => x)`,
                     `column('${col_label}')`,
                     `select('${col_label}')`,
                     `drop('${col_label}')`,
-                    `relabel('${col_label}', new_label)`,
-                    `relabeled('${col_label}', new_label)`,
-                    `where('${col_label}', predicate)`,
+                    `relabel('${col_label}', 'new_label')`,
+                    `relabeled('${col_label}', 'new_label')`,
+                    `where('${col_label}', x => true)`,
                     `sort('${col_label}')`,
                     `sorted('${col_label}')`,
                     `group('${col_label}')`,
-                    `join('${col_label}', other_table, other_label?)`,
+                    `join('${col_label}', other_table, other_label?)`, // [TODO] how to do this?
                     `hist('${col_label}')`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
@@ -846,7 +846,7 @@ export class Table {
                     `select` + parameters,
                     `drop` + parameters,
                     `groups` + parameters,
-                    `pivot('${col1}', '${col2}', ${col3}, collect_function?)`
+                    `pivot('${col1}', '${col2}', ${col3}, d3.sum)`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length > 3) {
@@ -906,7 +906,11 @@ export class Table {
         $(`.suggestion-item`).click(function() {
             let editor = ace.edit(`editor-${datai}`);
             let new_code = table_expr + '.' + $(this).text() + ';';
-            editor.setValue(editor.getValue() + '\n' + new_code);
+            let rown = editor.getCursorPosition().row;
+            editor.getSession().getDocument().insertLines(rown + 1, [new_code]);
+            editor.selection.moveCursorToPosition({ row: rown + 1, column: 0 });
+            editor.selection.selectLineEnd();
+            editor.focus();
             $(`#suggestion-${datai}`).hide();
         });
     }
