@@ -269,7 +269,7 @@ export class Table {
     with_columns(...labels_and_values: any[]) {
         let copy = this.copy();
         copy._with_columns(labels_and_values);
-        console.log(copy);
+        // console.log(copy);
         return copy;
     }
 
@@ -762,7 +762,7 @@ export class Table {
     }
 
     // show the table in the show-panel
-    show(hide = false) {
+    show(hide = false, table_expr?) {
         let raw_components = this.construct_table_components();
         for (let i = 0; i < raw_components[0].length; i++) {
             raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
@@ -774,10 +774,18 @@ export class Table {
         // }
 
         window.selected_columns = [];
+        if (!table_expr) {
+            table_expr = `t${this._id}`;
+        }
+
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
+        $('.suggestion-item').hide();
 
         let _this = this;
         // events binding for table header
+        // [TODO] here for undecided parameters, instead of random names we should
+        // put some real working (and) safe parameters, this is really to make the
+        // live rendering working (they need real parameters)
         $('.table-header-col').hover(function() {
             if (window.selected_columns.length == 0) {
                 let col_label = $(this).text();
@@ -796,7 +804,7 @@ export class Table {
                     `join('${col_label}', other_table, other_label?)`,
                     `hist('${col_label}')`
                 ];
-                _this.construct_html_suggestions(suggestions, pos);
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
         });
 
@@ -815,6 +823,7 @@ export class Table {
             }
 
             let suggestions;
+            let pos = $(this).position();
             if (window.selected_columns.length == 2) {
                 let col1 = window.selected_columns[0];
                 let col2 = window.selected_columns[1];
@@ -827,6 +836,7 @@ export class Table {
                     `bar` + parameters,
                     `scatter` + parameters
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length == 3) {
                 let col1 = window.selected_columns[0];
                 let col2 = window.selected_columns[1];
@@ -838,6 +848,7 @@ export class Table {
                     `groups` + parameters,
                     `pivot('${col1}', '${col2}', ${col3}, collect_function?)`
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length > 3) {
                 let parameters = '(' + window.selected_columns.map(x => `'${x}'`).join(', ') + ')';
                 suggestions = [
@@ -845,13 +856,8 @@ export class Table {
                     `drop` + parameters,
                     `groups` + parameters
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
-            let pos = $(this).position();
-           _this.construct_html_suggestions(suggestions, pos);
-        });
-
-        $('.ds-table').mouseout(function() {
-            // $(`#suggestion-${_this._id}`).hide();
         });
 
         // events binding for last column
@@ -877,11 +883,11 @@ export class Table {
                 `row(${row})`,
                 `split(${row})`
             ];
-            _this.construct_html_suggestions(suggestions, pos);
+            _this.construct_html_suggestions(suggestions, pos, table_expr);
         });
     }
 
-    construct_html_suggestions(suggestions, pos) {
+    construct_html_suggestions(suggestions, pos, table_expr) {
         let datai = this._id;
         let template = `
             <h5>Operation Suggestions</h5>
@@ -894,12 +900,12 @@ export class Table {
 
         $(`#suggestion-${datai}`).html(template).css({
             left: pos.left + 25,
-            top: pos.top
+            top: pos.top + 10
         }).show();
 
         $(`.suggestion-item`).click(function() {
             let editor = ace.edit(`editor-${datai}`);
-            let new_code = `t${datai}.` + $(this).text() + ';';
+            let new_code = table_expr + '.' + $(this).text() + ';';
             editor.setValue(editor.getValue() + '\n' + new_code);
             $(`#suggestion-${datai}`).hide();
         });

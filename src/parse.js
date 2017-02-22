@@ -258,8 +258,17 @@ function env_init(_this, code) {
                     code += all_code[i] + '\n';
                 }
                 let res = eval(code);
-                if (res && res.__showable__) {
-                    res.show();
+                cur_line = editor.getSession().getLine(new_rowno);
+                if (cur_line.length && res && res.__showable__) {
+                    // [TODO] here we should embed the name of the shown table
+                    // (it can be an anonymous table returned by functions)
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
+                    // console.log(expr);
+                    if (expr.type == 'AssignmentExpression') {
+                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                    } else if (expr.type == 'CallExpression') {
+                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                    }
                 }
             }
         });

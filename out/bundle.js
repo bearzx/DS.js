@@ -10531,7 +10531,7 @@ var Table = (function () {
         }
         var copy = this.copy();
         copy._with_columns(labels_and_values);
-        console.log(copy);
+        // console.log(copy);
         return copy;
     };
     // [impure] add multiple columns to the end of the table
@@ -10997,7 +10997,7 @@ var Table = (function () {
         $("#table-area-" + this._id).html(s);
     };
     // show the table in the show-panel
-    Table.prototype.show = function (hide) {
+    Table.prototype.show = function (hide, table_expr) {
         if (hide === void 0) { hide = false; }
         var raw_components = this.construct_table_components();
         for (var i = 0; i < raw_components[0].length; i++) {
@@ -11008,7 +11008,11 @@ var Table = (function () {
         //     raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
         // }
         window.selected_columns = [];
+        if (!table_expr) {
+            table_expr = "t" + this._id;
+        }
         $("#table-area-" + this._id).html(this.construct_html_table(raw_components, hide, hide));
+        $('.suggestion-item').hide();
         var _this = this;
         // events binding for table header
         $('.table-header-col').hover(function () {
@@ -11029,7 +11033,7 @@ var Table = (function () {
                     "join('" + col_label + "', other_table, other_label?)",
                     "hist('" + col_label + "')"
                 ];
-                _this.construct_html_suggestions(suggestions, pos);
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
         });
         // multi-column selection
@@ -11047,6 +11051,7 @@ var Table = (function () {
                 window.selected_columns.push($(this).attr('data'));
             }
             var suggestions;
+            var pos = $(this).position();
             if (window.selected_columns.length == 2) {
                 var col1 = window.selected_columns[0];
                 var col2 = window.selected_columns[1];
@@ -11059,6 +11064,7 @@ var Table = (function () {
                     "bar" + parameters,
                     "scatter" + parameters
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
             else if (window.selected_columns.length == 3) {
                 var col1 = window.selected_columns[0];
@@ -11071,6 +11077,7 @@ var Table = (function () {
                     "groups" + parameters,
                     "pivot('" + col1 + "', '" + col2 + "', " + col3 + ", collect_function?)"
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
             else if (window.selected_columns.length > 3) {
                 var parameters = '(' + window.selected_columns.map(function (x) { return "'" + x + "'"; }).join(', ') + ')';
@@ -11079,12 +11086,8 @@ var Table = (function () {
                     "drop" + parameters,
                     "groups" + parameters
                 ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
-            var pos = $(this).position();
-            _this.construct_html_suggestions(suggestions, pos);
-        });
-        $('.ds-table').mouseout(function () {
-            // $(`#suggestion-${_this._id}`).hide();
         });
         // events binding for last column
         // $('.last-col').click(function() {
@@ -11107,10 +11110,10 @@ var Table = (function () {
                 "row(" + row + ")",
                 "split(" + row + ")"
             ];
-            _this.construct_html_suggestions(suggestions, pos);
+            _this.construct_html_suggestions(suggestions, pos, table_expr);
         });
     };
-    Table.prototype.construct_html_suggestions = function (suggestions, pos) {
+    Table.prototype.construct_html_suggestions = function (suggestions, pos, table_expr) {
         var datai = this._id;
         var template = "\n            <h5>Operation Suggestions</h5>\n            <ul>\n        ";
         suggestions.forEach(function (s) {
@@ -11119,11 +11122,13 @@ var Table = (function () {
         template += '</ul>';
         $("#suggestion-" + datai).html(template).css({
             left: pos.left + 25,
-            top: pos.top
+            top: pos.top + 10
         }).show();
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
-            var new_code = "t" + datai + "." + $(this).text() + ';';
+            console.log(table_expr);
+            console.log($(this).text());
+            var new_code = table_expr + '.' + $(this).text() + ';';
             editor.setValue(editor.getValue() + '\n' + new_code);
             $("#suggestion-" + datai).hide();
         });
@@ -11827,8 +11832,17 @@ function env_init(_this, code) {
                     code += all_code[i] + '\n';
                 }
                 let res = eval(code);
-                if (res && res.__showable__) {
-                    res.show();
+                cur_line = editor.getSession().getLine(new_rowno);
+                if (cur_line.length && res && res.__showable__) {
+                    // [TODO] here we should embed the name of the shown table
+                    // (it can be an anonymous table returned by functions)
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
+                    // console.log(expr);
+                    if (expr.type == 'AssignmentExpression') {
+                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                    } else if (expr.type == 'CallExpression') {
+                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                    }
                 }
             }
         });
