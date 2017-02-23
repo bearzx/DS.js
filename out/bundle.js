@@ -11585,7 +11585,6 @@ __webpack_require__(3);
 __webpack_require__(7);
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
-window.datai = '';
 
 function env_init(_this, code) {
     var datai = $(_this).attr('datai');
@@ -11659,7 +11658,6 @@ function env_init(_this, code) {
             let callee;
             // console.log(expr);
             // console.log(expr.callee.object.name);
-            // console.log(eval(`${expr.callee.object.name}.__showable__`));
             if (expr.type == 'CallExpression' || expr.type == 'AssignmentExpression') {
                 if (expr.type == 'CallExpression') {
                     if (expr.arguments) {
@@ -11677,7 +11675,7 @@ function env_init(_this, code) {
                     let identifier_name = callee.object.name;
                     let identifier_start = callee.object.loc.start.column;
                     let identifier_end = callee.object.loc.end.column;
-                    console.log(`${identifier_name} ${identifier_start} ${identifier_end} ${col}`);
+                    // console.log(`${identifier_name} ${identifier_start} ${identifier_end} ${col}`);
                     let method_name = callee.property.name;
                     let method_start = callee.loc.end.column - callee.property.name.length;
                     let method_end = callee.loc.end.column;
@@ -11688,6 +11686,7 @@ function env_init(_this, code) {
                         for (let i = 0; i < row; i++) {
                             pre_eval_code += all_code[i] + '\n';
                         }
+                        refresh_table(datai);
                         eval(pre_eval_code);
                         eval(`${identifier_name}.preview('self()')`);
                         let pos = $(`#env-${datai} .ace_cursor`).position();
@@ -11716,6 +11715,7 @@ function env_init(_this, code) {
                         let cur_line_partial = line.slice(cur_start, method_start - 1);
                         // console.log(`cur_line_partial: ${cur_line_partial}`);
                         pre_eval_code += cur_line_partial;
+                        refresh_table(datai);
                         let partial_result = eval(pre_eval_code);
                         eval(`partial_result.preview(\`${method_call}\`)`);
                         let pos = $(`#env-${datai} .ace_cursor`).position();
@@ -11825,6 +11825,12 @@ function env_init(_this, code) {
             // console.log(`row: ${row} col: ${col}`);
         });
 
+        function refresh_table(_datai) {
+            let tname = `t${_datai}`;
+            console.log(tname);
+            eval(`${tname} = window.table_store['${tname}'].copy()`); // make a new copy of the pre-loaded table
+        }
+
         editor.selection.on('changeCursor', function() {
             let new_rowno = editor.getCursorPosition().row;
             if (new_rowno != editor.cursor_rowno) {
@@ -11836,6 +11842,7 @@ function env_init(_this, code) {
                 for (let i = 0; i <= new_rowno; i++) {
                     code += all_code[i] + '\n';
                 }
+                refresh_table(editor.datai);
                 let res = eval(code);
                 cur_line = editor.getSession().getLine(new_rowno);
                 if (cur_line.length && res && res.__showable__) {
@@ -11902,6 +11909,9 @@ function env_init(_this, code) {
 }
 
 $(document).ready(function() {
+    window.table_store = {};
+    // [TODO] consider change it to another name to avoid conflicts
+    // with window.datai
     let datai = 0;
     // csv detection
     $('a').each(function(i) {
@@ -11909,7 +11919,8 @@ $(document).ready(function() {
         if (data_link && data_link.endsWith('.csv')) {
             $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Toggle ds.js</button>`);
             eval(`
-                t${datai} = new Table.Table(null, null, '${data_link}', ${datai})
+                t${datai} = new Table.Table(null, null, '${data_link}', ${datai});
+                window.table_store['t${datai}'] = t${datai}.copy();
             `);
             datai += 1;
         }
@@ -11922,6 +11933,7 @@ $(document).ready(function() {
         eval(`
             t${datai} = new Table.Table(null, null, null, ${datai});
             t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+            window.table_store['t${datai}'] = t${datai}.copy();
         `);
         datai += 1;
     });
