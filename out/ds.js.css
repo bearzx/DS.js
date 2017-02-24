@@ -21,10 +21,6 @@
 .dsjs-env .code {
   font-family: Monaco;
 }
-.dsjs-env .ds-table,
-.dsjs-env .preview-table {
-  overflow: hidden;
-}
 .dsjs-env .ds-table th,
 .dsjs-env .preview-table th,
 .dsjs-env .ds-table td,
@@ -106,6 +102,7 @@
   padding-top: 5px;
   padding-left: 5px;
   margin-top: 5px;
+  overflow: auto;
 }
 .dsjs-env .submitted {
   min-height: 580px;

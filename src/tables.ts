@@ -1093,9 +1093,7 @@ export class Table {
     }
 
     construct_html_table(raw_components, hide_row = false, hide_col = false, kept_cols?: any[], title?) {
-        let s = `
-            <table class="ds-table">
-        `;
+        let s = `<table class="ds-table">`;
 
         if (title) {
             s = `<h5>Preview for <span class="code">${title}</span></h5>` + s;

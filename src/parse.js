@@ -24,7 +24,7 @@ function env_init(_this) {
                     </div>
                     <div class="buttons">
                         <button datai="${datai}" envi="${envi}" class="run">Run</button>
-                        <button datai="${datai}" envi="${envi}" class="toggle-sg">Toggle SG</button>
+                        <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
                     </div>
                 </div>
             </div>
@@ -339,7 +339,6 @@ function env_init(_this) {
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
         let envi = $(this).attr('envi');
-        console.log(envi);
         SelectorGadget.toggle(datai, envi);
     });
 }

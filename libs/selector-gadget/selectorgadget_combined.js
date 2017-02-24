@@ -1159,7 +1159,8 @@ function diff_match_patch(){this.Diff_Timeout=1.0;this.Diff_EditCost=4;this.Diff
       // console.log(selected);
       selected = '[' + selected.map(x => `'${x}'`).join(', ') + ']';
       let editor = ace.edit(`editor-${this.datai}-${this.envi}`);
-      editor.setValue(editor.getValue() + '\n' + selected);
+      let pos = editor.getCursorPosition();
+      editor.getSession().getDocument().insert(pos, selected);
       // added by Xiong
 
         this.sg_div.remove();
