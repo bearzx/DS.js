@@ -14,7 +14,7 @@ export class Table {
     private _t: any = [];
     private _labels: any = [];
     private _column_order: any = {};
-    private _id: string;
+    public _id: string;
     public __showable__ = true;
 
     // constructor of the class
@@ -775,7 +775,8 @@ export class Table {
 
         window.selected_columns = [];
         if (!table_expr) {
-            table_expr = `t${this._id}`;
+            let items = this._id.split('-');
+            table_expr = `t${items[0]}_${items[1]}`;
         }
 
         $(`#table-area-${this._id}`).html(this.construct_html_table(raw_components, hide, hide));
@@ -846,7 +847,7 @@ export class Table {
                     `select` + parameters,
                     `drop` + parameters,
                     `groups` + parameters,
-                    `pivot('${col1}', '${col2}', ${col3}, d3.sum)`
+                    `pivot('${col1}', '${col2}', '${col3}', d3.sum)`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length > 3) {
