@@ -8,7 +8,7 @@
         padding: 9.5px;
         margin: 0 0 10px;
         font-size: 13px;
-        font-family: Consolas;
+        font-family: Monaco;
         line-height: 1.42857143;
         color: #333;
         word-break: break-all;
@@ -17,6 +17,10 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         overflow: auto;
+    }
+
+    .code {
+        font-family: Monaco;
     }
 
     .ds-table, .preview-table {
@@ -78,10 +82,6 @@
         td:hover {
             background-color: #99d8c9;
         }
-    }
-
-    .open-dsjs {
-        margin-left: 2px;
     }
 
     .repl {
@@ -210,6 +210,7 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         background-color: rgba(255, 255, 255, 0.7);
         padding: 15px;
+        text-align: left;
     }
 
     .suggestion-panel {
@@ -232,4 +233,8 @@
             background-color: #a6bddb;
         }
     }
+}
+
+.open-dsjs, .open-dsjs-htable {
+    margin: 2px;
 }

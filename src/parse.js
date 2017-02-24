@@ -15,6 +15,7 @@ function env_init(_this) {
     let editor_id = `editor-${datai}-${envi}`;
     // create new environment
     let ds_env = `
+        <h4>ds.js env ${datai}-${envi}</h4>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="repl">
                 <div class="inputs">
@@ -361,12 +362,11 @@ $(document).ready(function() {
 
     // html table detection
     $('table').each(function(i) {
-        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Append ds.js</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
         eval(`
-            t${datai} = new Table.Table(null, null, null, ${datai});
-            t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
-            window.table_store['t${datai}'] = t${datai};
+            window.table_store['t${datai}'] = new Table.Table(null, null, null, ${datai});
+            window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
         `);
         datai += 1;
     });

@@ -11291,10 +11291,13 @@ var Table = (function () {
         });
         return components;
     };
-    Table.prototype.construct_html_table = function (raw_components, hide_row, hide_col, kept_cols) {
+    Table.prototype.construct_html_table = function (raw_components, hide_row, hide_col, kept_cols, title) {
         if (hide_row === void 0) { hide_row = false; }
         if (hide_col === void 0) { hide_col = false; }
-        var s = '<table class="ds-table">';
+        var s = "\n            <table class=\"ds-table\">\n        ";
+        if (title) {
+            s = "<h5>Preview for <span class=\"code\">" + title + "</span></h5>" + s;
+        }
         var dot_counts;
         if (raw_components.length > 10 && hide_row) {
             for (var i = 0; i < 5; i++) {
@@ -11426,7 +11429,7 @@ var Table = (function () {
                     raw_components[raw_components.length - row][i] = $(raw_components[raw_components.length - row][i]).attr('class', 'preview').prop('outerHTML');
                 }
             }
-            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true));
+            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
         else if (method_name == 'with_column' || method_name == 'with_columns') {
             var new_table = eval("this." + method_name + "(" + args + ")");
@@ -11437,7 +11440,7 @@ var Table = (function () {
                     raw_components[i][raw_components[i].length - col] = $(raw_components[i][raw_components[i].length - col]).attr('class', 'preview').prop('outerHTML');
                 }
             }
-            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true));
+            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
         else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
@@ -11451,7 +11454,7 @@ var Table = (function () {
             for (var i = 0; i < raw_components_1.length; i++) {
                 _loop_1(i);
             }
-            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components_1, true, true, label_locs));
+            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components_1, true, true, label_locs, method_call));
         }
         else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
@@ -11459,7 +11462,7 @@ var Table = (function () {
             var raw_components = this.construct_table_components();
             var label_loc = this._as_label_index(args[0]);
             raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-del\">" + args[0] + "</span> <span class=\"preview-select\">" + args[1] + "</span>").attr('class', 'preview').prop('outerHTML');
-            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components, true, true, [label_loc]));
+            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
         }
         else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
@@ -11483,7 +11486,7 @@ var Table = (function () {
             for (var i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
-            $("#preview-" + this._datai_envi).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
+            $("#preview-" + this._datai_envi).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
         }
         else if (method_name == 'group' || method_name == 'groups') {
             var grouped_table = eval("this." + method_name + "(" + args + ")");
@@ -11499,7 +11502,7 @@ var Table = (function () {
             for (var i = 0; i < left_raw_components_1.length; i++) {
                 _loop_2(i);
             }
-            var left_table = this.construct_html_table(left_raw_components_1, true, true, left_group_indices);
+            var left_table = this.construct_html_table(left_raw_components_1, true, true, left_group_indices, method_call);
             var right_group_indices = grouped_table._as_label_indices(group_labels);
             var right_raw_components_1 = grouped_table.construct_table_components();
             var _loop_3 = function (i) {
@@ -11523,7 +11526,7 @@ var Table = (function () {
                 left_raw_components[i][left_pivot_indices[0]] = $(left_raw_components[i][left_pivot_indices[0]]).attr('class', 'preview').prop('outerHTML');
             }
             left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
-            var left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
+            var left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices, method_call);
             var right_raw_components = pivoted_table.construct_table_components();
             right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
             for (var i = 1; i < right_raw_components[0].length; i++) {
@@ -11542,14 +11545,14 @@ var Table = (function () {
             for (var i = 1; i < left_raw_components.length; i++) {
                 left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
+            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index], method_call);
             var middle_raw_components = args[1].construct_table_components();
             var middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
             middle_raw_components[0][middle_join_index] = $(middle_raw_components[0][middle_join_index]).attr('class', 'preview-select').prop('outerHTML');
             for (var i = 1; i < middle_raw_components.length; i++) {
                 middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
+            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index], method_call);
             var right_raw_components = joined_table.construct_table_components();
             var right_join_index = joined_table._as_label_index(args[0]);
             right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(args[0] + " - " + (args.length == 3 ? args[2] : args[0])).attr('class', 'preview-select').prop('outerHTML');
@@ -11595,6 +11598,7 @@ function env_init(_this) {
     let editor_id = `editor-${datai}-${envi}`;
     // create new environment
     let ds_env = `
+        <h4>ds.js env ${datai}-${envi}</h4>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="repl">
                 <div class="inputs">
@@ -11941,12 +11945,11 @@ $(document).ready(function() {
 
     // html table detection
     $('table').each(function(i) {
-        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Toggle ds.js</button>`);
+        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Append ds.js</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
         eval(`
-            t${datai} = new Table.Table(null, null, null, ${datai});
-            t${datai}.from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
-            window.table_store['t${datai}'] = t${datai};
+            window.table_store['t${datai}'] = new Table.Table(null, null, null, ${datai});
+            window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
         `);
         datai += 1;
     });

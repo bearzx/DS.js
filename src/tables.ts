@@ -1092,8 +1092,15 @@ export class Table {
         return components;
     }
 
-    construct_html_table(raw_components, hide_row = false, hide_col = false, kept_cols?: any[]) {
-        let s = '<table class="ds-table">';
+    construct_html_table(raw_components, hide_row = false, hide_col = false, kept_cols?: any[], title?) {
+        let s = `
+            <table class="ds-table">
+        `;
+
+        if (title) {
+            s = `<h5>Preview for <span class="code">${title}</span></h5>` + s;
+        }
+
         let dot_counts;
         if (raw_components.length > 10 && hide_row) {
             for (let i = 0; i < 5; i++) {
@@ -1242,7 +1249,7 @@ export class Table {
                 }
             }
 
-            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true));
+            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         } else if (method_name == 'with_column' || method_name == 'with_columns') {
             let new_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1253,7 +1260,7 @@ export class Table {
                 }
             }
 
-            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true));
+            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         } else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
@@ -1264,7 +1271,7 @@ export class Table {
                 });
             }
 
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, label_locs));
+            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, label_locs, method_call));
         } else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
             args = eval(`this._as_args(${args})`);
@@ -1272,7 +1279,7 @@ export class Table {
             let label_loc = this._as_label_index(args[0]);
             raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');
 
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, [label_loc]));
+            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
         } else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
             let res = eval(`this.iwhere(${args})`);
@@ -1295,7 +1302,7 @@ export class Table {
             for (let i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
-            $(`#preview-${this._datai_envi}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc]));
+            $(`#preview-${this._datai_envi}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
         } else if (method_name == 'group' || method_name == 'groups') {
             let grouped_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1307,7 +1314,7 @@ export class Table {
                     left_raw_components[i][lgi] = $(left_raw_components[i][lgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
                 });
             }
-            let left_table = this.construct_html_table(left_raw_components, true, true, left_group_indices);
+            let left_table = this.construct_html_table(left_raw_components, true, true, left_group_indices, method_call);
 
             let right_group_indices = grouped_table._as_label_indices(group_labels);
             let right_raw_components = grouped_table.construct_table_components();
@@ -1337,7 +1344,7 @@ export class Table {
                 left_raw_components[i][left_pivot_indices[0]] = $(left_raw_components[i][left_pivot_indices[0]]).attr('class', 'preview').prop('outerHTML');
             }
             left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
-            let left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
+            let left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices, method_call);
 
             let right_raw_components = pivoted_table.construct_table_components();
             right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
@@ -1364,7 +1371,7 @@ export class Table {
             for (let i = 1; i < left_raw_components.length; i++) {
                 left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
+            let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index], method_call);
 
             let middle_raw_components = args[1].construct_table_components();
             let middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
@@ -1372,7 +1379,7 @@ export class Table {
             for (let i = 1; i < middle_raw_components.length; i++) {
                 middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
+            let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index], method_call);
 
             let right_raw_components = joined_table.construct_table_components();
             let right_join_index = joined_table._as_label_index(args[0]);
