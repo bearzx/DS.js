@@ -994,7 +994,12 @@ function diff_match_patch(){this.Diff_Timeout=1.0;this.Diff_EditCost=4;this.Diff
       }
 
       if (prediction && prediction.length > 0) {
-        return this.path_output_field.value = prediction;
+        let selected_contents = [];
+        jQuerySG(prediction).each(function() {
+          selected_contents.push(jQuerySG(this).text());
+        });
+        // return this.path_output_field.value = prediction;
+        return this.path_output_field.value = selected_contents.join(', '); // added by Xiong
       } else {
         return this.path_output_field.value = 'No valid path found.';
       }
@@ -1116,44 +1121,49 @@ function diff_match_patch(){this.Diff_Timeout=1.0;this.Diff_EditCost=4;this.Diff
         return jQuerySG(this).select();
       });
       this.sg_div.append(path);
+
       this.clear_button = jQuerySG('<input type="button" value="Clear"/>').bind("click", {
         'self': this
       }, this.clearEverything).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field');
       this.sg_div.append(this.clear_button);
-      this.sg_div.append(jQuerySG('<input type="button" value="Toggle Position"/>').click(function() {
-        if (self.sg_div.hasClass('selectorgadget_top')) {
-          return self.sg_div.removeClass('selectorgadget_top').addClass('selectorgadget_bottom');
-        } else {
-          return self.sg_div.removeClass('selectorgadget_bottom').addClass('selectorgadget_top');
-        }
-      }).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
-      this.sg_div.append(jQuerySG('<input type="button" value="XPath"/>').bind("click", {
-        'self': this
-      }, this.showXPath).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
-      this.sg_div.append(jQuerySG('<input type="button" value="?"/>').bind("click", {
-        'self': this
-      }, this.showHelp).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
-      this.sg_div.append(jQuerySG('<input type="button" value="X"/>').bind("click", {
+
+      // this.sg_div.append(jQuerySG('<input type="button" value="Toggle Position"/>').click(function() {
+      //   if (self.sg_div.hasClass('selectorgadget_top')) {
+      //     return self.sg_div.removeClass('selectorgadget_top').addClass('selectorgadget_bottom');
+      //   } else {
+      //     return self.sg_div.removeClass('selectorgadget_bottom').addClass('selectorgadget_top');
+      //   }
+      // }).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
+
+      // this.sg_div.append(jQuerySG('<input type="button" value="XPath"/>').bind("click", {
+      //   'self': this
+      // }, this.showXPath).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
+
+      // this.sg_div.append(jQuerySG('<input type="button" value="?"/>').bind("click", {
+      //   'self': this
+      // }, this.showHelp).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
+
+      this.sg_div.append(jQuerySG('<input type="button" value="Done"/>').bind("click", {
         'self': this
       }, this.unbindAndRemoveInterface).addClass('selectorgadget_ignore').addClass('selectorgadget_input_field'));
       return this.path_output_field = path.get(0);
     };
 
     SelectorGadget.prototype.removeInterface = function(e) {
-	  // added by Xiong
-	  let selected = [];
-      jQuerySG(window.last_prediction).each(function() {
-          selected.push(jQuerySG(this).text());
-      });
-	  // console.log(this.datai);
-	  // console.log(selected);
-	  selected = '[' + selected.map(x => `'${x}'`).join(', ') + ']';
-	  let editor = ace.edit(`editor-${this.datai}`);
-	  editor.setValue(editor.getValue() + '\n' + selected);
-	  // added by Xiong
+      // added by Xiong
+      let selected = [];
+        jQuerySG(window.last_prediction).each(function() {
+            selected.push(jQuerySG(this).text());
+        });
+      // console.log(this.datai);
+      // console.log(selected);
+      selected = '[' + selected.map(x => `'${x}'`).join(', ') + ']';
+      let editor = ace.edit(`editor-${this.datai}-${this.envi}`);
+      editor.setValue(editor.getValue() + '\n' + selected);
+      // added by Xiong
 
-      this.sg_div.remove();
-      return this.sg_div = null;
+        this.sg_div.remove();
+        return this.sg_div = null;
     };
 
     SelectorGadget.prototype.unbind = function(e) {
@@ -1193,13 +1203,14 @@ function diff_match_patch(){this.Diff_Timeout=1.0;this.Diff_EditCost=4;this.Diff
     };
 
     // SelectorGadget.toggle = function(options) {
-	SelectorGadget.toggle = function(datai) {
+	SelectorGadget.toggle = function(datai, envi) {
       if (!window.selector_gadget) {
         window.selector_gadget = new SelectorGadget();
         window.selector_gadget.makeInterface();
         window.selector_gadget.clearEverything();
         window.selector_gadget.setMode('interactive');
-		window.selector_gadget.datai = datai; // added by Xiong
+		    window.selector_gadget.datai = datai; // added by Xiong
+        window.selector_gadget.envi = envi; // added by Xiong
         // pgbovine - don't do google analytics
         /*
         if ((options != null ? options.analytics : void 0) !== false) {

@@ -338,7 +338,9 @@ function env_init(_this) {
 
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
-        SelectorGadget.toggle(datai);
+        let envi = $(this).attr('envi');
+        console.log(envi);
+        SelectorGadget.toggle(datai, envi);
     });
 }
 
