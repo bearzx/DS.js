@@ -11,7 +11,6 @@ function env_init(_this) {
     let datai = $(_this).attr('datai');
     let env_class = 'env-' + datai;
     let envi = $(`.${env_class}`).length;
-    // var env_id = '#env-' + datai;
     let env_id = `env-${datai}-${envi}`;
     let editor_id = `editor-${datai}-${envi}`;
     // create new environment
@@ -253,7 +252,7 @@ function env_init(_this) {
         // make a new copy of the pre-loaded table
         eval(`
             ${tname} = window.table_store['${data_name}'].copy();
-            ${tname}._id = '${_datai}-${_envi}';
+            ${tname}._datai_envi = '${_datai}-${_envi}';
         `);
     }
 
@@ -280,7 +279,11 @@ function env_init(_this) {
                     res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
                 } else if (expr.type == 'CallExpression') {
                     res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                } else if (expr.type == 'Identifier') {
+                    res.show(false);
                 }
+            } else {
+                $(`#table-area-${datai}-${envi}`).html('');
             }
         }
     });
