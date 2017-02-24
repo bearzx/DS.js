@@ -11652,6 +11652,15 @@ function env_init(_this) {
         }
     });
 
+    editor.commands.addCommand({
+        name: 'cancel-out',
+        bindKey: { win: 'Esc',  mac: 'Esc' },
+        exec: function(_editor) {
+            $('.preview-panel').hide();
+            $('.suggestion-panel').hide();
+        }
+    });
+
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
         let envi = editor.envi;
