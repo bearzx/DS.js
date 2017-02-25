@@ -21,6 +21,10 @@
 .dsjs-env .code {
   font-family: Monaco;
 }
+.dsjs-env .ds-table,
+.dsjs-env .preview-table {
+  overflow: hidden;
+}
 .dsjs-env .ds-table th,
 .dsjs-env .preview-table th,
 .dsjs-env .ds-table td,

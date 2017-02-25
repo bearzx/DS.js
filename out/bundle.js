@@ -11630,12 +11630,12 @@ function env_init(_this) {
     var editor = ace.edit(editor_id);
     editor.datai = datai;
     editor.envi = envi;
-    editor.cursor_rowno = 0;
+    editor.last_rown = 0;
     editor.setTheme("ace/theme/chrome");
     // editor.setBehavioursEnabled(false);
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
-    editor.setValue(`// This table is denoted as t${datai}_${envi}`);
+    editor.setValue(`t${datai}_${envi}; // This table is denoted as t${datai}_${envi}`);
 
     editor.commands.addCommand({
         name: 'preview',
@@ -11850,24 +11850,23 @@ function env_init(_this) {
     }
 
     editor.selection.on('changeCursor', function() {
-        let new_rowno = editor.getCursorPosition().row;
-        if (new_rowno != editor.cursor_rowno) {
+        let rown = editor.getCursorPosition().row;
+        let cur_line = editor.getSession().getLine(rown);
+        if (rown != editor.last_rown) {
             // cursor changes to a new line, we evaluate the code again
             // and get the result
-            editor.cursor_rowno = new_rowno;
+            editor.last_rown = rown;
             let all_code = editor.getValue().split('\n');
             let code = '';
-            for (let i = 0; i <= new_rowno; i++) {
+            for (let i = 0; i <= rown; i++) {
                 code += all_code[i] + '\n';
             }
             refresh_table(editor.datai, editor.envi);
             let res = eval(code);
-            cur_line = editor.getSession().getLine(new_rowno);
             if (cur_line.length && res && res.__showable__) {
                 // [TODO] here we should embed the name of the shown table
                 // (it can be an anonymous table returned by functions)
                 let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
-                // console.log(expr);
                 if (expr.type == 'AssignmentExpression') {
                     res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
                 } else if (expr.type == 'CallExpression') {
