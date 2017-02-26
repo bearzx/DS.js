@@ -1219,6 +1219,8 @@ function diff_match_patch(){this.Diff_Timeout=1.0;this.Diff_EditCost=4;this.Diff
         }
         */
       } else if (window.selector_gadget.unbound) {
+        window.selector_gadget.datai = datai; // added by Xiong
+        window.selector_gadget.envi = envi; // added by Xiong
         window.selector_gadget.rebindAndMakeInterface();
       } else {
         window.selector_gadget.unbindAndRemoveInterface();

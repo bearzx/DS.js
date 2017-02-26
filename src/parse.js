@@ -109,7 +109,7 @@ function env_init(_this) {
                 let method_name = callee.property.name;
                 let method_start = callee.loc.end.column - callee.property.name.length;
                 let method_end = callee.loc.end.column;
-                if (between(col, identifier_start, identifier_end) && (eval(`${identifier_name}.__showable__`))) {
+                if (between(col, identifier_start, identifier_end) && (eval(`${identifier_name}`)) && (eval(`${identifier_name}.__showable__`))) {
                     // here we preview an identifier
                     let all_code = editor.getValue().split('\n');
                     let pre_eval_code = '';

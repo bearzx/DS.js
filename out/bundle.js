@@ -11105,7 +11105,7 @@ var Table = (function () {
         //     let suggestions = ['with_row(row)', 'with_rows(rows)'];
         //     _this.construct_html_suggestions(suggestions, pos);
         // });
-        $('td').hover(function () {
+        $('.ds-table-elem').hover(function () {
             var pos = $(this).position();
             var row = $(this).attr('row');
             var col = $(this).attr('col');
@@ -11285,7 +11285,7 @@ var Table = (function () {
         _this._t.forEach(function (row, i) {
             var tds = [];
             _this._labels.forEach(function (label) {
-                tds.push("<td data=\"" + row[label] + "\" row=\"" + i + "\" col=\"" + label + "\">" + row[label] + "</td>");
+                tds.push("<td class=\"ds-table-elem\" data=\"" + row[label] + "\" row=\"" + i + "\" col=\"" + label + "\">" + row[label] + "</td>");
             });
             components.push(tds);
         });
@@ -11502,7 +11502,7 @@ var Table = (function () {
             for (var i = 0; i < left_raw_components_1.length; i++) {
                 _loop_2(i);
             }
-            var left_table = this.construct_html_table(left_raw_components_1, true, true, left_group_indices, method_call);
+            var left_table = this.construct_html_table(left_raw_components_1, true, true, left_group_indices);
             var right_group_indices = grouped_table._as_label_indices(group_labels);
             var right_raw_components_1 = grouped_table.construct_table_components();
             var _loop_3 = function (i) {
@@ -11514,7 +11514,7 @@ var Table = (function () {
                 _loop_3(i);
             }
             var right_table = grouped_table.construct_html_table_peek(right_raw_components_1, [0, 1, 2, 3, 4], null, false);
-            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
             $("#preview-" + this._datai_envi).html(template);
         }
         else if (method_name == 'pivot') {
@@ -11526,14 +11526,14 @@ var Table = (function () {
                 left_raw_components[i][left_pivot_indices[0]] = $(left_raw_components[i][left_pivot_indices[0]]).attr('class', 'preview').prop('outerHTML');
             }
             left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
-            var left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices, method_call);
+            var left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
             var right_raw_components = pivoted_table.construct_table_components();
             right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
             for (var i = 1; i < right_raw_components[0].length; i++) {
                 right_raw_components[0][i] = $(right_raw_components[0][i]).attr('class', 'preview').prop('outerHTML');
             }
             var right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
-            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
             $("#preview-" + this._datai_envi).html(template);
         }
         else if (method_name == 'join') {
@@ -11545,14 +11545,14 @@ var Table = (function () {
             for (var i = 1; i < left_raw_components.length; i++) {
                 left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index], method_call);
+            var left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
             var middle_raw_components = args[1].construct_table_components();
             var middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
             middle_raw_components[0][middle_join_index] = $(middle_raw_components[0][middle_join_index]).attr('class', 'preview-select').prop('outerHTML');
             for (var i = 1; i < middle_raw_components.length; i++) {
                 middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index], method_call);
+            var middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
             var right_raw_components = joined_table.construct_table_components();
             var right_join_index = joined_table._as_label_index(args[0]);
             right_raw_components[0][right_join_index] = $(right_raw_components[0][right_join_index]).html(args[0] + " - " + (args.length == 3 ? args[2] : args[0])).attr('class', 'preview-select').prop('outerHTML');
@@ -11560,7 +11560,7 @@ var Table = (function () {
                 right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
             }
             var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
-            var template = "\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
             $("#preview-" + this._datai_envi).html(template);
         }
         else if (method_name == 'self') {
@@ -11692,7 +11692,7 @@ function env_init(_this) {
                 let method_name = callee.property.name;
                 let method_start = callee.loc.end.column - callee.property.name.length;
                 let method_end = callee.loc.end.column;
-                if (between(col, identifier_start, identifier_end) && (eval(`${identifier_name}.__showable__`))) {
+                if (between(col, identifier_start, identifier_end) && (eval(`${identifier_name}`)) && (eval(`${identifier_name}.__showable__`))) {
                     // here we preview an identifier
                     let all_code = editor.getValue().split('\n');
                     let pre_eval_code = '';

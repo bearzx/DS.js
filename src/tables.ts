@@ -876,7 +876,7 @@ export class Table {
         //     _this.construct_html_suggestions(suggestions, pos);
         // });
 
-        $('td').hover(function() {
+        $('.ds-table-elem').hover(function() {
             let pos = $(this).position();
             let row = $(this).attr('row');
             let col = $(this).attr('col');
@@ -1084,7 +1084,7 @@ export class Table {
         _this._t.forEach(function(row, i) {
             let tds = [];
             _this._labels.forEach(function(label) {
-                tds.push(`<td data="${row[label]}" row="${i}" col="${label}">${row[label]}</td>`);
+                tds.push(`<td class="ds-table-elem" data="${row[label]}" row="${i}" col="${label}">${row[label]}</td>`);
             });
             components.push(tds);
         });
@@ -1312,7 +1312,7 @@ export class Table {
                     left_raw_components[i][lgi] = $(left_raw_components[i][lgi]).attr('class', i == 0 ? 'preview-select' : 'preview').prop('outerHTML');
                 });
             }
-            let left_table = this.construct_html_table(left_raw_components, true, true, left_group_indices, method_call);
+            let left_table = this.construct_html_table(left_raw_components, true, true, left_group_indices);
 
             let right_group_indices = grouped_table._as_label_indices(group_labels);
             let right_raw_components = grouped_table.construct_table_components();
@@ -1324,6 +1324,7 @@ export class Table {
             let right_table = grouped_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, false);
 
             let template = `
+                <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
                     <div class="left">${left_table}</div>
                     <div class="arrow">=></div>
@@ -1342,7 +1343,7 @@ export class Table {
                 left_raw_components[i][left_pivot_indices[0]] = $(left_raw_components[i][left_pivot_indices[0]]).attr('class', 'preview').prop('outerHTML');
             }
             left_raw_components[0][left_pivot_indices[1]] = $(left_raw_components[0][left_pivot_indices[1]]).attr('class', 'preview-select').prop('outerHTML');
-            let left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices, method_call);
+            let left_table = this.construct_html_table(left_raw_components, true, true, left_pivot_indices);
 
             let right_raw_components = pivoted_table.construct_table_components();
             right_raw_components[0][0] = $(right_raw_components[0][0]).attr('class', 'preview-select').prop('outerHTML');
@@ -1352,6 +1353,7 @@ export class Table {
             let right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 
             let template = `
+                <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
                     <div class="left">${left_table}</div>
                     <div class="arrow">=></div>
@@ -1369,7 +1371,7 @@ export class Table {
             for (let i = 1; i < left_raw_components.length; i++) {
                 left_raw_components[i][left_join_index] = $(left_raw_components[i][left_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index], method_call);
+            let left_table = this.construct_html_table(left_raw_components, true, true, [left_join_index]);
 
             let middle_raw_components = args[1].construct_table_components();
             let middle_join_index = args[1]._as_label_index(args.length == 3 ? args[2] : args[0]);
@@ -1377,7 +1379,7 @@ export class Table {
             for (let i = 1; i < middle_raw_components.length; i++) {
                 middle_raw_components[i][middle_join_index] = $(middle_raw_components[i][middle_join_index]).attr('class', 'preview').prop('outerHTML');
             }
-            let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index], method_call);
+            let middle_table = args[1].construct_html_table(middle_raw_components, true, true, [middle_join_index]);
 
             let right_raw_components = joined_table.construct_table_components();
             let right_join_index = joined_table._as_label_index(args[0]);
@@ -1388,6 +1390,7 @@ export class Table {
             let right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
 
             let template = `
+                <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
                     <div class="left">${left_table}</div>
                     <div class="arrow">join</div>
