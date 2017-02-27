@@ -15,7 +15,7 @@ export class Table {
     private _labels: any = [];
     private _column_order: any = {};
     // public _id: string;
-    public _datai_envi: string;
+    // public _datai_envi: string;
     public __showable__ = true;
 
     // constructor of the class
@@ -37,13 +37,13 @@ export class Table {
             this.read_table_csv_sync(url);
         }
 
-        if (datai == undefined) {
-            if (window._datai) {
-                this._datai_envi = window._datai;
-            }
-        } else {
-            this._datai_envi = datai;
-        }
+        // if (datai == undefined) {
+        //     if (window._datai) {
+        //         this._datai_envi = window._datai;
+        //     }
+        // } else {
+        //     this._datai_envi = datai;
+        // }
 
         this.auto_convert();
     }
@@ -177,6 +177,10 @@ export class Table {
             cols.push(_this.column(label));
         });
         return cols;
+    }
+
+    private cur_env() {
+        return `${window.datai}-${window.envi}`;
     }
 
     // return a certain row
@@ -339,7 +343,6 @@ export class Table {
         var _this = this;
         column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
-        table._datai_envi = this._datai_envi;
         for (var i = 0; i < this._t.length; i++) {
             table.with_row({});
         }
@@ -410,7 +413,7 @@ export class Table {
     }
 
     _where(column_or_label, value_or_predicate, keep_index: boolean) {
-        let table = new Table(null, this.labels(), null, this._datai_envi);
+        let table = new Table(null, this.labels(), null);
         let indices = [];
         let predicate;
         if (value_or_predicate instanceof Function) {
@@ -478,7 +481,7 @@ export class Table {
         if (collect) {
             let old_labels = this.labels();
             old_labels.splice(old_labels.indexOf(label), 1);
-            grouped = new Table(null, [label].concat(old_labels), null, this._datai_envi);
+            grouped = new Table(null, [label].concat(old_labels), null);
             keys.forEach(function(k) {
                 let row = { [label]: k };
                 old_labels.forEach(function(l) {
@@ -487,7 +490,7 @@ export class Table {
                 grouped._with_row(row);
             });
         } else {
-            grouped = new Table(null, [label, 'count'], null, this._datai_envi);
+            grouped = new Table(null, [label, 'count'], null);
             keys.forEach(function (key) {
                 grouped._with_row({ [label]: key, 'count': group_t[key].length });
             });
@@ -525,7 +528,7 @@ export class Table {
             labels.forEach(function(l) {
                 old_labels.splice(old_labels.indexOf(l), 1);
             });
-            grouped = new Table(null, labels.concat(old_labels), null, this._datai_envi);
+            grouped = new Table(null, labels.concat(old_labels), null);
             Object.keys(key_combinations).forEach(function(skey) {
                 let row = {};
                 labels.forEach(function (l, i) {
@@ -576,7 +579,7 @@ export class Table {
             }
         });
 
-        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null, this._datai_envi);
+        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null);
 
         row_labels.forEach(function (row_label: any) {
             var pivot_row = { [rows]: row_label };
@@ -658,7 +661,7 @@ export class Table {
             }
         });
 
-        let joined = new Table(null, joined_labels, null, this._datai_envi);
+        let joined = new Table(null, joined_labels, null);
         joined._with_rows(joined_rows);
 
         // console.log('joined table');
@@ -735,33 +738,6 @@ export class Table {
         return { 'first': first, 'rest': rest };
     }
 
-    // @deprecated
-    _show() {
-        var _this = this;
-        var s = `<table class="ds-table">`;
-        s += "<tr>";
-        this._labels.forEach(function (label) {
-            s += "<th>";
-            s += label;
-            s += "</th>";
-        });
-        s += "</tr>";
-        this._t.forEach(function (row) {
-            s += "<tr>";
-            // console.log(row);
-            _this._labels.forEach(function (label) {
-                s += "<td>";
-                s += row[label];
-                s += "</td>";
-            });
-            s += "</tr>";
-        });
-        s += `</table>`;
-
-        console.log(`#table-area-${this._datai_envi}`);
-        $(`#table-area-${this._datai_envi}`).html(s);
-    }
-
     // show the table in the show-panel
     show(hide = false, table_expr?) {
         let raw_components = this.construct_table_components();
@@ -776,11 +752,10 @@ export class Table {
 
         window.selected_columns = [];
         if (!table_expr) {
-            let items = this._datai_envi.split('-');
-            table_expr = `t${items[0]}_${items[1]}`;
+            table_expr = `t${this.cur_env()}`;
         }
 
-        $(`#table-area-${this._datai_envi}`).html(this.construct_html_table(raw_components, hide, hide));
+        $(`#table-area-${this.cur_env()}`).html(this.construct_html_table(raw_components, hide, hide));
         $('.suggestion-panel').hide();
 
         let _this = this;
@@ -818,7 +793,7 @@ export class Table {
                 $(this).removeClass('table-header-selected');
                 let index = window.selected_columns.indexOf($(this).attr('data'));
                 window.selected_columns.splice(index, 1);
-                $(`#suggestion-${_this._datai_envi}`).hide();
+                $(`#suggestion-${_this.cur_env()}`).hide();
             } else {
                 $(this).addClass('table-header-selected');
                 window.selected_columns.push($(this).attr('data'));
@@ -890,7 +865,7 @@ export class Table {
     }
 
     construct_html_suggestions(suggestions, pos, table_expr) {
-        let datai = this._datai_envi;
+        let datai = this.cur_env();
         let template = `
             <div class="suggestions-wrap">
                 <div class="left">
@@ -949,7 +924,7 @@ export class Table {
 
     // plot a ylabel-xlabel figure
     plot(xlabel, ylabel) {
-        let id = this._datai_envi;
+        let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -960,7 +935,7 @@ export class Table {
 
     // create a ylabel-xlabel bar chart
     bar(xlabel, ylabel) {
-        let id = this._datai_envi;
+        let id = this.cur_env();
         let templates = new vgt.VGTemplate();
         let values = [];
         this._t.forEach(function (row) {
@@ -971,7 +946,7 @@ export class Table {
 
     // create a ylabel-xlabel bar chart
     scatter(xlabel, ylabel) {
-        let id = this._datai_envi;
+        let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -981,7 +956,7 @@ export class Table {
     }
 
     scatter_d3(xlabel, ylabel) {
-        let id = this._datai_envi;
+        let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -1063,7 +1038,7 @@ export class Table {
         });
         // console.log(data);
         var templates = new vgt.VGTemplate();
-        var id = this._datai_envi;
+        var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
             chart({ el: `#vis-${id}` }).update();
         });
@@ -1071,7 +1046,7 @@ export class Table {
 
     vhist(column: string) {
         var templates = new vgt.VGTemplate();
-        var id = this._datai_envi;
+        var id = this.cur_env();
         vg.parse.spec(templates.vbar(this._t), function (error, chart) {
             chart({ el: `#vis-${id}` }).update();
         });
@@ -1079,7 +1054,7 @@ export class Table {
 
     // create box-plots for each column
     boxplot() {
-        let id = this._datai_envi;
+        let id = this.cur_env();
         let templates = new vgt.VGTemplate();
         let values = [];
         let _this = this;
@@ -1273,7 +1248,7 @@ export class Table {
                 }
             }
 
-            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
+            $(`#preview-${this.cur_env()}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         } else if (method_name == 'with_column' || method_name == 'with_columns') {
             let new_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1284,7 +1259,7 @@ export class Table {
                 }
             }
 
-            $(`#preview-${this._datai_envi}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
+            $(`#preview-${this.cur_env()}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         } else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
@@ -1295,7 +1270,7 @@ export class Table {
                 });
             }
 
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, label_locs, method_call));
+            $(`#preview-${this.cur_env()}`).html(this.construct_html_table(raw_components, true, true, label_locs, method_call));
         } else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
             args = eval(`this._as_args(${args})`);
@@ -1303,7 +1278,7 @@ export class Table {
             let label_loc = this._as_label_index(args[0]);
             raw_components[0][label_loc] = $(raw_components[0][label_loc]).html(`<span class="preview-del">${args[0]}</span> <span class="preview-select">${args[1]}</span>`).attr('class', 'preview').prop('outerHTML');
 
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
+            $(`#preview-${this.cur_env()}`).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
         } else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
             let res = eval(`this.iwhere(${args})`);
@@ -1315,7 +1290,7 @@ export class Table {
                 }
             });
 
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table_peek(raw_components, res.index, res.label, false));
+            $(`#preview-${this.cur_env()}`).html(this.construct_html_table_peek(raw_components, res.index, res.label, false));
         } else if (method_name == 'sorted') {
             let sorted_table = eval(`this.sorted(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1326,7 +1301,7 @@ export class Table {
             for (let i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
-            $(`#preview-${this._datai_envi}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
+            $(`#preview-${this.cur_env()}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
         } else if (method_name == 'group' || method_name == 'groups') {
             let grouped_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1359,7 +1334,7 @@ export class Table {
                 <div style="clear: both"></div>
             `;
 
-            $(`#preview-${this._datai_envi}`).html(template);
+            $(`#preview-${this.cur_env()}`).html(template);
         } else if (method_name == 'pivot') {
             let pivoted_table = eval(`this.pivot(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1387,7 +1362,7 @@ export class Table {
                 </div>
             `;
 
-            $(`#preview-${this._datai_envi}`).html(template);
+            $(`#preview-${this.cur_env()}`).html(template);
         } else if (method_name == 'join') {
             let joined_table = eval(`this.join(${args})`);
             args = eval(`this._as_args(${args})`);
@@ -1427,10 +1402,10 @@ export class Table {
                 <div style="clear: both"></div>
             `;
 
-            $(`#preview-${this._datai_envi}`).html(template);
+            $(`#preview-${this.cur_env()}`).html(template);
         } else if (method_name == 'self') {
             let raw_components = this.construct_table_components();
-            $(`#preview-${this._datai_envi}`).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
+            $(`#preview-${this.cur_env()}`).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
         } else {
             console.warn(`Method call not supported: ${method_call}`);
         }

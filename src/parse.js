@@ -85,6 +85,7 @@ function env_init(_this) {
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
         let envi = editor.envi;
+        bind_env(datai, envi);
         let callee;
         // console.log(expr);
         // console.log(expr.callee.object.name);
@@ -270,7 +271,6 @@ function env_init(_this) {
         // make a new copy of the pre-loaded table
         eval(`
             ${tname} = window.table_store['${data_name}'].copy();
-            ${tname}._datai_envi = '${_datai}-${_envi}';
         `);
     }
 
@@ -286,6 +286,7 @@ function env_init(_this) {
             for (let i = 0; i <= rown; i++) {
                 code += all_code[i] + '\n';
             }
+            bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
             try {
                 let res = eval(code);
@@ -301,13 +302,18 @@ function env_init(_this) {
                         res.show(false);
                     }
                 } else {
-                    $(`#table-area-${datai}-${envi}`).html('');
+                    $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                 }
             } catch (e) {
                 console.log(e.message);
             }
         }
     });
+
+    function bind_env(_datai, _envi) {
+        window.datai = _datai;
+        window.envi = _envi;
+    }
 
     editor.session.on('change', function(e) {
         $('.preview-panel').each(function() {
@@ -324,6 +330,7 @@ function env_init(_this) {
     $('.run').click(function() {
         let datai = $(this).attr('datai');
         let envi = $(this).attr('envi');
+        bind_env(datai, envi);
         $(`#vis-${datai}-${envi}`).html('');
         $(`#table-area-${datai}-${envi}`).html('');
         var editor = ace.edit(`editor-${datai}-${envi}`);
@@ -370,7 +377,7 @@ $(document).ready(function() {
             $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Append ds.js</button>`);
             // pre-load the csv file
             eval(`
-                window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}', ${datai});
+                window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
             `);
             datai += 1;
         }
@@ -381,7 +388,7 @@ $(document).ready(function() {
         $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Append ds.js</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
         eval(`
-            window.table_store['t${datai}'] = new Table.Table(null, null, null, ${datai});
+            window.table_store['t${datai}'] = new Table.Table(null, null, null);
             window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
         `);
         datai += 1;

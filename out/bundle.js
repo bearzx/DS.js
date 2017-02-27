@@ -10311,6 +10311,8 @@ var Table = (function () {
         this._t = [];
         this._labels = [];
         this._column_order = {};
+        // public _id: string;
+        // public _datai_envi: string;
         this.__showable__ = true;
         // types of column variables, especially in the cases when we want to do sorting
         if (t != null) {
@@ -10321,14 +10323,13 @@ var Table = (function () {
         if (url != null) {
             this.read_table_csv_sync(url);
         }
-        if (datai == undefined) {
-            if (window._datai) {
-                this._datai_envi = window._datai;
-            }
-        }
-        else {
-            this._datai_envi = datai;
-        }
+        // if (datai == undefined) {
+        //     if (window._datai) {
+        //         this._datai_envi = window._datai;
+        //     }
+        // } else {
+        //     this._datai_envi = datai;
+        // }
         this.auto_convert();
     }
     // convert all the elements with a cast function (e.g. parseInt)
@@ -10446,6 +10447,9 @@ var Table = (function () {
             cols.push(_this.column(label));
         });
         return cols;
+    };
+    Table.prototype.cur_env = function () {
+        return window.datai + "-" + window.envi;
     };
     // return a certain row
     Table.prototype.row = function (index) {
@@ -10598,7 +10602,6 @@ var Table = (function () {
         var _this = this;
         column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
-        table._datai_envi = this._datai_envi;
         for (var i = 0; i < this._t.length; i++) {
             table.with_row({});
         }
@@ -10667,7 +10670,7 @@ var Table = (function () {
         return this._where(column_or_label, value_or_predicate, true);
     };
     Table.prototype._where = function (column_or_label, value_or_predicate, keep_index) {
-        var table = new Table(null, this.labels(), null, this._datai_envi);
+        var table = new Table(null, this.labels(), null);
         var indices = [];
         var predicate;
         if (value_or_predicate instanceof Function) {
@@ -10737,7 +10740,7 @@ var Table = (function () {
         if (collect) {
             var old_labels_1 = this.labels();
             old_labels_1.splice(old_labels_1.indexOf(label), 1);
-            grouped = new Table(null, [label].concat(old_labels_1), null, this._datai_envi);
+            grouped = new Table(null, [label].concat(old_labels_1), null);
             keys.forEach(function (k) {
                 var row = (_a = {}, _a[label] = k, _a);
                 old_labels_1.forEach(function (l) {
@@ -10748,7 +10751,7 @@ var Table = (function () {
             });
         }
         else {
-            grouped = new Table(null, [label, 'count'], null, this._datai_envi);
+            grouped = new Table(null, [label, 'count'], null);
             keys.forEach(function (key) {
                 grouped._with_row((_a = {}, _a[label] = key, _a['count'] = group_t[key].length, _a));
                 var _a;
@@ -10785,7 +10788,7 @@ var Table = (function () {
             labels.forEach(function (l) {
                 old_labels_2.splice(old_labels_2.indexOf(l), 1);
             });
-            grouped = new Table(null, labels.concat(old_labels_2), null, this._datai_envi);
+            grouped = new Table(null, labels.concat(old_labels_2), null);
             Object.keys(key_combinations).forEach(function (skey) {
                 var row = {};
                 labels.forEach(function (l, i) {
@@ -10835,7 +10838,7 @@ var Table = (function () {
                 pivot_t[row[rows]][row[columns]] = [row[values]];
             }
         });
-        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null, this._datai_envi);
+        var pivoted = new Table(null, [rows].concat(Array.from(column_labels)), null);
         row_labels.forEach(function (row_label) {
             var pivot_row = (_a = {}, _a[rows] = row_label, _a);
             column_labels.forEach(function (column_label) {
@@ -10908,7 +10911,7 @@ var Table = (function () {
                 joined_labels.push(_this._unused_label(l));
             }
         });
-        var joined = new Table(null, joined_labels, null, this._datai_envi);
+        var joined = new Table(null, joined_labels, null);
         joined._with_rows(joined_rows);
         // console.log('joined table');
         // console.log(joined);
@@ -10971,31 +10974,6 @@ var Table = (function () {
         }
         return { 'first': first, 'rest': rest };
     };
-    // @deprecated
-    Table.prototype._show = function () {
-        var _this = this;
-        var s = "<table class=\"ds-table\">";
-        s += "<tr>";
-        this._labels.forEach(function (label) {
-            s += "<th>";
-            s += label;
-            s += "</th>";
-        });
-        s += "</tr>";
-        this._t.forEach(function (row) {
-            s += "<tr>";
-            // console.log(row);
-            _this._labels.forEach(function (label) {
-                s += "<td>";
-                s += row[label];
-                s += "</td>";
-            });
-            s += "</tr>";
-        });
-        s += "</table>";
-        console.log("#table-area-" + this._datai_envi);
-        $("#table-area-" + this._datai_envi).html(s);
-    };
     // show the table in the show-panel
     Table.prototype.show = function (hide, table_expr) {
         if (hide === void 0) { hide = false; }
@@ -11009,10 +10987,9 @@ var Table = (function () {
         // }
         window.selected_columns = [];
         if (!table_expr) {
-            var items = this._datai_envi.split('-');
-            table_expr = "t" + items[0] + "_" + items[1];
+            table_expr = "t" + this.cur_env();
         }
-        $("#table-area-" + this._datai_envi).html(this.construct_html_table(raw_components, hide, hide));
+        $("#table-area-" + this.cur_env()).html(this.construct_html_table(raw_components, hide, hide));
         $('.suggestion-panel').hide();
         var _this = this;
         // events binding for table header
@@ -11048,7 +11025,7 @@ var Table = (function () {
                 $(this).removeClass('table-header-selected');
                 var index = window.selected_columns.indexOf($(this).attr('data'));
                 window.selected_columns.splice(index, 1);
-                $("#suggestion-" + _this._datai_envi).hide();
+                $("#suggestion-" + _this.cur_env()).hide();
             }
             else {
                 $(this).addClass('table-header-selected');
@@ -11118,7 +11095,7 @@ var Table = (function () {
         });
     };
     Table.prototype.construct_html_suggestions = function (suggestions, pos, table_expr) {
-        var datai = this._datai_envi;
+        var datai = this.cur_env();
         var template = "\n            <div class=\"suggestions-wrap\">\n                <div class=\"left\">\n                <h5>In-Context Operations</h5>\n                <ul>\n        ";
         suggestions.forEach(function (s) {
             template += "<li class=\"suggestion-item\">" + s + "</li>";
@@ -11164,7 +11141,7 @@ var Table = (function () {
     };
     // plot a ylabel-xlabel figure
     Table.prototype.plot = function (xlabel, ylabel) {
-        var id = this._datai_envi;
+        var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -11174,7 +11151,7 @@ var Table = (function () {
     };
     // create a ylabel-xlabel bar chart
     Table.prototype.bar = function (xlabel, ylabel) {
-        var id = this._datai_envi;
+        var id = this.cur_env();
         var templates = new vgt.VGTemplate();
         var values = [];
         this._t.forEach(function (row) {
@@ -11184,7 +11161,7 @@ var Table = (function () {
     };
     // create a ylabel-xlabel bar chart
     Table.prototype.scatter = function (xlabel, ylabel) {
-        var id = this._datai_envi;
+        var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -11193,7 +11170,7 @@ var Table = (function () {
         vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": "#vis-" + id }).update(); });
     };
     Table.prototype.scatter_d3 = function (xlabel, ylabel) {
-        var id = this._datai_envi;
+        var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
@@ -11262,21 +11239,21 @@ var Table = (function () {
         });
         // console.log(data);
         var templates = new vgt.VGTemplate();
-        var id = this._datai_envi;
+        var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
             chart({ el: "#vis-" + id }).update();
         });
     };
     Table.prototype.vhist = function (column) {
         var templates = new vgt.VGTemplate();
-        var id = this._datai_envi;
+        var id = this.cur_env();
         vg.parse.spec(templates.vbar(this._t), function (error, chart) {
             chart({ el: "#vis-" + id }).update();
         });
     };
     // create box-plots for each column
     Table.prototype.boxplot = function () {
-        var id = this._datai_envi;
+        var id = this.cur_env();
         var templates = new vgt.VGTemplate();
         var values = [];
         var _this = this;
@@ -11449,7 +11426,7 @@ var Table = (function () {
                     raw_components[raw_components.length - row][i] = $(raw_components[raw_components.length - row][i]).attr('class', 'preview').prop('outerHTML');
                 }
             }
-            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
+            $("#preview-" + this.cur_env()).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
         else if (method_name == 'with_column' || method_name == 'with_columns') {
             var new_table = eval("this." + method_name + "(" + args + ")");
@@ -11460,7 +11437,7 @@ var Table = (function () {
                     raw_components[i][raw_components[i].length - col] = $(raw_components[i][raw_components[i].length - col]).attr('class', 'preview').prop('outerHTML');
                 }
             }
-            $("#preview-" + this._datai_envi).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
+            $("#preview-" + this.cur_env()).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
         else if (method_name == 'select' || method_name == 'drop') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
@@ -11474,7 +11451,7 @@ var Table = (function () {
             for (var i = 0; i < raw_components_1.length; i++) {
                 _loop_1(i);
             }
-            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components_1, true, true, label_locs, method_call));
+            $("#preview-" + this.cur_env()).html(this.construct_html_table(raw_components_1, true, true, label_locs, method_call));
         }
         else if (method_name == 'relabeled') {
             // [bug] what if we give it a non-existing label name?
@@ -11482,7 +11459,7 @@ var Table = (function () {
             var raw_components = this.construct_table_components();
             var label_loc = this._as_label_index(args[0]);
             raw_components[0][label_loc] = $(raw_components[0][label_loc]).html("<span class=\"preview-del\">" + args[0] + "</span> <span class=\"preview-select\">" + args[1] + "</span>").attr('class', 'preview').prop('outerHTML');
-            $("#preview-" + this._datai_envi).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
+            $("#preview-" + this.cur_env()).html(this.construct_html_table(raw_components, true, true, [label_loc], method_call));
         }
         else if (method_name == 'where') {
             // [TODO] hide_col strategies on this
@@ -11494,7 +11471,7 @@ var Table = (function () {
                     raw_components_2[i + 1][j] = $(raw_components_2[i + 1][j]).attr('class', 'preview').prop('outerHTML');
                 }
             });
-            $("#preview-" + this._datai_envi).html(this.construct_html_table_peek(raw_components_2, res.index, res.label, false));
+            $("#preview-" + this.cur_env()).html(this.construct_html_table_peek(raw_components_2, res.index, res.label, false));
         }
         else if (method_name == 'sorted') {
             var sorted_table = eval("this.sorted(" + args + ")");
@@ -11506,7 +11483,7 @@ var Table = (function () {
             for (var i = 1; i < raw_components.length; i++) {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
-            $("#preview-" + this._datai_envi).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
+            $("#preview-" + this.cur_env()).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
         }
         else if (method_name == 'group' || method_name == 'groups') {
             var grouped_table = eval("this." + method_name + "(" + args + ")");
@@ -11535,7 +11512,7 @@ var Table = (function () {
             }
             var right_table = grouped_table.construct_html_table_peek(right_raw_components_1, [0, 1, 2, 3, 4], null, false);
             var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
-            $("#preview-" + this._datai_envi).html(template);
+            $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'pivot') {
             var pivoted_table = eval("this.pivot(" + args + ")");
@@ -11554,7 +11531,7 @@ var Table = (function () {
             }
             var right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
             var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
-            $("#preview-" + this._datai_envi).html(template);
+            $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'join') {
             var joined_table = eval("this.join(" + args + ")");
@@ -11581,11 +11558,11 @@ var Table = (function () {
             }
             var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
             var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
-            $("#preview-" + this._datai_envi).html(template);
+            $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'self') {
             var raw_components = this.construct_table_components();
-            $("#preview-" + this._datai_envi).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
+            $("#preview-" + this.cur_env()).html(this.construct_html_table_peek(raw_components, [0, 1, 2, 3, 4], null, true));
         }
         else {
             console.warn("Method call not supported: " + method_call);
@@ -11688,6 +11665,7 @@ function env_init(_this) {
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
         let envi = editor.envi;
+        bind_env(datai, envi);
         let callee;
         // console.log(expr);
         // console.log(expr.callee.object.name);
@@ -11753,14 +11731,18 @@ function env_init(_this) {
                     // console.log(`cur_line_partial: ${cur_line_partial}`);
                     pre_eval_code += cur_line_partial;
                     refresh_table(datai, envi);
-                    let partial_result = eval(pre_eval_code);
-                    eval(`partial_result.preview(\`${method_call}\`)`);
-                    let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
-                    $(`#env-${datai}-${envi} .preview-panel`).css({
-                        left: pos.left + 50,
-                        top: pos.top + 30
-                    }).toggle();
-                    break;
+                    try {
+                        let partial_result = eval(pre_eval_code);
+                        eval(`partial_result.preview(\`${method_call}\`)`);
+                        let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
+                        $(`#env-${datai}-${envi} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
+                        break;
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 } else {
                     last_callee = callee;
                     callee_level += 1;
@@ -11869,7 +11851,6 @@ function env_init(_this) {
         // make a new copy of the pre-loaded table
         eval(`
             ${tname} = window.table_store['${data_name}'].copy();
-            ${tname}._datai_envi = '${_datai}-${_envi}';
         `);
     }
 
@@ -11885,6 +11866,7 @@ function env_init(_this) {
             for (let i = 0; i <= rown; i++) {
                 code += all_code[i] + '\n';
             }
+            bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
             try {
                 let res = eval(code);
@@ -11900,13 +11882,18 @@ function env_init(_this) {
                         res.show(false);
                     }
                 } else {
-                    $(`#table-area-${datai}-${envi}`).html('');
+                    $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                 }
             } catch (e) {
                 console.log(e.message);
             }
         }
     });
+
+    function bind_env(_datai, _envi) {
+        window.datai = _datai;
+        window.envi = _envi;
+    }
 
     editor.session.on('change', function(e) {
         $('.preview-panel').each(function() {
@@ -11923,6 +11910,7 @@ function env_init(_this) {
     $('.run').click(function() {
         let datai = $(this).attr('datai');
         let envi = $(this).attr('envi');
+        bind_env(datai, envi);
         $(`#vis-${datai}-${envi}`).html('');
         $(`#table-area-${datai}-${envi}`).html('');
         var editor = ace.edit(`editor-${datai}-${envi}`);
@@ -11930,9 +11918,13 @@ function env_init(_this) {
         window._datai = `${datai}-${envi}`;
         // [TODO] use esprima to detect table variable name
         // [TODO] we should also use the current line to decide which table to show
-        let res = eval(code);
-        if (res && res.__showable__) {
-            res.show();
+        try {
+            let res = eval(code);
+            if (res && res.__showable__) {
+                res.show();
+            }
+        } catch (e) {
+            console.log(e.message);
         }
     });
 
@@ -11965,7 +11957,7 @@ $(document).ready(function() {
             $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Append ds.js</button>`);
             // pre-load the csv file
             eval(`
-                window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}', ${datai});
+                window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
             `);
             datai += 1;
         }
@@ -11976,7 +11968,7 @@ $(document).ready(function() {
         $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Append ds.js</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
         eval(`
-            window.table_store['t${datai}'] = new Table.Table(null, null, null, ${datai});
+            window.table_store['t${datai}'] = new Table.Table(null, null, null);
             window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
         `);
         datai += 1;
