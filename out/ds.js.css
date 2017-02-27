@@ -178,7 +178,7 @@
 .dsjs-env .suggestion-panel {
   position: absolute;
   display: none;
-  width: 400px;
+  min-width: 500px;
   float: left;
   z-index: 999;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -191,6 +191,12 @@
 .dsjs-env .suggestion-panel .suggestion-item:hover {
   cursor: pointer;
   background-color: #a6bddb;
+}
+.dsjs-env .suggestion-panel .suggestions-wrap .left {
+  float: left;
+}
+.dsjs-env .suggestion-panel .suggestions-wrap .right {
+  float: left;
 }
 .open-dsjs,
 .open-dsjs-htable {

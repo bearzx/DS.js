@@ -11119,11 +11119,31 @@ var Table = (function () {
     };
     Table.prototype.construct_html_suggestions = function (suggestions, pos, table_expr) {
         var datai = this._datai_envi;
-        var template = "\n            <h5>Operation Suggestions</h5>\n            <ul>\n        ";
+        var template = "\n            <div class=\"suggestions-wrap\">\n                <div class=\"left\">\n                <h5>In-Context Operations</h5>\n                <ul>\n        ";
         suggestions.forEach(function (s) {
             template += "<li class=\"suggestion-item\">" + s + "</li>";
         });
-        template += '</ul>';
+        template += '</ul></div>';
+        var global_methods = [
+            'converted()',
+            'num_rows()',
+            'num_columns()',
+            'labels()',
+            'columns()',
+            'with_row()',
+            'with_rows()',
+            'with_column()',
+            'with_columns()',
+            'copy()',
+            'stats()',
+            'percentile()',
+            'sample()',
+        ];
+        template += "\n            <div class=\"right\">\n            <h5>Global Operations</h5>\n            <ul>\n        ";
+        global_methods.forEach(function (s) {
+            template += "<li class=\"suggestion-item\">" + s + "</li>";
+        });
+        template += '</ul></div></div>';
         $("#suggestion-" + datai).html(template).css({
             left: pos.left + 25,
             top: pos.top + 10
@@ -11700,14 +11720,18 @@ function env_init(_this) {
                         pre_eval_code += all_code[i] + '\n';
                     }
                     refresh_table(datai, envi);
-                    eval(pre_eval_code);
-                    eval(`${identifier_name}.preview('self()')`);
-                    let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
-                    $(`#env-${datai}-${envi} .preview-panel`).css({
-                        left: pos.left + 50,
-                        top: pos.top + 30
-                    }).toggle();
-                    break;
+                    try {
+                        eval(pre_eval_code);
+                        eval(`${identifier_name}.preview('self()')`);
+                        let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
+                        $(`#env-${datai}-${envi} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
+                        break;
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 } else if (is_supported_preview(method_name) && between(col, method_start, method_end)) {
                     // here we preview a method call
                     // console.log(`method ${callee.property.name} found`);
@@ -11862,20 +11886,24 @@ function env_init(_this) {
                 code += all_code[i] + '\n';
             }
             refresh_table(editor.datai, editor.envi);
-            let res = eval(code);
-            if (cur_line.length && res && res.__showable__) {
-                // [TODO] here we should embed the name of the shown table
-                // (it can be an anonymous table returned by functions)
-                let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
-                if (expr.type == 'AssignmentExpression') {
-                    res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                } else if (expr.type == 'CallExpression') {
-                    res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                } else if (expr.type == 'Identifier') {
-                    res.show(false);
+            try {
+                let res = eval(code);
+                if (cur_line.length && res && res.__showable__) {
+                    // [TODO] here we should embed the name of the shown table
+                    // (it can be an anonymous table returned by functions)
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
+                    if (expr.type == 'AssignmentExpression') {
+                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                    } else if (expr.type == 'CallExpression') {
+                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                    } else if (expr.type == 'Identifier') {
+                        res.show(false);
+                    }
+                } else {
+                    $(`#table-area-${datai}-${envi}`).html('');
                 }
-            } else {
-                $(`#table-area-${datai}-${envi}`).html('');
+            } catch (e) {
+                console.log(e.message);
             }
         }
     });

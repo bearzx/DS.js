@@ -117,14 +117,18 @@ function env_init(_this) {
                         pre_eval_code += all_code[i] + '\n';
                     }
                     refresh_table(datai, envi);
-                    eval(pre_eval_code);
-                    eval(`${identifier_name}.preview('self()')`);
-                    let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
-                    $(`#env-${datai}-${envi} .preview-panel`).css({
-                        left: pos.left + 50,
-                        top: pos.top + 30
-                    }).toggle();
-                    break;
+                    try {
+                        eval(pre_eval_code);
+                        eval(`${identifier_name}.preview('self()')`);
+                        let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
+                        $(`#env-${datai}-${envi} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
+                        break;
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 } else if (is_supported_preview(method_name) && between(col, method_start, method_end)) {
                     // here we preview a method call
                     // console.log(`method ${callee.property.name} found`);
@@ -146,14 +150,18 @@ function env_init(_this) {
                     // console.log(`cur_line_partial: ${cur_line_partial}`);
                     pre_eval_code += cur_line_partial;
                     refresh_table(datai, envi);
-                    let partial_result = eval(pre_eval_code);
-                    eval(`partial_result.preview(\`${method_call}\`)`);
-                    let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
-                    $(`#env-${datai}-${envi} .preview-panel`).css({
-                        left: pos.left + 50,
-                        top: pos.top + 30
-                    }).toggle();
-                    break;
+                    try {
+                        let partial_result = eval(pre_eval_code);
+                        eval(`partial_result.preview(\`${method_call}\`)`);
+                        let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
+                        $(`#env-${datai}-${envi} .preview-panel`).css({
+                            left: pos.left + 50,
+                            top: pos.top + 30
+                        }).toggle();
+                        break;
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 } else {
                     last_callee = callee;
                     callee_level += 1;
@@ -279,20 +287,24 @@ function env_init(_this) {
                 code += all_code[i] + '\n';
             }
             refresh_table(editor.datai, editor.envi);
-            let res = eval(code);
-            if (cur_line.length && res && res.__showable__) {
-                // [TODO] here we should embed the name of the shown table
-                // (it can be an anonymous table returned by functions)
-                let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
-                if (expr.type == 'AssignmentExpression') {
-                    res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                } else if (expr.type == 'CallExpression') {
-                    res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                } else if (expr.type == 'Identifier') {
-                    res.show(false);
+            try {
+                let res = eval(code);
+                if (cur_line.length && res && res.__showable__) {
+                    // [TODO] here we should embed the name of the shown table
+                    // (it can be an anonymous table returned by functions)
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
+                    if (expr.type == 'AssignmentExpression') {
+                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                    } else if (expr.type == 'CallExpression') {
+                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                    } else if (expr.type == 'Identifier') {
+                        res.show(false);
+                    }
+                } else {
+                    $(`#table-area-${datai}-${envi}`).html('');
                 }
-            } else {
-                $(`#table-area-${datai}-${envi}`).html('');
+            } catch (e) {
+                console.log(e.message);
             }
         }
     });
@@ -319,9 +331,13 @@ function env_init(_this) {
         window._datai = `${datai}-${envi}`;
         // [TODO] use esprima to detect table variable name
         // [TODO] we should also use the current line to decide which table to show
-        let res = eval(code);
-        if (res && res.__showable__) {
-            res.show();
+        try {
+            let res = eval(code);
+            if (res && res.__showable__) {
+                res.show();
+            }
+        } catch (e) {
+            console.log(e.message);
         }
     });
 

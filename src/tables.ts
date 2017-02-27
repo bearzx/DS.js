@@ -892,13 +892,39 @@ export class Table {
     construct_html_suggestions(suggestions, pos, table_expr) {
         let datai = this._datai_envi;
         let template = `
-            <h5>Operation Suggestions</h5>
-            <ul>
+            <div class="suggestions-wrap">
+                <div class="left">
+                <h5>In-Context Operations</h5>
+                <ul>
         `;
         suggestions.forEach(function(s) {
             template += `<li class="suggestion-item">${s}</li>`;
         });
-        template += '</ul>';
+        template += '</ul></div>';
+        let global_methods = [
+            'converted()',
+            'num_rows()',
+            'num_columns()',
+            'labels()',
+            'columns()',
+            'with_row()',
+            'with_rows()',
+            'with_column()',
+            'with_columns()',
+            'copy()',
+            'stats()',
+            'percentile()',
+            'sample()',
+        ];
+        template += `
+            <div class="right">
+            <h5>Global Operations</h5>
+            <ul>
+        `;
+        global_methods.forEach(function(s) {
+            template += `<li class="suggestion-item">${s}</li>`;
+        });
+        template += '</ul></div></div>'
 
         $(`#suggestion-${datai}`).html(template).css({
             left: pos.left + 25,

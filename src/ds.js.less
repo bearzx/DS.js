@@ -217,7 +217,7 @@
     .suggestion-panel {
         position: absolute;
         display: none;
-        width: 400px;
+        min-width: 500px;
         // min-height: 100px;
         float: left;
         z-index: 999;
@@ -232,6 +232,16 @@
         .suggestion-item:hover {
             cursor: pointer;
             background-color: #a6bddb;
+        }
+
+        .suggestions-wrap {
+            .left {
+                float: left;
+            }
+
+            .right {
+                float: left;
+            }
         }
     }
 }
