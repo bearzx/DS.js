@@ -10987,7 +10987,7 @@ var Table = (function () {
         // }
         window.selected_columns = [];
         if (!table_expr) {
-            table_expr = "t" + this.cur_env();
+            table_expr = "t" + window.datai;
         }
         $("#table-area-" + this.cur_env()).html(this.construct_html_table(raw_components, hide, hide));
         $('.suggestion-panel').hide();
@@ -11632,7 +11632,7 @@ function env_init(_this) {
     // editor.setBehavioursEnabled(false);
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
-    editor.setValue(`t${datai}_${envi}; // This table is denoted as t${datai}_${envi}`);
+    editor.setValue(`t${datai}; // This table is denoted as t${datai}`);
 
     editor.commands.addCommand({
         name: 'preview',
@@ -11847,7 +11847,8 @@ function env_init(_this) {
 
     function refresh_table(_datai, _envi) {
         let data_name = `t${_datai}`;
-        let tname = `t${_datai}_${_envi}`;
+        // let tname = `t${_datai}_${_envi}`;
+        let tname = `t${_datai}`;
         // make a new copy of the pre-loaded table
         eval(`
             ${tname} = window.table_store['${data_name}'].copy();
@@ -11870,10 +11871,14 @@ function env_init(_this) {
             refresh_table(editor.datai, editor.envi);
             try {
                 let res = eval(code);
+                // console.log(res);
                 if (cur_line.length && res && res.__showable__) {
                     // [TODO] here we should embed the name of the shown table
                     // (it can be an anonymous table returned by functions)
-                    let expr = esprima.parse(cur_line, { loc: true }).body[0].expression;
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0];
+                    if (expr.type == 'ExpressionStatement') {
+                        expr = expr.expression;
+                    }
                     if (expr.type == 'AssignmentExpression') {
                         res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
                     } else if (expr.type == 'CallExpression') {
@@ -11881,11 +11886,13 @@ function env_init(_this) {
                     } else if (expr.type == 'Identifier') {
                         res.show(false);
                     }
+                } else if (cur_line.length) {
+                    $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
                 } else {
                     $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                 }
             } catch (e) {
-                console.log(e.message);
+                console.log(e);
             }
         }
     });
@@ -11922,6 +11929,8 @@ function env_init(_this) {
             let res = eval(code);
             if (res && res.__showable__) {
                 res.show();
+            } else {
+                $(`#table-area-${datai}-${envi}`).html(JSON.stringify(res));
             }
         } catch (e) {
             console.log(e.message);

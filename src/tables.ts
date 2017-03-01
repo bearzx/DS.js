@@ -752,7 +752,7 @@ export class Table {
 
         window.selected_columns = [];
         if (!table_expr) {
-            table_expr = `t${this.cur_env()}`;
+            table_expr = `t${window.datai}`;
         }
 
         $(`#table-area-${this.cur_env()}`).html(this.construct_html_table(raw_components, hide, hide));
