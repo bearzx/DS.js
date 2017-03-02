@@ -4,6 +4,7 @@ window.esprima = require('esprima');
 window.numeral = require('numeral');
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
+require('../libs/jquery.ba-bbq.js');
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
 
@@ -22,10 +23,6 @@ function env_init(_this) {
                     <div id="preview-${datai}-${envi}" class="preview-panel"></div>
                     <div id="${editor_id}" class="editor">
                     </div>
-                    <div class="buttons">
-                        <button datai="${datai}" envi="${envi}" class="run">Run</button>
-                        <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
-                    </div>
                 </div>
             </div>
             <div class="show-panel">
@@ -33,8 +30,14 @@ function env_init(_this) {
                 <div id="table-area-${datai}-${envi}" class="table-area"></div>
                 <div id="suggestion-${datai}-${envi}" class="suggestion-panel"></div>
             </div>
+            <div style="clear: both"></div>
+            <div class="buttons">
+                <button datai="${datai}" envi="${envi}" class="run">Run</button>
+                <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
+                <button class="share-button">Share</button>
+                <!-- <input type="text" size="50" /> -->
+            </div>
         </div>
-        <div style="clear: both"></div>
     `;
 
     let cur = _this;
@@ -360,10 +363,12 @@ function env_init(_this) {
     $('.table-area').click(function(e) {
         let pos = $(this).position();
         let table_pos = $(this).children('.ds-table').position();
-        let width = $(this).children('.ds-table').width();
-        let height = $(this).children('.ds-table').height();
-        if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
-            $(this).siblings('.suggestion-panel').hide();
+        if (table_pos) {
+            let width = $(this).children('.ds-table').width();
+            let height = $(this).children('.ds-table').height();
+            if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
+                $(this).siblings('.suggestion-panel').hide();
+            }
         }
     });
 
@@ -371,6 +376,30 @@ function env_init(_this) {
         let datai = $(this).attr('datai');
         let envi = $(this).attr('envi');
         SelectorGadget.toggle(datai, envi);
+    });
+
+    function compress_states() {
+
+    }
+
+    $('.share-button').click(function() {
+        let params = {};
+        $('.editor').each(function(i) {
+            let editor = ace.edit(this);
+            let editor_id = $(this).attr('id');
+            let pos = editor.getCursorPosition();
+            let code = editor.getValue();
+            let param = {
+                'code': code,
+                'crow': pos.row,
+                'ccol': pos.column
+            };
+            params[editor_id] = param;
+        });
+        console.log($.param.querystring(window.location.href, params));
+        $('#hidden-copy-area').val($.param.querystring(window.location.href, params)).select();
+        // let obj = $.deparam.querystring($.param.querystring(window.location.href, params));
+        // console.log(obj);
     });
 }
 
