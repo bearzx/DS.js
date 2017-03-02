@@ -11614,8 +11614,6 @@ function env_init(_this) {
             <div class="buttons">
                 <button datai="${datai}" envi="${envi}" class="run">Run</button>
                 <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
-                <button class="share-button">Share</button>
-                <!-- <input type="text" size="50" /> -->
             </div>
         </div>
     `;
@@ -11898,6 +11896,7 @@ function env_init(_this) {
                 console.log(e);
             }
         }
+        update_url();
     });
 
     function bind_env(_datai, _envi) {
@@ -11958,6 +11957,24 @@ function env_init(_this) {
         SelectorGadget.toggle(datai, envi);
     });
 
+    function update_url() {
+        let params = {};
+        $('.editor').each(function(i) {
+            let editor = ace.edit(this);
+            let editor_id = $(this).attr('id');
+            let pos = editor.getCursorPosition();
+            let code = editor.getValue();
+            let param = {
+                'code': code,
+                'crow': pos.row,
+                'ccol': pos.column
+            };
+            params[editor_id] = param;
+        });
+        // console.log($.param.querystring(window.location.href, params));
+        window.history.pushState('', '', $.param.querystring(window.location.href, params));
+    }
+
     $('.share-button').click(function() {
         let params = {};
         $('.editor').each(function(i) {
@@ -11972,16 +11989,7 @@ function env_init(_this) {
             };
             params[editor_id] = param;
         });
-        console.log($.param.querystring(window.location.href, params));
-        $('#hidden-copy-area').val($.param.querystring(window.location.href, params)).select();
-        try {
-            let success = document.execCommand('copy');
-            console.log(success);
-            $(this).text('Copied!');
-        } catch (e) {
-            console.log('copy failed');
-            console.log(e);
-        }
+        console.log($.param.querystring("", params));
         // let obj = $.deparam.querystring($.param.querystring(window.location.href, params));
         // console.log(obj);
     });
