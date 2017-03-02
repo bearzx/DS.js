@@ -11588,8 +11588,17 @@ __webpack_require__(3);
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
 
-function env_init(_this) {
+function env_init(_this, code_obj) {
     let datai = $(_this).attr('datai');
+    let data_link = $(_this).attr('data-link');
+
+    if ($(_this).attr('class') == 'open-dsjs') {
+        window.table_store[`t${datai}`] = new Table.Table(null, null, `${data_link}`);
+    } else if ($(_this).attr('class') == 'open-dsjs-htable') {
+        window.table_store[`t${datai}`] = new Table.Table(null, null, null);
+        window.table_store[`t${datai}`].from_columns($(`.dsjs-htable-${datai}`).parsetable(true, true));
+    }
+
     let env_class = 'env-' + datai;
     let envi = $(`.${env_class}`).length;
     let env_id = `env-${datai}-${envi}`;
@@ -11633,7 +11642,12 @@ function env_init(_this) {
     // editor.setBehavioursEnabled(false);
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
-    editor.setValue(`t${datai}; // This table is denoted as t${datai}`);
+    if (code_obj) {
+        editor.setValue(code_obj.code);
+        editor.gotoLine(code_obj.crow + 1, code_obj.ccol);
+    } else {
+        editor.setValue(`t${datai}; // This table is denoted as t${datai}`);
+    }
 
     editor.commands.addCommand({
         name: 'preview',
@@ -11912,7 +11926,6 @@ function env_init(_this) {
         });
     });
 
-    let data_link = $(_this).attr('data-link');
     window._datai = `${datai}-${envi}`;
     $('#' + env_id).toggle();
 
@@ -11958,28 +11971,17 @@ function env_init(_this) {
     });
 
     function update_url() {
-        let params = {};
-        $('.editor').each(function(i) {
-            let editor = ace.edit(this);
-            let editor_id = $(this).attr('id');
-            let pos = editor.getCursorPosition();
-            let code = editor.getValue();
-            let param = {
-                'code': code,
-                'crow': pos.row,
-                'ccol': pos.column
-            };
-            params[editor_id] = param;
-        });
-        // console.log($.param.querystring(window.location.href, params));
-        window.history.pushState('', '', $.param.querystring(window.location.href, params));
-    }
+        // fetch existing parameters so that we don't
+        // mess up with them
+        let url_params = $.deparam.querystring(location.search);
+        if (url_params.dsjs) {
+            delete url_params.dsjs;
+        }
 
-    $('.share-button').click(function() {
-        let params = {};
+        let dsjs_params = {};
         $('.editor').each(function(i) {
             let editor = ace.edit(this);
-            let editor_id = $(this).attr('id');
+            let key = `${editor.datai}-${editor.envi}`;
             let pos = editor.getCursorPosition();
             let code = editor.getValue();
             let param = {
@@ -11987,12 +11989,11 @@ function env_init(_this) {
                 'crow': pos.row,
                 'ccol': pos.column
             };
-            params[editor_id] = param;
+            dsjs_params[key] = param;
         });
-        console.log($.param.querystring("", params));
-        // let obj = $.deparam.querystring($.param.querystring(window.location.href, params));
-        // console.log(obj);
-    });
+        url_params.dsjs = dsjs_params;
+        window.history.pushState('', '', $.param.querystring(window.location.href, url_params));
+    }
 }
 
 $(document).ready(function() {
@@ -12004,23 +12005,23 @@ $(document).ready(function() {
     $('a').each(function(i) {
         let data_link = $(this).attr('href');
         if (data_link && data_link.endsWith('.csv')) {
-            $(this).after(`<button datai="${datai}" data-link=${data_link} class="open-dsjs btn btn-primary btn-xs">Append ds.js</button>`);
+            $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append ds.js</button>`);
             // pre-load the csv file
-            eval(`
-                window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
-            `);
+            // eval(`
+            //     window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
+            // `);
             datai += 1;
         }
     });
 
     // html table detection
     $('table').each(function(i) {
-        $(this).after(`<button datai="${datai}" class="open-dsjs-htable btn btn-primary btn-xs">Append ds.js</button>`);
+        $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" class="open-dsjs-htable">Append ds.js</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
-        eval(`
-            window.table_store['t${datai}'] = new Table.Table(null, null, null);
-            window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
-        `);
+        // eval(`
+        //     window.table_store['t${datai}'] = new Table.Table(null, null, null);
+        //     window.table_store['t${datai}'].from_columns($('.dsjs-htable-${datai}').parsetable(true, true));
+        // `);
         datai += 1;
     });
 
@@ -12036,6 +12037,18 @@ $(document).ready(function() {
     window.sg_prediction = function(prediction) {
         window.last_prediction = prediction;
     };
+
+    // read url parameters and restore states
+    let url_params = $.deparam.querystring(location.search);
+    if (url_params.dsjs) {
+        Object.keys(url_params.dsjs).forEach(function(datai_envi) {
+            let datai;
+            let envi;
+            [datai, envi] = datai_envi.split('-');
+            let code_obj = url_params.dsjs[datai_envi];
+            env_init($(`#open-dsjs-${datai}`), code_obj);
+        });
+    }
 });
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
