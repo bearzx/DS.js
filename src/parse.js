@@ -418,6 +418,7 @@ function env_init(_this, code_obj) {
 
 $(document).ready(function() {
     window.table_store = {};
+    window.lib_urls = {};
     // [TODO] consider change it to another name to avoid conflicts
     // with window._datai
     let datai = 0;
@@ -468,5 +469,15 @@ $(document).ready(function() {
             let code_obj = url_params.dsjs[datai_envi];
             env_init($(`#open-dsjs-${datai}`), code_obj);
         });
+    }
+
+    window.using = function(url) {
+        if (!window.lib_urls[url]) {
+            $.getScript(url).done(function() {
+                window.lib_urls[url] = true;
+            }).fail(function() {
+                return 'load fail';
+            });
+        }
     }
 });
