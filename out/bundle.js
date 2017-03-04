@@ -10321,7 +10321,12 @@ var Table = (function () {
             this._labels = l.slice();
         }
         if (url != null) {
-            this.read_table_csv_sync(url);
+            if (url.endsWith('.csv')) {
+                this.read_table_csv_sync(url);
+            }
+            else if (url.endsWith('.tsv')) {
+                this.read_table_tsv_sync(url);
+            }
         }
         // if (datai == undefined) {
         //     if (window._datai) {
@@ -10392,6 +10397,18 @@ var Table = (function () {
             async: false,
             success: function (data) {
                 _this._t = d3.csvParse(data);
+                _this.table_init();
+            }
+        });
+    };
+    Table.prototype.read_table_tsv_sync = function (url) {
+        var _this = this;
+        $.ajax({
+            dataType: "text",
+            url: url,
+            async: false,
+            success: function (data) {
+                _this._t = d3.tsvParse(data);
                 _this.table_init();
             }
         });
@@ -11416,7 +11433,7 @@ var Table = (function () {
     Table.prototype.preview = function (method_call) {
         var method_name = method_call.slice(0, method_call.indexOf('('));
         var args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
-        console.log("method_call: " + method_call + ", method_name: " + method_name + ", args: " + args);
+        // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
         if (method_name == 'with_row' || method_name == 'with_rows') {
             var new_table = eval("this." + method_name + "(" + args + ")");
             args = method_name == 'with_row' ? [eval("this._as_args(" + args + ")")] : eval("this._as_args(" + args + ")")[0];
@@ -11605,7 +11622,8 @@ function env_init(_this, code_obj) {
     let editor_id = `editor-${datai}-${envi}`;
     // create new environment
     let ds_env = `
-        <h4>ds.js env ${datai}-${envi}</h4>
+        <h4>ds.js environment ${datai}-${envi}</h4>
+        <button id="show-env-${datai}-${envi}" class="show-env" datai="${datai}" envi="${envi}">open</button>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="repl">
                 <div class="inputs">
@@ -11623,6 +11641,7 @@ function env_init(_this, code_obj) {
             <div class="buttons">
                 <button datai="${datai}" envi="${envi}" class="run">Run</button>
                 <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
+                <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">X</button>
             </div>
         </div>
     `;
@@ -11723,7 +11742,7 @@ function env_init(_this, code_obj) {
                         }).toggle();
                         break;
                     } catch (e) {
-                        console.log(e.message);
+                        // console.log(e.message);
                     }
                 } else if (is_supported_preview(method_name) && between(col, method_start, method_end)) {
                     // here we preview a method call
@@ -11756,7 +11775,7 @@ function env_init(_this, code_obj) {
                         }).toggle();
                         break;
                     } catch (e) {
-                        console.log(e.message);
+                        // console.log(e.message);
                     }
                 } else {
                     last_callee = callee;
@@ -11907,7 +11926,7 @@ function env_init(_this, code_obj) {
                     $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                 }
             } catch (e) {
-                console.log(e);
+                // console.log(e);
             }
         }
         update_url();
@@ -11948,7 +11967,7 @@ function env_init(_this, code_obj) {
                 $(`#table-area-${datai}-${envi}`).html(JSON.stringify(res));
             }
         } catch (e) {
-            console.log(e.message);
+            // console.log(e.message);
         }
     });
 
@@ -11994,6 +12013,20 @@ function env_init(_this, code_obj) {
         url_params.dsjs = dsjs_params;
         window.history.pushState('', '', $.param.querystring(window.location.href, url_params));
     }
+
+    $('.hide-env').click(function() {
+        let datai = $(this).attr('datai');
+        let envi = $(this).attr('envi');
+        $(`#env-${datai}-${envi}`).hide();
+        $(`#show-env-${datai}-${envi}`).show();
+    });
+
+    $('.show-env').click(function() {
+        let datai = $(this).attr('datai');
+        let envi = $(this).attr('envi');
+        $(`#env-${datai}-${envi}`).show();
+        $(this).hide();
+    });
 }
 
 $(document).ready(function() {
@@ -12005,7 +12038,7 @@ $(document).ready(function() {
     // csv detection
     $('a').each(function(i) {
         let data_link = $(this).attr('href');
-        if (data_link && data_link.endsWith('.csv')) {
+        if (data_link && (data_link.endsWith('.csv') || data_link.endsWith('.tsv'))) {
             $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append ds.js</button>`);
             // pre-load the csv file
             // eval(`

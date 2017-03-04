@@ -34,7 +34,11 @@ export class Table {
         }
 
         if (url != null) {
-            this.read_table_csv_sync(url);
+            if (url.endsWith('.csv')) {
+                this.read_table_csv_sync(url);
+            } else if (url.endsWith('.tsv')) {
+                this.read_table_tsv_sync(url);
+            }
         }
 
         // if (datai == undefined) {
@@ -115,6 +119,19 @@ export class Table {
             async: false,
             success: function (data) {
                 _this._t = d3.csvParse(data);
+                _this.table_init();
+            }
+        });
+    }
+
+    public read_table_tsv_sync(url: string) {
+        var _this = this;
+        $.ajax({
+            dataType: "text",
+            url: url,
+            async: false,
+            success: function (data) {
+                _this._t = d3.tsvParse(data);
                 _this.table_init();
             }
         });
@@ -1236,7 +1253,7 @@ export class Table {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
 
-        console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
+        // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
         if (method_name == 'with_row' || method_name == 'with_rows') {
             let new_table = eval(`this.${method_name}(${args})`);
