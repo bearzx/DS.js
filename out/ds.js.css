@@ -81,10 +81,10 @@
   min-height: 300px;
   /*border: 1px dashed;*/
   padding: 5px;
+  margin-right: 20px;
 }
 .dsjs-env .show-panel {
   float: left;
-  margin-left: 20px;
   min-width: 600px;
   min-height: 300px;
   padding: 5px;
