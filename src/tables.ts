@@ -947,7 +947,7 @@ export class Table {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
+        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
     // create a ylabel-xlabel bar chart
@@ -958,7 +958,7 @@ export class Table {
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
-        vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
+        vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
     // create a ylabel-xlabel bar chart
@@ -969,7 +969,7 @@ export class Table {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": `#vis-${id}` }).update(); });
+        vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
     scatter_d3(xlabel, ylabel) {
@@ -1057,7 +1057,7 @@ export class Table {
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-            chart({ el: `#vis-${id}` }).update();
+            chart({ el: `#table-area-${id}` }).update();
         });
     }
 
@@ -1065,7 +1065,7 @@ export class Table {
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.vbar(this._t), function (error, chart) {
-            chart({ el: `#vis-${id}` }).update();
+            chart({ el: `#table-area-${id}` }).update();
         });
     }
 
@@ -1086,7 +1086,7 @@ export class Table {
             });
         });
         vg.parse.spec(templates.boxplot(values), function (error, chart) {
-            chart({ el: `#vis-${id}` }).update();
+            chart({ el: `#table-area-${id}` }).update();
         });
     }
 

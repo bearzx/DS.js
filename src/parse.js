@@ -28,6 +28,11 @@ function env_init(_this, code_obj) {
         <h4>ds.js environment ${datai}-${envi}</h4>
         <button id="show-env-${datai}-${envi}" class="show-env" datai="${datai}" envi="${envi}">open</button>
         <div id="${env_id}" class="dsjs-env ${env_class}">
+            <div class="buttons">
+                <button datai="${datai}" envi="${envi}" class="run">&#9654;</button>
+                <button datai="${datai}" envi="${envi}" class="toggle-sg">Pick Data</button>
+                <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">&#10005;</button>
+            </div>
             <div class="repl">
                 <div class="inputs">
                     <div id="preview-${datai}-${envi}" class="preview-panel"></div>
@@ -41,11 +46,6 @@ function env_init(_this, code_obj) {
                 <div id="suggestion-${datai}-${envi}" class="suggestion-panel"></div>
             </div>
             <div style="clear: both"></div>
-            <div class="buttons">
-                <button datai="${datai}" envi="${envi}" class="run">Run</button>
-                <button datai="${datai}" envi="${envi}" class="toggle-sg">Click and Pick Data</button>
-                <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">X</button>
-            </div>
         </div>
     `;
 
@@ -280,6 +280,10 @@ function env_init(_this, code_obj) {
         // let row = _editor.getCursorPosition().row;
         // let col = _editor.getCursorPosition().column;
         // console.log(`row: ${row} col: ${col}`);
+    });
+
+    editor.on('focus', function(e) {
+        $('.suggestion-panel').hide();
     });
 
     function refresh_table(_datai, _envi) {

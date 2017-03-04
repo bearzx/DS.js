@@ -1,6 +1,6 @@
 .dsjs-env {
   min-width: 2000px;
-  min-height: 600px;
+  min-height: 300px;
   display: none;
 }
 .dsjs-env pre {
@@ -78,7 +78,7 @@
 .dsjs-env .repl {
   float: left;
   min-width: 400px;
-  min-height: 600px;
+  min-height: 300px;
   /*border: 1px dashed;*/
   padding: 5px;
 }
@@ -86,7 +86,7 @@
   float: left;
   margin-left: 20px;
   min-width: 600px;
-  min-height: 600px;
+  min-height: 300px;
   padding: 5px;
 }
 .dsjs-env .history {
@@ -97,6 +97,7 @@
   border: 1px dashed;
 }
 .dsjs-env .vis {
+  display: none;
   min-height: 300px;
   border: 1px dashed;
 }
@@ -121,7 +122,7 @@
   right: 0;
   bottom: 0;
   width: 400px;
-  height: 600px;
+  height: 300px;
   border: 1px dashed;
 }
 .dsjs-env .preview {
@@ -200,7 +201,10 @@
 }
 .open-dsjs,
 .open-dsjs-htable,
-.show-env {
+.show-env,
+.hide-env,
+.run,
+.toggle-sg {
   display: inline-block;
   padding: 1px 5px;
   font-size: 12px;
