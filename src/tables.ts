@@ -1074,32 +1074,39 @@ export class Table {
     }
 
     bhist(column: string, nbins: number) {
+        let bins = {};
         if (nbins) {
             let col = this.column(column);
             let range = col.max() - col.min();
-            let step = range / nbins;
-        } else {
-
-        }
-        var bins = {};
-        this._t.forEach(function (row) {
-            var elem = row[column];
-            if (elem.length != 0) {
-                if (elem in bins) {
-                    bins[elem] += 1;
-                } else {
-                    bins[elem] = 1;
-                }
+            let step = Math.ceil(range / nbins);
+            let start = Math.floor(col.min());
+            for (let i = 0; i < nbins; i++) {
+                bins[start + i * step] = 0;
             }
-        });
+            this._t.forEach(function(row) {
+                let elem = row[column];
+                let i = Math.floor((elem - start) / step);
+                bins[start + i * step] += 1;
+            });
+        } else {
+            this._t.forEach(function (row) {
+                let elem = row[column];
+                if (elem.length != 0) {
+                    if (elem in bins) {
+                        bins[elem] += 1;
+                    } else {
+                        bins[elem] = 1;
+                    }
+                }
+            });
+        }
+        console.log(bins);
         var data = [];
         var xs = Object.keys(bins);
         xs.sort((a, b) => parseInt(a) - parseInt(b));
-        // console.log(xs);
         xs.forEach(function (x) {
             data.push({ 'x': x, 'y': bins[x] });
         });
-        // console.log(data);
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {

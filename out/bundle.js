@@ -14373,6 +14373,7 @@ var Table = (function () {
             .attr("r", 8);
     };
     // create a histogram on a certain column
+    // naive version
     Table.prototype.hist = function (column) {
         var bins = {};
         this._t.forEach(function (row) {
@@ -14394,6 +14395,53 @@ var Table = (function () {
             data.push({ 'x': x, 'y': bins[x] });
         });
         // console.log(data);
+        var templates = new vgt.VGTemplate();
+        var id = this.cur_env();
+        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
+            chart({ el: "#table-area-" + id }).update();
+        });
+    };
+    Table.prototype.bhist = function (column, nbins) {
+        var bins = {};
+        if (nbins) {
+            var col = this.column(column);
+            var range = col.max() - col.min();
+            console.log("range " + range);
+            var step_1 = Math.ceil(range / nbins);
+            console.log("step " + step_1);
+            var start_1 = Math.floor(col.min());
+            console.log("start " + start_1);
+            console.log("max " + col.max());
+            for (var i = 0; i < nbins; i++) {
+                bins[start_1 + i * step_1] = 0;
+            }
+            this._t.forEach(function (row) {
+                var elem = row[column];
+                var i = Math.floor((elem - start_1) / step_1);
+                console.log(elem + " mapped to " + i);
+                bins[start_1 + i * step_1] += 1;
+            });
+        }
+        else {
+            this._t.forEach(function (row) {
+                var elem = row[column];
+                if (elem.length != 0) {
+                    if (elem in bins) {
+                        bins[elem] += 1;
+                    }
+                    else {
+                        bins[elem] = 1;
+                    }
+                }
+            });
+        }
+        console.log(bins);
+        var data = [];
+        var xs = Object.keys(bins);
+        xs.sort(function (a, b) { return parseInt(a) - parseInt(b); });
+        xs.forEach(function (x) {
+            data.push({ 'x': x, 'y': bins[x] });
+        });
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
@@ -15043,8 +15091,8 @@ function env_init(_this, code_obj) {
             let all_code = editor.getValue().split('\n');
             let code = '';
             for (let i = 0; i <= rown; i++) {
-                // code += all_code[i] + '\n';
-                code += all_code[i].trim();
+                code += all_code[i] + '\n';
+                // code += all_code[i].trim();
             }
             bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
@@ -15054,8 +15102,8 @@ function env_init(_this, code_obj) {
                 // console.log(res);
                 if (cur_line.length && res && res.__showable__) {
                     // [TODO] should we use cur_line or all the code?
+                    let expr = esprima.parse(cur_line, { loc: true }).body[0];
                     // let expr = esprima.parse(code, { loc: true }).body[0];
-                    let expr = esprima.parse(code, { loc: true }).body[0];
                     if (expr.type == 'ExpressionStatement') {
                         expr = expr.expression;
                     }
