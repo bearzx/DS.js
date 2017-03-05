@@ -1045,7 +1045,42 @@ export class Table {
     }
 
     // create a histogram on a certain column
+    // naive version
     hist(column: string) {
+        var bins = {};
+        this._t.forEach(function (row) {
+            var elem = row[column];
+            if (elem.length != 0) {
+                if (elem in bins) {
+                    bins[elem] += 1;
+                } else {
+                    bins[elem] = 1;
+                }
+            }
+        });
+        var data = [];
+        var xs = Object.keys(bins);
+        xs.sort((a, b) => parseInt(a) - parseInt(b));
+        // console.log(xs);
+        xs.forEach(function (x) {
+            data.push({ 'x': x, 'y': bins[x] });
+        });
+        // console.log(data);
+        var templates = new vgt.VGTemplate();
+        var id = this.cur_env();
+        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
+            chart({ el: `#table-area-${id}` }).update();
+        });
+    }
+
+    bhist(column: string, nbins: number) {
+        if (nbins) {
+            let col = this.column(column);
+            let range = col.max() - col.min();
+            let step = range / nbins;
+        } else {
+
+        }
         var bins = {};
         this._t.forEach(function (row) {
             var elem = row[column];
