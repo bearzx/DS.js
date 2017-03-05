@@ -2,6 +2,7 @@ window.$ = window.jQuery = require('jquery');
 // window.$ = window.jQuerySG;
 window.esprima = require('esprima');
 window.numeral = require('numeral');
+window.nj = require('numjs');
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
 require('../libs/jquery.ba-bbq.js');
@@ -306,17 +307,19 @@ function env_init(_this, code_obj) {
             let all_code = editor.getValue().split('\n');
             let code = '';
             for (let i = 0; i <= rown; i++) {
-                code += all_code[i] + '\n';
+                // code += all_code[i] + '\n';
+                code += all_code[i].trim();
             }
             bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
+            // console.log(code);
             try {
                 let res = eval(code);
                 // console.log(res);
                 if (cur_line.length && res && res.__showable__) {
-                    // [TODO] here we should embed the name of the shown table
-                    // (it can be an anonymous table returned by functions)
-                    let expr = esprima.parse(cur_line, { loc: true }).body[0];
+                    // [TODO] should we use cur_line or all the code?
+                    // let expr = esprima.parse(code, { loc: true }).body[0];
+                    let expr = esprima.parse(code, { loc: true }).body[0];
                     if (expr.type == 'ExpressionStatement') {
                         expr = expr.expression;
                     }
@@ -332,8 +335,9 @@ function env_init(_this, code_obj) {
                 } else {
                     $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                 }
-            } catch (e) {
-                // console.log(e);
+            }
+            catch (e) {
+                console.log(e);
             }
         }
         update_url();

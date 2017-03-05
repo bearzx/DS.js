@@ -25,15 +25,14 @@
 .dsjs-env .preview-table {
   overflow: hidden;
 }
+.dsjs-env .ds-table tr,
+.dsjs-env .preview-table tr,
 .dsjs-env .ds-table th,
 .dsjs-env .preview-table th,
 .dsjs-env .ds-table td,
 .dsjs-env .preview-table td {
-  border: none;
-}
-.dsjs-env .ds-table tr,
-.dsjs-env .preview-table tr {
-  border: 1px solid;
+  border: 1px solid #ddd;
+  border-collapse: collapse;
 }
 .dsjs-env .ds-table th:hover::after {
   content: "";
@@ -151,10 +150,10 @@
 .dsjs-env .blank {
   height: 10px;
   background-color: #eee;
-  border: 1px solid;
+  border: 1px solid #ddd;
 }
 .dsjs-env .blank td {
-  border: none;
+  border: 1px solid #ddd;
 }
 .dsjs-env .preview-hl {
   position: absolute;
@@ -172,7 +171,7 @@
   float: left;
   z-index: 999;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.9);
   padding: 15px;
   text-align: left;
 }

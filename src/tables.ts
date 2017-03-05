@@ -8,6 +8,7 @@ declare var ace: any;
 declare var window: any;
 declare var esprima: any;
 declare var numeral: any;
+declare var nj: any;
 
 export class Table {
 
@@ -80,7 +81,7 @@ export class Table {
         this._t.forEach(function(row) {
             _this._labels.forEach(function(l) {
                 let n = numeral(row[l]);
-                row[l] =  n._value ? n._value : row[l];
+                row[l] =  n._value != null ? n._value : row[l];
             });
         });
     }
@@ -177,12 +178,12 @@ export class Table {
             this._t.forEach(function (row) {
                 col.push(row[column_label]);
             });
-            return col;
+            return nj.array(col);
         } else if (typeof index_or_label === 'string') {
             this._t.forEach(function (row) {
                 col.push(row[index_or_label]);
             });
-            return col;
+            return nj.array(col);
         }
     }
 
@@ -263,6 +264,10 @@ export class Table {
 
     // [impure] add a column to the end of the table
     _with_column(label, values) {
+        if (values.tolist) {
+            values = values.tolist();
+        }
+        // console.log(values);
         if ((values.length == 1) && (this._t.length != 0)) {
             // insert a new column with all the same values
             for (var i = 0; i < this._t.length; i++) {
@@ -302,8 +307,12 @@ export class Table {
         }
 
         if (labels_and_values.length % 2 == 0) {
-            for (var i = 0; i < labels_and_values.length / 2; i++) {
-                this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+            for (let i = 0; i < labels_and_values.length / 2; i++) {
+                if (labels_and_values[i * 2 + 1].tolist) {
+                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1].tolist());
+                } else {
+                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+                }
             }
         }
 
@@ -450,6 +459,7 @@ export class Table {
 
     // [impure] sort all rows based on a column
     sort(column_or_label, descending = false, distinct = false) {
+        column_or_label = this._as_label(column_or_label);
         var compare = function (a, b) {
             if (a[column_or_label] > b[column_or_label]) {
                 return 1;
@@ -613,7 +623,7 @@ export class Table {
     }
 
     private index_by(label) {
-        let column = this.column(label);
+        let column = this.column(label).tolist();
         var indexed = {};
         let _this = this;
         column.forEach(function (c, i) {
@@ -696,15 +706,16 @@ export class Table {
         let median_row = { 'statistics': 'median' };
         let sum_row = { 'statistics': 'sum' };
         this._labels.forEach(function (l) {
-            min_row[l] = d3.min(_this.column(l));
-            max_row[l] = d3.max(_this.column(l));
-            median_row[l] = d3.median(_this.column(l));
-            sum_row[l] = d3.sum(_this.column(l));
+            let cur_col = _this.column(l);
+            min_row[l] = cur_col.min();
+            max_row[l] = cur_col.max();
+            median_row[l] = d3.median(cur_col.tolist());
+            sum_row[l] = cur_col.sum();
         });
-        stats_table.with_row(min_row);
-        stats_table.with_row(max_row);
-        stats_table.with_row(median_row);
-        stats_table.with_row(sum_row);
+        stats_table._with_row(min_row);
+        stats_table._with_row(max_row);
+        stats_table._with_row(median_row);
+        stats_table._with_row(sum_row);
 
         return stats_table;
     }
