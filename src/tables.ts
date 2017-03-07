@@ -3,6 +3,7 @@ import * as vgt from './vgtemplates';
 declare var d3: any;
 declare var $: any;
 declare var vg: any;
+declare var vega: any;
 declare var ace: any;
 // declare var _datai: any;
 declare var window: any;
@@ -931,8 +932,8 @@ export class Table {
 
         $(`#suggestion-${datai}`).html(template).css({
             left: pos.left + 25,
-            top: pos.top + 10
-        }).show();
+            top: pos.top + 15
+        }).show('fast');
 
         $(`.suggestion-item`).click(function() {
             let editor = ace.edit(`editor-${datai}`);

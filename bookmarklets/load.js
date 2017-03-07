@@ -31,7 +31,8 @@ javascript: (
         function vega_load() {
             var vegajs = document.createElement('script');
             vegajs.onload = bundle_load;
-            vegajs.setAttribute('src', 'https://vega.github.io/vega/vega.min.js');
+            /* vegajs.setAttribute('src', 'https://vega.github.io/vega/vega.min.js'); */
+            vegajs.setAttribute('src', 'http://localhost/~bearzx/ds.js/tmp/vega/vega.js');
             document.body.appendChild(vegajs);
         }
 

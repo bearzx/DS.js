@@ -14279,8 +14279,8 @@ var Table = (function () {
         template += '</ul></div></div>';
         $("#suggestion-" + datai).html(template).css({
             left: pos.left + 25,
-            top: pos.top + 10
-        }).show();
+            top: pos.top + 15
+        }).show('fast');
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
             var new_code = table_expr + '.' + $(this).text() + ';';
@@ -14406,19 +14406,14 @@ var Table = (function () {
         if (nbins) {
             var col = this.column(column);
             var range = col.max() - col.min();
-            console.log("range " + range);
             var step_1 = Math.ceil(range / nbins);
-            console.log("step " + step_1);
             var start_1 = Math.floor(col.min());
-            console.log("start " + start_1);
-            console.log("max " + col.max());
             for (var i = 0; i < nbins; i++) {
                 bins[start_1 + i * step_1] = 0;
             }
             this._t.forEach(function (row) {
                 var elem = row[column];
                 var i = Math.floor((elem - start_1) / step_1);
-                console.log(elem + " mapped to " + i);
                 bins[start_1 + i * step_1] += 1;
             });
         }
@@ -14875,14 +14870,14 @@ function env_init(_this, code_obj) {
         }
     });
 
-    editor.commands.addCommand({
-        name: 'cancel-out',
-        bindKey: { win: 'Esc',  mac: 'Esc' },
-        exec: function(_editor) {
-            $('.preview-panel').hide();
-            $('.suggestion-panel').hide();
-        }
-    });
+    // editor.commands.addCommand({
+    //     name: 'cancel-out',
+    //     bindKey: { win: 'Esc',  mac: 'Esc' },
+    //     exec: function(_editor) {
+    //         $('.preview-panel').hide();
+    //         $('.suggestion-panel').hide();
+    //     }
+    // });
 
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
@@ -15099,20 +15094,21 @@ function env_init(_this, code_obj) {
             // console.log(code);
             try {
                 let res = eval(code);
-                // console.log(res);
                 if (cur_line.length && res && res.__showable__) {
                     // [TODO] should we use cur_line or all the code?
                     let expr = esprima.parse(cur_line, { loc: true }).body[0];
                     // let expr = esprima.parse(code, { loc: true }).body[0];
-                    if (expr.type == 'ExpressionStatement') {
-                        expr = expr.expression;
-                    }
-                    if (expr.type == 'AssignmentExpression') {
-                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                    } else if (expr.type == 'CallExpression') {
-                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                    } else if (expr.type == 'Identifier') {
-                        res.show(false);
+                    if (expr) {
+                        if (expr.type == 'ExpressionStatement') {
+                            expr = expr.expression;
+                        }
+                        if (expr.type == 'AssignmentExpression') {
+                            res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                        } else if (expr.type == 'CallExpression') {
+                            res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                        } else if (expr.type == 'Identifier') {
+                            res.show(false);
+                        }
                     }
                 } else if (cur_line.length) {
                     $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
@@ -15288,6 +15284,13 @@ $(document).ready(function() {
             });
         }
     }
+
+    $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+            $('.preview-panel').hide();
+            $('.suggestion-panel').hide();
+        }
+    });
 });
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 

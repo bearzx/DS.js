@@ -91,14 +91,14 @@ function env_init(_this, code_obj) {
         }
     });
 
-    editor.commands.addCommand({
-        name: 'cancel-out',
-        bindKey: { win: 'Esc',  mac: 'Esc' },
-        exec: function(_editor) {
-            $('.preview-panel').hide();
-            $('.suggestion-panel').hide();
-        }
-    });
+    // editor.commands.addCommand({
+    //     name: 'cancel-out',
+    //     bindKey: { win: 'Esc',  mac: 'Esc' },
+    //     exec: function(_editor) {
+    //         $('.preview-panel').hide();
+    //         $('.suggestion-panel').hide();
+    //     }
+    // });
 
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
@@ -315,20 +315,21 @@ function env_init(_this, code_obj) {
             // console.log(code);
             try {
                 let res = eval(code);
-                // console.log(res);
                 if (cur_line.length && res && res.__showable__) {
                     // [TODO] should we use cur_line or all the code?
                     let expr = esprima.parse(cur_line, { loc: true }).body[0];
                     // let expr = esprima.parse(code, { loc: true }).body[0];
-                    if (expr.type == 'ExpressionStatement') {
-                        expr = expr.expression;
-                    }
-                    if (expr.type == 'AssignmentExpression') {
-                        res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                    } else if (expr.type == 'CallExpression') {
-                        res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                    } else if (expr.type == 'Identifier') {
-                        res.show(false);
+                    if (expr) {
+                        if (expr.type == 'ExpressionStatement') {
+                            expr = expr.expression;
+                        }
+                        if (expr.type == 'AssignmentExpression') {
+                            res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                        } else if (expr.type == 'CallExpression') {
+                            res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                        } else if (expr.type == 'Identifier') {
+                            res.show(false);
+                        }
                     }
                 } else if (cur_line.length) {
                     $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
@@ -504,4 +505,11 @@ $(document).ready(function() {
             });
         }
     }
+
+    $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+            $('.preview-panel').hide();
+            $('.suggestion-panel').hide();
+        }
+    });
 });
