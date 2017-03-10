@@ -790,10 +790,47 @@ export class Table {
         let _this = this;
         // events binding for table header
         // [TODO] here for undecided parameters, instead of random names we should
-        // put some real working (and) safe parameters, this is really to make the
+        // put some real working (and safe) parameters, this is really to make the
         // live rendering working (they need real parameters)
-        $('.table-header-col').hover(function() {
-            if (window.selected_columns.length == 0) {
+        // $('.table-header-col').click(function() {
+        //     if (window.selected_columns.length == 0) {
+        //         let col_label = $(this).text();
+        //         let pos = $(this).position();
+        //         let suggestions = [
+        //             `set('${col_label}', x => x)`,
+        //             `column('${col_label}')`,
+        //             `select('${col_label}')`,
+        //             `drop('${col_label}')`,
+        //             `relabel('${col_label}', 'new_label')`,
+        //             `relabeled('${col_label}', 'new_label')`,
+        //             `where('${col_label}', x => true)`,
+        //             `sort('${col_label}')`,
+        //             `sorted('${col_label}')`,
+        //             `group('${col_label}')`,
+        //             `join('${col_label}', other_table, other_label?)`, // [TODO] how to do this?
+        //             `hist('${col_label}')`
+        //         ];
+        //         _this.construct_html_suggestions(suggestions, pos, table_expr);
+        //     }
+        // });
+
+        // multi-column selection
+        // set a "global" variable after each selection
+        // and pop out suggestions based on the # of selections
+        $('.table-header-col').click(function() {
+            if ($(this).hasClass('table-header-selected')) {
+                $(this).removeClass('table-header-selected');
+                let index = window.selected_columns.indexOf($(this).attr('data'));
+                window.selected_columns.splice(index, 1);
+                $(`#suggestion-${this.cur_env()}`).hide();
+            } else {
+                $(this).addClass('table-header-selected');
+                window.selected_columns.push($(this).attr('data'));
+            }
+
+            let suggestions;
+            let pos = $(this).position();
+            if (window.selected_columns.length == 1) {
                 let col_label = $(this).text();
                 let pos = $(this).position();
                 let suggestions = [
@@ -811,26 +848,7 @@ export class Table {
                     `hist('${col_label}')`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
-            }
-        });
-
-        // multi-column selection
-        // set a "global" variable after each selection
-        // and pop out suggestions based on the # of selections
-        $('.table-header-col').click(function() {
-            if ($(this).hasClass('table-header-selected')) {
-                $(this).removeClass('table-header-selected');
-                let index = window.selected_columns.indexOf($(this).attr('data'));
-                window.selected_columns.splice(index, 1);
-                $(`#suggestion-${_this.cur_env()}`).hide();
-            } else {
-                $(this).addClass('table-header-selected');
-                window.selected_columns.push($(this).attr('data'));
-            }
-
-            let suggestions;
-            let pos = $(this).position();
-            if (window.selected_columns.length == 2) {
+            } else if (window.selected_columns.length == 2) {
                 let col1 = window.selected_columns[0];
                 let col2 = window.selected_columns[1];
                 let parameters = `('${col1}', '${col2}')`;
@@ -880,16 +898,22 @@ export class Table {
         //     _this.construct_html_suggestions(suggestions, pos);
         // });
 
-        $('.ds-table-elem').hover(function() {
-            let pos = $(this).position();
-            let row = $(this).attr('row');
-            let col = $(this).attr('col');
-            let suggestions = [
-                `elem(${row}, '${col}')`,
-                `row(${row})`,
-                `split(${row})`
-            ];
-            _this.construct_html_suggestions(suggestions, pos, table_expr);
+        $('.ds-table-elem').click(function() {
+            if ($(this).hasClass('table-elem-selected')) {
+                $(this).removeClass('table-elem-selected');
+                $(`#suggestion-${_this.cur_env()}`).hide();
+            } else {
+                $(this).addClass('table-elem-selected');
+                let pos = $(this).position();
+                let row = $(this).attr('row');
+                let col = $(this).attr('col');
+                let suggestions = [
+                    `elem(${row}, '${col}')`,
+                    `row(${row})`,
+                    `split(${row})`
+                ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
+            }
         });
     }
 

@@ -27,6 +27,7 @@
         overflow: hidden;
 
         tr, th, td {
+            cursor: pointer;
             border: 1px solid #ddd;
             border-collapse: collapse;
         }
@@ -59,6 +60,10 @@
             width: 99%;
             z-index: -1;
             transition-duration: 0.5s;
+        }
+
+        td.table-elem-selected {
+            background-color: #99d8c9;
         }
 
         td, th {

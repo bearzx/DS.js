@@ -14150,13 +14150,49 @@ var Table = (function () {
         var _this = this;
         // events binding for table header
         // [TODO] here for undecided parameters, instead of random names we should
-        // put some real working (and) safe parameters, this is really to make the
+        // put some real working (and safe) parameters, this is really to make the
         // live rendering working (they need real parameters)
-        $('.table-header-col').hover(function () {
-            if (window.selected_columns.length == 0) {
+        // $('.table-header-col').click(function() {
+        //     if (window.selected_columns.length == 0) {
+        //         let col_label = $(this).text();
+        //         let pos = $(this).position();
+        //         let suggestions = [
+        //             `set('${col_label}', x => x)`,
+        //             `column('${col_label}')`,
+        //             `select('${col_label}')`,
+        //             `drop('${col_label}')`,
+        //             `relabel('${col_label}', 'new_label')`,
+        //             `relabeled('${col_label}', 'new_label')`,
+        //             `where('${col_label}', x => true)`,
+        //             `sort('${col_label}')`,
+        //             `sorted('${col_label}')`,
+        //             `group('${col_label}')`,
+        //             `join('${col_label}', other_table, other_label?)`, // [TODO] how to do this?
+        //             `hist('${col_label}')`
+        //         ];
+        //         _this.construct_html_suggestions(suggestions, pos, table_expr);
+        //     }
+        // });
+        // multi-column selection
+        // set a "global" variable after each selection
+        // and pop out suggestions based on the # of selections
+        $('.table-header-col').click(function () {
+            if ($(this).hasClass('table-header-selected')) {
+                $(this).removeClass('table-header-selected');
+                var index = window.selected_columns.indexOf($(this).attr('data'));
+                window.selected_columns.splice(index, 1);
+                $("#suggestion-" + this.cur_env()).hide();
+            }
+            else {
+                $(this).addClass('table-header-selected');
+                window.selected_columns.push($(this).attr('data'));
+            }
+            var suggestions;
+            var pos = $(this).position();
+            if (window.selected_columns.length == 1) {
                 var col_label = $(this).text();
-                var pos = $(this).position();
-                var suggestions = [
+                var pos_1 = $(this).position();
+                var suggestions_1 = [
                     "set('" + col_label + "', x => x)",
                     "column('" + col_label + "')",
                     "select('" + col_label + "')",
@@ -14170,26 +14206,9 @@ var Table = (function () {
                     "join('" + col_label + "', other_table, other_label?)",
                     "hist('" + col_label + "')"
                 ];
-                _this.construct_html_suggestions(suggestions, pos, table_expr);
+                _this.construct_html_suggestions(suggestions_1, pos_1, table_expr);
             }
-        });
-        // multi-column selection
-        // set a "global" variable after each selection
-        // and pop out suggestions based on the # of selections
-        $('.table-header-col').click(function () {
-            if ($(this).hasClass('table-header-selected')) {
-                $(this).removeClass('table-header-selected');
-                var index = window.selected_columns.indexOf($(this).attr('data'));
-                window.selected_columns.splice(index, 1);
-                $("#suggestion-" + _this.cur_env()).hide();
-            }
-            else {
-                $(this).addClass('table-header-selected');
-                window.selected_columns.push($(this).attr('data'));
-            }
-            var suggestions;
-            var pos = $(this).position();
-            if (window.selected_columns.length == 2) {
+            else if (window.selected_columns.length == 2) {
                 var col1 = window.selected_columns[0];
                 var col2 = window.selected_columns[1];
                 var parameters = "('" + col1 + "', '" + col2 + "')";
@@ -14238,16 +14257,24 @@ var Table = (function () {
         //     let suggestions = ['with_row(row)', 'with_rows(rows)'];
         //     _this.construct_html_suggestions(suggestions, pos);
         // });
-        $('.ds-table-elem').hover(function () {
-            var pos = $(this).position();
-            var row = $(this).attr('row');
-            var col = $(this).attr('col');
-            var suggestions = [
-                "elem(" + row + ", '" + col + "')",
-                "row(" + row + ")",
-                "split(" + row + ")"
-            ];
-            _this.construct_html_suggestions(suggestions, pos, table_expr);
+        $('.ds-table-elem').click(function () {
+            if ($(this).hasClass('table-elem-selected')) {
+                $(this).removeClass('table-elem-selected');
+                console.log("#suggestion-" + _this.cur_env());
+                $("#suggestion-" + _this.cur_env()).hide();
+            }
+            else {
+                $(this).addClass('table-elem-selected');
+                var pos = $(this).position();
+                var row = $(this).attr('row');
+                var col = $(this).attr('col');
+                var suggestions = [
+                    "elem(" + row + ", '" + col + "')",
+                    "row(" + row + ")",
+                    "split(" + row + ")"
+                ];
+                _this.construct_html_suggestions(suggestions, pos, table_expr);
+            }
         });
     };
     Table.prototype.construct_html_suggestions = function (suggestions, pos, table_expr) {
