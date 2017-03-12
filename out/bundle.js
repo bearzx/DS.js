@@ -14137,10 +14137,6 @@ var Table = (function () {
         for (var i = 0; i < raw_components[0].length; i++) {
             raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
         }
-        // add last-col class to last columns
-        // for (let i = 1; i < raw_components.length; i++) {
-        //     raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
-        // }
         window.selected_columns = [];
         if (!table_expr) {
             table_expr = "t" + window.datai;
@@ -14149,10 +14145,8 @@ var Table = (function () {
         $('.suggestion-panel').hide();
         var _this = this;
         // events binding for table header
-        // [TODO] here for undecided parameters, instead of random names we should
-        // put some real working (and safe) parameters, this is really to make the
-        // live rendering working (they need real parameters)
-        // $('.table-header-col').click(function() {
+        // this event binding is a legacy code when we want to open the suggestion pane via hovering on a single column header
+        // $('.table-header-col').hover(function() {
         //     if (window.selected_columns.length == 0) {
         //         let col_label = $(this).text();
         //         let pos = $(this).position();
@@ -14260,7 +14254,6 @@ var Table = (function () {
         $('.ds-table-elem').click(function () {
             if ($(this).hasClass('table-elem-selected')) {
                 $(this).removeClass('table-elem-selected');
-                console.log("#suggestion-" + _this.cur_env());
                 $("#suggestion-" + _this.cur_env()).hide();
             }
             else {
@@ -14737,7 +14730,7 @@ var Table = (function () {
                 _loop_3(i);
             }
             var right_table = grouped_table.construct_html_table_peek(right_raw_components_1, [0, 1, 2, 3, 4], null, false);
-            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <table>\n                        <tr class=\"preview-layout\">\n                            <td class=\"preview-layout\">" + left_table + "</td>\n                            <td class=\"preview-layout\">=></td>\n                            <td class=\"preview-layout\">" + right_table + "</td>\n                        </tr>\n                    </table>\n                </div>\n            ";
             $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'pivot') {
@@ -14756,7 +14749,7 @@ var Table = (function () {
                 right_raw_components[0][i] = $(right_raw_components[0][i]).attr('class', 'preview').prop('outerHTML');
             }
             var right_table = pivoted_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
-            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <table>\n                        <tr class=\"preview-layout\">\n                            <td class=\"preview-layout\">" + left_table + "</td>\n                            <td class=\"preview-layout\">=></td>\n                            <td class=\"preview-layout\">" + right_table + "</td>\n                        </tr>\n                    </table>\n                </div>\n            ";
             $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'join') {
@@ -14783,7 +14776,7 @@ var Table = (function () {
                 right_raw_components[i][right_join_index] = $(right_raw_components[i][right_join_index]).attr('class', 'preview').prop('outerHTML');
             }
             var right_table = joined_table.construct_html_table_peek(right_raw_components, [0, 1, 2, 3, 4], null, true);
-            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <div class=\"left\">" + left_table + "</div>\n                    <div class=\"arrow\">join</div>\n                    <div class=\"left\">" + middle_table + "</div>\n                    <div class=\"arrow\">=></div>\n                    <div class=\"right\">" + right_table + "</div>\n                </div>\n                <div style=\"clear: both\"></div>\n            ";
+            var template = "\n                <h5>Preview for <span class=\"code\">" + method_call + "</span></h5>\n                <div class=\"multi-table-preview\">\n                    <table>\n                        <tr class=\"preview-layout\">\n                            <td class=\"preview-layout\">" + left_table + "</td>\n                            <td class=\"preview-layout\">join</td>\n                            <td class=\"preview-layout\">" + middle_table + "</td>\n                            <td class=\"preview-layout\">=></td>\n                            <td class=\"preview-layout\">" + right_table + "</td>\n                        </tr>\n                    </table>\n                </div>\n            ";
             $("#preview-" + this.cur_env()).html(template);
         }
         else if (method_name == 'self') {
@@ -14882,16 +14875,22 @@ function env_init(_this, code_obj) {
         name: 'preview',
         bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
         exec: function(_editor) {
-            let ast = esprima.parse(_editor.getValue(), { loc: true });
-            let row = _editor.getCursorPosition().row;
-            let col = _editor.getCursorPosition().column;
-            let line = editor.getSession().getLine(row);
+            let datai = _editor.datai;
+            let envi = _editor.envi;
+            if ($(`#env-${datai}-${envi} .preview-panel`).css('display') != 'none') {
+                $(`#env-${datai}-${envi} .preview-panel`).hide();
+            } else {
+                let ast = esprima.parse(_editor.getValue(), { loc: true });
+                let row = _editor.getCursorPosition().row;
+                let col = _editor.getCursorPosition().column;
+                let line = editor.getSession().getLine(row);
 
-            for (let i = 0; i < ast.body.length; i++) {
-                let stmt = ast.body[i];
-                if (row == (stmt.loc.start.line - 1)) {
-                    find_and_preview(stmt.expression, _editor, line, row, col, 0, line.length);
-                    break;
+                for (let i = 0; i < ast.body.length; i++) {
+                    let stmt = ast.body[i];
+                    if (row == (stmt.loc.start.line - 1)) {
+                        find_and_preview(stmt.expression, _editor, line, row, col, 0, line.length);
+                        break;
+                    }
                 }
             }
         }
@@ -14982,7 +14981,7 @@ function env_init(_this, code_obj) {
                         $(`#env-${datai}-${envi} .preview-panel`).css({
                             left: pos.left + 50,
                             top: pos.top + 30
-                        }).toggle();
+                        }).css('display', 'inline-block');
                         break;
                     } catch (e) {
                         // console.log(e.message);

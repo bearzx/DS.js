@@ -91,7 +91,7 @@
 
     .repl {
         float: left;
-        min-width: 400px;
+        min-width: 600px;
         min-height: 300px;
         /*border: 1px dashed;*/
         padding: 5px;
@@ -145,7 +145,7 @@
         bottom: 0;
         // left: 5px;
         // margin-bottom: 10px;
-        width: 800px;
+        width: 600px;
         height: 300px;
         border: 1px dashed;
     }
@@ -169,6 +169,15 @@
     }
 
     .multi-table-preview {
+        .preview-layout {
+            border: none;
+        }
+
+        td.preview-layout {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
         .left {
             float: left;
             .top {
@@ -211,6 +220,7 @@
         position: absolute;
         display: none;
         min-width: 500px;
+        margin: auto;
         height: 300px;
         float: left;
         z-index: 999;

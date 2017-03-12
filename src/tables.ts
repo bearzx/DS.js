@@ -774,11 +774,6 @@ export class Table {
             raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
         }
 
-        // add last-col class to last columns
-        // for (let i = 1; i < raw_components.length; i++) {
-        //     raw_components[i][raw_components[i].length - 1] = $(raw_components[i][raw_components[i].length - 1]).attr('class', 'last-col').prop('outerHTML');
-        // }
-
         window.selected_columns = [];
         if (!table_expr) {
             table_expr = `t${window.datai}`;
@@ -789,10 +784,8 @@ export class Table {
 
         let _this = this;
         // events binding for table header
-        // [TODO] here for undecided parameters, instead of random names we should
-        // put some real working (and safe) parameters, this is really to make the
-        // live rendering working (they need real parameters)
-        // $('.table-header-col').click(function() {
+        // this event binding is a legacy code when we want to open the suggestion pane via hovering on a single column header
+        // $('.table-header-col').hover(function() {
         //     if (window.selected_columns.length == 0) {
         //         let col_label = $(this).text();
         //         let pos = $(this).position();
@@ -1422,11 +1415,14 @@ export class Table {
             let template = `
                 <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
-                    <div class="left">${left_table}</div>
-                    <div class="arrow">=></div>
-                    <div class="right">${right_table}</div>
+                    <table>
+                        <tr class="preview-layout">
+                            <td class="preview-layout">${left_table}</td>
+                            <td class="preview-layout">=></td>
+                            <td class="preview-layout">${right_table}</td>
+                        </tr>
+                    </table>
                 </div>
-                <div style="clear: both"></div>
             `;
 
             $(`#preview-${this.cur_env()}`).html(template);
@@ -1451,9 +1447,13 @@ export class Table {
             let template = `
                 <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
-                    <div class="left">${left_table}</div>
-                    <div class="arrow">=></div>
-                    <div class="right">${right_table}</div>
+                    <table>
+                        <tr class="preview-layout">
+                            <td class="preview-layout">${left_table}</td>
+                            <td class="preview-layout">=></td>
+                            <td class="preview-layout">${right_table}</td>
+                        </tr>
+                    </table>
                 </div>
             `;
 
@@ -1488,13 +1488,16 @@ export class Table {
             let template = `
                 <h5>Preview for <span class="code">${method_call}</span></h5>
                 <div class="multi-table-preview">
-                    <div class="left">${left_table}</div>
-                    <div class="arrow">join</div>
-                    <div class="left">${middle_table}</div>
-                    <div class="arrow">=></div>
-                    <div class="right">${right_table}</div>
+                    <table>
+                        <tr class="preview-layout">
+                            <td class="preview-layout">${left_table}</td>
+                            <td class="preview-layout">join</td>
+                            <td class="preview-layout">${middle_table}</td>
+                            <td class="preview-layout">=></td>
+                            <td class="preview-layout">${right_table}</td>
+                        </tr>
+                    </table>
                 </div>
-                <div style="clear: both"></div>
             `;
 
             $(`#preview-${this.cur_env()}`).html(template);

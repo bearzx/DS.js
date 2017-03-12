@@ -76,16 +76,22 @@ function env_init(_this, code_obj) {
         name: 'preview',
         bindKey: { win: 'Ctrl-B',  mac: 'Command-B' },
         exec: function(_editor) {
-            let ast = esprima.parse(_editor.getValue(), { loc: true });
-            let row = _editor.getCursorPosition().row;
-            let col = _editor.getCursorPosition().column;
-            let line = editor.getSession().getLine(row);
+            let datai = _editor.datai;
+            let envi = _editor.envi;
+            if ($(`#env-${datai}-${envi} .preview-panel`).css('display') != 'none') {
+                $(`#env-${datai}-${envi} .preview-panel`).hide();
+            } else {
+                let ast = esprima.parse(_editor.getValue(), { loc: true });
+                let row = _editor.getCursorPosition().row;
+                let col = _editor.getCursorPosition().column;
+                let line = editor.getSession().getLine(row);
 
-            for (let i = 0; i < ast.body.length; i++) {
-                let stmt = ast.body[i];
-                if (row == (stmt.loc.start.line - 1)) {
-                    find_and_preview(stmt.expression, _editor, line, row, col, 0, line.length);
-                    break;
+                for (let i = 0; i < ast.body.length; i++) {
+                    let stmt = ast.body[i];
+                    if (row == (stmt.loc.start.line - 1)) {
+                        find_and_preview(stmt.expression, _editor, line, row, col, 0, line.length);
+                        break;
+                    }
                 }
             }
         }
@@ -176,7 +182,7 @@ function env_init(_this, code_obj) {
                         $(`#env-${datai}-${envi} .preview-panel`).css({
                             left: pos.left + 50,
                             top: pos.top + 30
-                        }).toggle();
+                        }).css('display', 'inline-block');
                         break;
                     } catch (e) {
                         // console.log(e.message);
