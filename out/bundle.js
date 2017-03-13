@@ -50104,6 +50104,8 @@ var VGTemplate = (function () {
         return spec;
     };
     VGTemplate.prototype.plot = function (_values, xtitle, ytitle) {
+        // let xmin = Math.round(d3.min(_values.map(x => x.x)));
+        // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         var spec = {
             "width": 1,
             "height": 1,

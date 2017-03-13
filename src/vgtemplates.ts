@@ -1,3 +1,5 @@
+declare var d3: any;
+
 export class VGTemplate {
     constructor() {
 
@@ -399,6 +401,8 @@ export class VGTemplate {
     }
 
     public plot(_values, xtitle, ytitle) {
+        // let xmin = Math.round(d3.min(_values.map(x => x.x)));
+        // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         let spec = {
             "width": 1,
             "height": 1,
@@ -499,12 +503,12 @@ export class VGTemplate {
                             //     "labels": {
                             //         "text": {
                             //             "template": "{{datum.data}}"
-                            //         },                                    
+                            //         },
                             //         "angle": { "value": 270 },
                             //         "align": { "value": "right" },
                             //         "baseline": { "value": "middle" }
                             //     }
-                            // }                            
+                            // }
                         },
                         {
                             "type": "y",
