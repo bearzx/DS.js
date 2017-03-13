@@ -30,7 +30,7 @@ function env_init(_this, code_obj) {
         <button id="show-env-${datai}-${envi}" class="show-env" datai="${datai}" envi="${envi}">open</button>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="buttons">
-                <button datai="${datai}" envi="${envi}" class="run">&#9654;</button>
+                <!-- <button datai="${datai}" envi="${envi}" class="run">&#9654;</button> -->
                 <button datai="${datai}" envi="${envi}" class="toggle-sg">Pick Data</button>
                 <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">&#10005;</button>
             </div>

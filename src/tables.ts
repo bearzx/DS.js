@@ -815,7 +815,7 @@ export class Table {
                 $(this).removeClass('table-header-selected');
                 let index = window.selected_columns.indexOf($(this).attr('data'));
                 window.selected_columns.splice(index, 1);
-                $(`#suggestion-${this.cur_env()}`).hide();
+                $(`#suggestion-${_this.cur_env()}`).hide();
             } else {
                 $(this).addClass('table-header-selected');
                 window.selected_columns.push($(this).attr('data'));

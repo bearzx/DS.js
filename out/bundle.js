@@ -14175,7 +14175,7 @@ var Table = (function () {
                 $(this).removeClass('table-header-selected');
                 var index = window.selected_columns.indexOf($(this).attr('data'));
                 window.selected_columns.splice(index, 1);
-                $("#suggestion-" + this.cur_env()).hide();
+                $("#suggestion-" + _this.cur_env()).hide();
             }
             else {
                 $(this).addClass('table-header-selected');
@@ -14829,7 +14829,7 @@ function env_init(_this, code_obj) {
         <button id="show-env-${datai}-${envi}" class="show-env" datai="${datai}" envi="${envi}">open</button>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="buttons">
-                <button datai="${datai}" envi="${envi}" class="run">&#9654;</button>
+                <!-- <button datai="${datai}" envi="${envi}" class="run">&#9654;</button> -->
                 <button datai="${datai}" envi="${envi}" class="toggle-sg">Pick Data</button>
                 <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">&#10005;</button>
             </div>
@@ -50101,8 +50101,8 @@ var VGTemplate = (function () {
     };
     VGTemplate.prototype.plot = function (_values, xtitle, ytitle) {
         var spec = {
-            "width": 1,
-            "height": 1,
+            "width": 600,
+            "height": 400,
             "padding": "auto",
             "data": [
                 {
@@ -50125,8 +50125,8 @@ var VGTemplate = (function () {
                     "name": "layout",
                     "values": [{}],
                     "transform": [
-                        { "type": "formula", "field": "width", "expr": "200" },
-                        { "type": "formula", "field": "height", "expr": "200" }
+                        { "type": "formula", "field": "width", "expr": "600" },
+                        { "type": "formula", "field": "height", "expr": "400" }
                     ]
                 }
             ],
@@ -50168,7 +50168,7 @@ var VGTemplate = (function () {
                                 "field": "x"
                             },
                             "rangeMin": 0,
-                            "rangeMax": 200,
+                            "rangeMax": 600,
                             "round": true
                         },
                         {
@@ -50178,7 +50178,7 @@ var VGTemplate = (function () {
                                 "data": "source",
                                 "field": "y"
                             },
-                            "rangeMin": 200,
+                            "rangeMin": 400,
                             "rangeMax": 0,
                             "round": true,
                             "nice": true,
@@ -50210,7 +50210,7 @@ var VGTemplate = (function () {
     };
     VGTemplate.prototype.scatter = function (_values, xtitle, ytitle) {
         var spec = {
-            "width": 400,
+            "width": 600,
             "height": 400,
             "data": [
                 {

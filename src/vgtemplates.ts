@@ -400,8 +400,8 @@ export class VGTemplate {
 
     public plot(_values, xtitle, ytitle) {
         let spec = {
-            "width": 1,
-            "height": 1,
+            "width": 600,
+            "height": 400,
             "padding": "auto",
             "data": [
                 {
@@ -424,8 +424,8 @@ export class VGTemplate {
                     "name": "layout",
                     "values": [{}],
                     "transform": [
-                        { "type": "formula", "field": "width", "expr": "200" },
-                        { "type": "formula", "field": "height", "expr": "200" }
+                        { "type": "formula", "field": "width", "expr": "600" },
+                        { "type": "formula", "field": "height", "expr": "400" }
                     ]
                 }
             ],
@@ -469,7 +469,7 @@ export class VGTemplate {
                                 // "sort": { "field": "date", "op": "min" }
                             },
                             "rangeMin": 0,
-                            "rangeMax": 200,
+                            "rangeMax": 600,
                             "round": true
                         },
                         {
@@ -479,7 +479,7 @@ export class VGTemplate {
                                 "data": "source",
                                 "field": "y"
                             },
-                            "rangeMin": 200,
+                            "rangeMin": 400,
                             "rangeMax": 0,
                             "round": true,
                             "nice": true,
@@ -499,12 +499,12 @@ export class VGTemplate {
                             //     "labels": {
                             //         "text": {
                             //             "template": "{{datum.data}}"
-                            //         },                                    
+                            //         },
                             //         "angle": { "value": 270 },
                             //         "align": { "value": "right" },
                             //         "baseline": { "value": "middle" }
                             //     }
-                            // }                            
+                            // }
                         },
                         {
                             "type": "y",
@@ -523,7 +523,7 @@ export class VGTemplate {
 
     public scatter(_values, xtitle, ytitle) {
         let spec = {
-            "width": 400,
+            "width": 600,
             "height": 400,
             "data": [
                 {
