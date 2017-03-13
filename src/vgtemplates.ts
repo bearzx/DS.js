@@ -1,3 +1,5 @@
+declare var d3: any;
+
 export class VGTemplate {
     constructor() {
 
@@ -399,6 +401,8 @@ export class VGTemplate {
     }
 
     public plot(_values, xtitle, ytitle) {
+        // let xmin = Math.round(d3.min(_values.map(x => x.x)));
+        // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         let spec = {
             "width": 600,
             "height": 400,

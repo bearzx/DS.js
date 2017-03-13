@@ -15255,13 +15255,16 @@ $(document).ready(function() {
     // csv detection
     $('a').each(function(i) {
         let data_link = $(this).attr('href');
-        if (data_link && (data_link.endsWith('.csv') || data_link.endsWith('.tsv'))) {
-            $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append ds.js</button>`);
-            // pre-load the csv file
-            // eval(`
-            //     window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
-            // `);
-            datai += 1;
+        if (data_link) {
+            data_link = data_link.split('?')[0];
+            if (data_link.endsWith('.csv') || data_link.endsWith('.tsv')) {
+                $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append ds.js</button>`);
+                // pre-load the csv file
+                // eval(`
+                //     window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
+                // `);
+                datai += 1;
+            }
         }
     });
 
@@ -15312,6 +15315,7 @@ $(document).ready(function() {
     }
 
     $(document).keyup(function(e) {
+        // press ESC key to close preview pane and suggestion pane
         if (e.keyCode == 27) {
             $('.preview-panel').hide();
             $('.suggestion-panel').hide();
@@ -50100,6 +50104,8 @@ var VGTemplate = (function () {
         return spec;
     };
     VGTemplate.prototype.plot = function (_values, xtitle, ytitle) {
+        // let xmin = Math.round(d3.min(_values.map(x => x.x)));
+        // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         var spec = {
             "width": 600,
             "height": 400,
