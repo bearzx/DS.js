@@ -14339,6 +14339,17 @@ var Table = (function () {
             console.log(error);
         });
     };
+    Table.prototype.bar_lite = function (xlabel, ylabel) {
+        var id = this.cur_env();
+        var templates = new vglt.VGLTemplate();
+        var values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        vg.embed("#table-area-" + id, templates.bar(values, xlabel, ylabel), function (error, result) {
+            console.log(error);
+        });
+    };
     // create a ylabel-xlabel bar chart
     Table.prototype.bar = function (xlabel, ylabel) {
         var id = this.cur_env();
@@ -49933,6 +49944,33 @@ process.umask = function() { return 0; };
 var VGLTemplate = (function () {
     function VGLTemplate() {
     }
+    VGLTemplate.prototype.bar = function (_values, xtitle, ytitle) {
+        var spec = {
+            "data": {
+                "values": _values
+            },
+            "mark": "bar",
+            "encoding": {
+                "x": {
+                    "field": "x",
+                    "type": "quantitative"
+                },
+                "y": {
+                    // "aggregate": "average",
+                    "field": "y",
+                    "type": "quantitative"
+                }
+            },
+            "width": 600,
+            "height": 300
+        };
+        var embed_spec = {
+            mode: "vega-lite",
+            spec: spec,
+            actions: false
+        };
+        return embed_spec;
+    };
     VGLTemplate.prototype.plot = function (_values, xtitle, ytitle, xtype) {
         var spec = {
             "data": { "values": _values },

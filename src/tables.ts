@@ -991,6 +991,18 @@ export class Table {
         });
     }
 
+    bar_lite(xlabel, ylabel) {
+        let id = this.cur_env();
+        let templates = new vglt.VGLTemplate();
+        let values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        vg.embed(`#table-area-${id}`, templates.bar(values, xlabel, ylabel), function(error, result) {
+            console.log(error);
+        });
+    }
+
     // create a ylabel-xlabel bar chart
     bar(xlabel, ylabel) {
         let id = this.cur_env();
