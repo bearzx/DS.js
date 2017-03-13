@@ -64,7 +64,7 @@ var Table =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 57);
+/******/ 	return __webpack_require__(__webpack_require__.s = 58);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -13428,7 +13428,8 @@ module.exports = unique
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {
-var vgt = __webpack_require__(54);
+var vgt = __webpack_require__(55);
+var vglt = __webpack_require__(54);
 var Table = (function () {
     // constructor of the class
     // t? - make this table a copy of t
@@ -14316,14 +14317,27 @@ var Table = (function () {
         this.show(true);
     };
     // plot a ylabel-xlabel figure
-    Table.prototype.plot = function (xlabel, ylabel) {
+    Table.prototype.plot = function (xlabel, ylabel, xtype) {
+        if (xtype === void 0) { xtype = 'linear'; }
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         var templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
+        vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
+    };
+    Table.prototype.plot_lite = function (xlabel, ylabel, xtype) {
+        if (xtype === void 0) { xtype = 'quantitative'; }
+        var id = this.cur_env();
+        var values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        var templates = new vglt.VGLTemplate();
+        vg.embed("#table-area-" + id, templates.plot(values, xlabel, ylabel, xtype), function (error, result) {
+            console.log(error);
+        });
     };
     // create a ylabel-xlabel bar chart
     Table.prototype.bar = function (xlabel, ylabel) {
@@ -14335,15 +14349,28 @@ var Table = (function () {
         });
         vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
     };
+    Table.prototype.scatter_lite = function (xlabel, ylabel, xtype) {
+        if (xtype === void 0) { xtype = 'quantitative'; }
+        var id = this.cur_env();
+        var values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        var templates = new vglt.VGLTemplate();
+        vg.embed("#table-area-" + id, templates.scatter(values, xlabel, ylabel, xtype), function (error, result) {
+            console.log(error);
+        });
+    };
     // create a ylabel-xlabel bar chart
-    Table.prototype.scatter = function (xlabel, ylabel) {
+    Table.prototype.scatter = function (xlabel, ylabel, xtype) {
+        if (xtype === void 0) { xtype = 'linear'; }
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         var templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
+        vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
     };
     Table.prototype.scatter_d3 = function (xlabel, ylabel) {
         var id = this.cur_env();
@@ -14803,7 +14830,7 @@ window.esprima = __webpack_require__(30);
 window.numeral = __webpack_require__(39);
 window.nj = __webpack_require__(51);
 __webpack_require__(22);
-__webpack_require__(56);
+__webpack_require__(57);
 __webpack_require__(21);
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
@@ -46727,7 +46754,7 @@ module.exports = Array.isArray || function (arr) {
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(55)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(56)(module)))
 
 /***/ }),
 /* 36 */
@@ -49903,6 +49930,74 @@ process.umask = function() { return 0; };
 
 "use strict";
 
+var VGLTemplate = (function () {
+    function VGLTemplate() {
+    }
+    VGLTemplate.prototype.plot = function (_values, xtitle, ytitle, xtype) {
+        var spec = {
+            "data": { "values": _values },
+            "mark": "line",
+            "encoding": {
+                "x": {
+                    "field": "x",
+                    "type": xtype,
+                    "axis": {
+                        'ticks': _values.length
+                    }
+                },
+                "y": {
+                    "field": "y",
+                    "type": "quantitative"
+                }
+            },
+            "width": 600,
+            "height": 300
+        };
+        var embed_spec = {
+            mode: "vega-lite",
+            spec: spec,
+            actions: false
+        };
+        return embed_spec;
+    };
+    VGLTemplate.prototype.scatter = function (_values, xtitle, ytitle, xtype) {
+        var spec = {
+            "data": { "values": _values },
+            "mark": "circle",
+            "encoding": {
+                "x": {
+                    "field": "x",
+                    "type": xtype,
+                    "axis": {
+                        'ticks': _values.length
+                    }
+                },
+                "y": {
+                    "field": "y",
+                    "type": "quantitative"
+                }
+            },
+            "width": 600,
+            "height": 300
+        };
+        var embed_spec = {
+            mode: "vega-lite",
+            spec: spec,
+            actions: false
+        };
+        return embed_spec;
+    };
+    return VGLTemplate;
+}());
+exports.VGLTemplate = VGLTemplate;
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var VGTemplate = (function () {
     function VGTemplate() {
     }
@@ -50103,7 +50198,7 @@ var VGTemplate = (function () {
         };
         return spec;
     };
-    VGTemplate.prototype.plot = function (_values, xtitle, ytitle) {
+    VGTemplate.prototype.plot = function (_values, xtitle, ytitle, xtype) {
         // let xmin = Math.round(d3.min(_values.map(x => x.x)));
         // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         var spec = {
@@ -50168,7 +50263,7 @@ var VGTemplate = (function () {
                     "scales": [
                         {
                             "name": "x",
-                            "type": "linear",
+                            "type": xtype,
                             "domain": {
                                 "data": "source",
                                 "field": "x"
@@ -50214,30 +50309,22 @@ var VGTemplate = (function () {
         };
         return spec;
     };
-    VGTemplate.prototype.scatter = function (_values, xtitle, ytitle) {
+    VGTemplate.prototype.scatter = function (_values, xtitle, ytitle, xtype) {
         var spec = {
             "width": 600,
             "height": 400,
             "data": [
                 {
-                    "name": "gdp",
-                    // "url": "data/gdp.csv",
-                    // "format": {
-                    //     "type": "csv",
-                    //     "parse": {
-                    //         "agriculture_2010": "number",
-                    //         "industry_2010": "number"
-                    //     }
-                    // }
+                    "name": "_values",
                     "values": _values
                 }
             ],
             "scales": [
                 {
                     "name": "xscale",
-                    "type": "linear",
+                    "type": xtype,
                     "domain": {
-                        "data": "gdp",
+                        "data": "_values",
                         "field": ["x"]
                     },
                     "range": "width",
@@ -50247,7 +50334,7 @@ var VGTemplate = (function () {
                     "name": "yscale",
                     "type": "linear",
                     "domain": {
-                        "data": "gdp",
+                        "data": "_values",
                         "field": ["y"]
                     },
                     "range": "height",
@@ -50259,7 +50346,14 @@ var VGTemplate = (function () {
                     "type": "x",
                     "scale": "xscale",
                     "orient": "bottom",
-                    "title": xtitle
+                    "title": xtitle,
+                    "properties": {
+                        "labels": {
+                            "angle": { "value": 270 },
+                            "align": { "value": "right" },
+                            "baseline": { "value": "middle" }
+                        }
+                    }
                 },
                 {
                     "type": "y",
@@ -50272,7 +50366,7 @@ var VGTemplate = (function () {
                 {
                     "type": "symbol",
                     "from": {
-                        "data": "gdp"
+                        "data": "_values"
                     },
                     "properties": {
                         "enter": {
@@ -50332,7 +50426,7 @@ var VGTemplate = (function () {
     };
     VGTemplate.prototype.bar = function (_values, xtitle, ytitle) {
         var spec = {
-            "width": 600,
+            "width": 500,
             "height": 200,
             "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
             "signals": [
@@ -50370,7 +50464,17 @@ var VGTemplate = (function () {
                 {
                     "type": "x",
                     "scale": "x",
-                    "title": xtitle
+                    "title": xtitle,
+                    "properties": {
+                        "labels": {
+                            // "text": {
+                            //     "template": "{{datum[\"data\"] | time:'%b %d, %Y'}}"
+                            // },
+                            "angle": { "value": 270 },
+                            "align": { "value": "right" },
+                            "baseline": { "value": "middle" }
+                        }
+                    }
                 },
                 {
                     "type": "y",
@@ -50525,7 +50629,7 @@ exports.VGTemplate = VGTemplate;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -50553,7 +50657,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports) {
 
 if (!Array.prototype.last) {
@@ -50563,7 +50667,7 @@ if (!Array.prototype.last) {
 };
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(20);

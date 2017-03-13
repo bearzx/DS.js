@@ -1,11 +1,11 @@
 import * as vgt from './vgtemplates';
+import * as vglt from './vgltemplates';
 
 declare var d3: any;
 declare var $: any;
 declare var vg: any;
 declare var vega: any;
 declare var ace: any;
-// declare var _datai: any;
 declare var window: any;
 declare var esprima: any;
 declare var numeral: any;
@@ -969,14 +969,26 @@ export class Table {
     }
 
     // plot a ylabel-xlabel figure
-    plot(xlabel, ylabel) {
+    plot(xlabel, ylabel, xtype: string = 'linear') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.plot(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+        vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+    }
+
+    plot_lite(xlabel, ylabel, xtype: string = 'quantitative') {
+        let id = this.cur_env();
+        let values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        let templates = new vglt.VGLTemplate();
+        vg.embed(`#table-area-${id}`, templates.plot(values, xlabel, ylabel, xtype), function(error, result) {
+            console.log(error);
+        });
     }
 
     // create a ylabel-xlabel bar chart
@@ -990,15 +1002,27 @@ export class Table {
         vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
+    scatter_lite(xlabel, ylabel, xtype: string = 'quantitative') {
+        let id = this.cur_env();
+        let values = [];
+        this._t.forEach(function (row) {
+            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+        });
+        let templates = new vglt.VGLTemplate();
+        vg.embed(`#table-area-${id}`, templates.scatter(values, xlabel, ylabel, xtype), function(error, result) {
+            console.log(error);
+        });
+    }
+
     // create a ylabel-xlabel bar chart
-    scatter(xlabel, ylabel) {
+    scatter(xlabel, ylabel, xtype: string = 'linear') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.scatter(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+        vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
     scatter_d3(xlabel, ylabel) {

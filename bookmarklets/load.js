@@ -32,10 +32,25 @@ javascript: (
 
         function vega_load() {
             var vegajs = document.createElement('script');
-            vegajs.onload = bundle_load;
+            /*vegajs.onload = bundle_load;*/
+            vegajs.onload = vgl_load;
             vegajs.setAttribute('src', 'https://www.bearzx.com/ds.js/out/vega.js');
             /*vegajs.setAttribute('src', 'http://localhost/~bearzx/ds.js/tmp/vega/vega.js');*/
             document.body.appendChild(vegajs);
+        }
+
+        function vgl_load() {
+            var vgljs = document.createElement('script');
+            vgljs.onload = vge_load;
+            vgljs.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.3.1/vega-lite.js');
+            document.body.appendChild(vgljs);
+        }
+
+        function vge_load() {
+            var vgejs = document.createElement('script');
+            vgejs.onload = bundle_load;
+            vgejs.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/vega-embed/2.2.0/vega-embed.js');
+            document.body.appendChild(vgejs);
         }
 
         function d3csv_load() {

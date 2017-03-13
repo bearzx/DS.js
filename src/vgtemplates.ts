@@ -400,7 +400,7 @@ export class VGTemplate {
         return spec;
     }
 
-    public plot(_values, xtitle, ytitle) {
+    public plot(_values, xtitle, ytitle, xtype) {
         // let xmin = Math.round(d3.min(_values.map(x => x.x)));
         // let xmax = Math.round(d3.max(_values.map(x => x.x)));
         let spec = {
@@ -466,7 +466,7 @@ export class VGTemplate {
                     "scales": [
                         {
                             "name": "x",
-                            "type": "linear",
+                            "type": xtype,
                             "domain": {
                                 "data": "source",
                                 "field": "x",
@@ -525,30 +525,22 @@ export class VGTemplate {
         return spec;
     }
 
-    public scatter(_values, xtitle, ytitle) {
+    public scatter(_values, xtitle, ytitle, xtype) {
         let spec = {
             "width": 600,
             "height": 400,
             "data": [
                 {
-                    "name": "gdp",
-                    // "url": "data/gdp.csv",
-                    // "format": {
-                    //     "type": "csv",
-                    //     "parse": {
-                    //         "agriculture_2010": "number",
-                    //         "industry_2010": "number"
-                    //     }
-                    // }
+                    "name": "_values",
                     "values": _values
                 }
             ],
             "scales": [
                 {
                     "name": "xscale",
-                    "type": "linear",
+                    "type": xtype,
                     "domain": {
-                        "data": "gdp",
+                        "data": "_values",
                         "field": ["x"]
                     },
                     "range": "width",
@@ -558,7 +550,7 @@ export class VGTemplate {
                     "name": "yscale",
                     "type": "linear",
                     "domain": {
-                        "data": "gdp",
+                        "data": "_values",
                         "field": ["y"]
                     },
                     "range": "height",
@@ -570,7 +562,14 @@ export class VGTemplate {
                     "type": "x",
                     "scale": "xscale",
                     "orient": "bottom",
-                    "title": xtitle
+                    "title": xtitle,
+                    "properties": {
+                        "labels": {
+                            "angle": {"value": 270},
+                            "align": {"value": "right"},
+                            "baseline": {"value": "middle"}
+                        }
+                    }
                 },
                 {
                     "type": "y",
@@ -583,7 +582,7 @@ export class VGTemplate {
                 {
                     "type": "symbol",
                     "from": {
-                        "data": "gdp"
+                        "data": "_values"
                     },
                     "properties": {
                         "enter": {
@@ -646,7 +645,7 @@ export class VGTemplate {
 
     public bar(_values, xtitle, ytitle) {
         let spec = {
-            "width": 600,
+            "width": 500,
             "height": 200,
             "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
 
@@ -688,7 +687,17 @@ export class VGTemplate {
                 {
                     "type": "x",
                     "scale": "x",
-                    "title": xtitle
+                    "title": xtitle,
+                    "properties": {
+                        "labels": {
+                            // "text": {
+                            //     "template": "{{datum[\"data\"] | time:'%b %d, %Y'}}"
+                            // },
+                            "angle": {"value": 270},
+                            "align": {"value": "right"},
+                            "baseline": {"value": "middle"}
+                        }
+                    }
                 },
                 {
                     "type": "y",

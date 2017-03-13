@@ -10,7 +10,8 @@
   "files": [
     // "demo.ts",
     "./src/tables.ts",
-    "./src/vgtemplates.ts"
+    "./src/vgtemplates.ts",
+    "./src/vgltemplates.ts"
   ],
   "exclude": [
     "node_modules",
