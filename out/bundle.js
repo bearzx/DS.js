@@ -13552,7 +13552,7 @@ var Table = (function () {
         return this;
     };
     // return an element at [row, col]
-    Table.prototype.elem = function (row, col) {
+    Table.prototype.get_element = function (row, col) {
         return this._t[row][col];
     };
     // return the number of rows
@@ -13560,7 +13560,7 @@ var Table = (function () {
         return this._t.length;
     };
     // return a list of all the labels
-    Table.prototype.labels = function () {
+    Table.prototype.get_column_names = function () {
         var labels_copy = $.extend([], this._labels);
         return labels_copy;
     };
@@ -13569,7 +13569,7 @@ var Table = (function () {
         return Object.keys(this._t[0]).length;
     };
     // return a certain column
-    Table.prototype.column = function (index_or_label) {
+    Table.prototype.get_column = function (index_or_label) {
         var col = [];
         if (typeof index_or_label === 'number') {
             var column_label = this._labels[index_or_label];
@@ -13586,11 +13586,11 @@ var Table = (function () {
         }
     };
     // return all the columns in a list
-    Table.prototype.columns = function () {
+    Table.prototype.get_columns = function () {
         var _this = this;
         var cols = [];
         this._labels.forEach(function (label) {
-            cols.push(_this.column(label));
+            cols.push(_this.get_column(label));
         });
         return cols;
     };
@@ -13598,21 +13598,21 @@ var Table = (function () {
         return window.datai + "-" + window.envi;
     };
     // return a certain row
-    Table.prototype.row = function (index) {
+    Table.prototype.get_row = function (index) {
         return this._t[index];
     };
     // return a view of all rows
-    Table.prototype.rows = function () {
+    Table.prototype.get_rows = function () {
         return this._t;
     };
     // add one row to the end of the table
-    Table.prototype.with_row = function (row) {
+    Table.prototype.add_row = function (row) {
         var copy = this.copy();
-        copy._with_row(row);
+        copy._add_row(row);
         return copy;
     };
     // add one row to the end of the table
-    Table.prototype._with_row = function (row) {
+    Table.prototype._add_row = function (row) {
         // [TODO] what if row doesn't have enough elements? e.g. lack of values for some columns
         if (row instanceof Array) {
             var o_row = {};
@@ -13627,28 +13627,28 @@ var Table = (function () {
         return this;
     };
     // [impure] add multiple rows to the end of the table
-    Table.prototype._with_rows = function (rows) {
+    Table.prototype._add_rows = function (rows) {
         var _this = this;
         rows.forEach(function (row) {
-            _this._with_row(row);
+            _this._add_row(row);
         });
         return this;
     };
     // [pure] add multiple rows to the end of the table
-    Table.prototype.with_rows = function (rows) {
+    Table.prototype.add_rows = function (rows) {
         var copy = this.copy();
-        copy._with_rows(rows);
+        copy._add_rows(rows);
         return copy;
     };
     // [pure] add a column to the end of the table
-    Table.prototype.with_column = function (label, values) {
+    Table.prototype.add_column = function (label, values) {
         // [TODO] what if label is already in _labels?
         var copy = this.copy();
-        copy._with_column(label, values);
+        copy._add_column(label, values);
         return copy;
     };
     // [impure] add a column to the end of the table
-    Table.prototype._with_column = function (label, values) {
+    Table.prototype._add_column = function (label, values) {
         if (values.tolist) {
             values = values.tolist();
         }
@@ -13678,18 +13678,18 @@ var Table = (function () {
         var _a;
     };
     // [pure] add multiple columns to the end of the table
-    Table.prototype.with_columns = function () {
+    Table.prototype.add_columns = function () {
         var labels_and_values = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             labels_and_values[_i] = arguments[_i];
         }
         var copy = this.copy();
-        copy._with_columns(labels_and_values);
+        copy._add_columns(labels_and_values);
         // console.log(copy);
         return copy;
     };
     // [impure] add multiple columns to the end of the table
-    Table.prototype._with_columns = function () {
+    Table.prototype._add_columns = function () {
         var labels_and_values = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             labels_and_values[_i] = arguments[_i];
@@ -13700,10 +13700,10 @@ var Table = (function () {
         if (labels_and_values.length % 2 == 0) {
             for (var i = 0; i < labels_and_values.length / 2; i++) {
                 if (labels_and_values[i * 2 + 1].tolist) {
-                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1].tolist());
+                    this._add_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1].tolist());
                 }
                 else {
-                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+                    this._add_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
                 }
             }
         }
@@ -13716,10 +13716,12 @@ var Table = (function () {
                 var node = document.createElement('div');
                 node.innerHTML = s;
                 column[i] = node.textContent || node.innerText || '';
-                var n = numeral(column[i]);
-                column[i] = n._value ? n._value : column[i];
+                if (i != 0) {
+                    var n = numeral(column[i]);
+                    column[i] = n._value ? n._value : column[i];
+                }
             });
-            _this._with_column(column[0], column.slice(1, column.length));
+            _this._add_column(column[0], column.slice(1, column.length));
         });
         return this;
     };
@@ -13738,7 +13740,7 @@ var Table = (function () {
         return this;
     };
     // [pure] relabel a column name
-    Table.prototype.relabeled = function (label, new_label) {
+    Table.prototype.rename_column = function (label, new_label) {
         var copy = $.extend(true, {}, this);
         copy.relabel(label, new_label);
         return copy;
@@ -13747,8 +13749,12 @@ var Table = (function () {
     Table.prototype.copy = function () {
         return $.extend(true, {}, this);
     };
+    // copy a table
+    Table.prototype.copy_table = function () {
+        return this.copy();
+    };
     // [pure] select a column
-    Table.prototype.select = function () {
+    Table.prototype.select_columns = function () {
         var column_label_or_labels = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             column_label_or_labels[_i] = arguments[_i];
@@ -13758,10 +13764,10 @@ var Table = (function () {
         column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
         for (var i = 0; i < this._t.length; i++) {
-            table.with_row({});
+            table.add_row({});
         }
         column_label_or_labels.forEach(function (label) {
-            table = table.with_column(label, _this.column(label));
+            table._add_column(label, _this.get_column(label));
         });
         // console.log(table);
         return table;
@@ -13807,7 +13813,7 @@ var Table = (function () {
         }
     };
     // [pure] drop a column/columns
-    Table.prototype.drop = function () {
+    Table.prototype.drop_columns = function () {
         var column_label_or_labels = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             column_label_or_labels[_i] = arguments[_i];
@@ -13815,7 +13821,7 @@ var Table = (function () {
         var left_columns = this._labels.filter(function (c) {
             return column_label_or_labels.indexOf(c) == -1;
         });
-        return this.select.apply(this, left_columns);
+        return this.select_columns.apply(this, left_columns);
     };
     // [pure] filter rows based on the judging function
     Table.prototype.where = function (column_or_label, value_or_predicate) {
@@ -13825,7 +13831,7 @@ var Table = (function () {
         return this._where(column_or_label, value_or_predicate, true);
     };
     Table.prototype._where = function (column_or_label, value_or_predicate, keep_index) {
-        var table = new Table(null, this.labels(), null);
+        var table = new Table(null, this.get_column_names(), null);
         var indices = [];
         var predicate;
         if (value_or_predicate instanceof Function) {
@@ -13836,7 +13842,7 @@ var Table = (function () {
         }
         this._t.forEach(function (row, i) {
             if (predicate(row[column_or_label])) {
-                table._with_row(row);
+                table._add_row(row);
                 indices.push(i);
             }
         });
@@ -13879,7 +13885,7 @@ var Table = (function () {
         return copy;
     };
     // [pure] grouping rows based on a label
-    Table.prototype.group = function (column_or_label, collect) {
+    Table.prototype.groupby = function (column_or_label, collect) {
         var label = this._as_label(column_or_label);
         var group_t = {};
         this._t.forEach(function (row) {
@@ -13894,7 +13900,7 @@ var Table = (function () {
         keys.sort();
         var grouped;
         if (collect) {
-            var old_labels_1 = this.labels();
+            var old_labels_1 = this.get_column_names();
             old_labels_1.splice(old_labels_1.indexOf(label), 1);
             grouped = new Table(null, [label].concat(old_labels_1), null);
             keys.forEach(function (k) {
@@ -13902,14 +13908,14 @@ var Table = (function () {
                 old_labels_1.forEach(function (l) {
                     row[l] = collect(group_t[k].map(function (x) { return x[l]; }));
                 });
-                grouped._with_row(row);
+                grouped._add_row(row);
                 var _a;
             });
         }
         else {
             grouped = new Table(null, [label, 'count'], null);
             keys.forEach(function (key) {
-                grouped._with_row((_a = {}, _a[label] = key, _a['count'] = group_t[key].length, _a));
+                grouped._add_row((_a = {}, _a[label] = key, _a['count'] = group_t[key].length, _a));
                 var _a;
             });
         }
@@ -13917,7 +13923,7 @@ var Table = (function () {
         return grouped;
     };
     // [pure] group rows based on labels
-    Table.prototype.groups = function (columns_or_labels, collect) {
+    Table.prototype.groupsby = function (columns_or_labels, collect) {
         var labels = this._as_labels(columns_or_labels);
         // console.log(labels);
         var group_t = {};
@@ -13940,7 +13946,7 @@ var Table = (function () {
         });
         var grouped;
         if (collect) {
-            var old_labels_2 = this.labels();
+            var old_labels_2 = this.get_column_names();
             labels.forEach(function (l) {
                 old_labels_2.splice(old_labels_2.indexOf(l), 1);
             });
@@ -13953,7 +13959,7 @@ var Table = (function () {
                 old_labels_2.forEach(function (l) {
                     row[l] = collect(group_t[skey].map(function (x) { return x[l]; }));
                 });
-                grouped._with_row(row);
+                grouped._add_row(row);
             });
         }
         else {
@@ -13964,7 +13970,7 @@ var Table = (function () {
                     row[l] = key_combinations[skey][i];
                 });
                 row['count'] = group_t[skey].length;
-                grouped._with_row(row);
+                grouped._add_row(row);
             });
         }
         // console.log(grouped);
@@ -14001,30 +14007,33 @@ var Table = (function () {
                 // console.log(`${row_label} | ${column_label}`);
                 var l = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label] : [];
                 pivot_row[column_label] = collect ? collect(l) : l.length;
+                if (!pivot_row[column_label]) {
+                    pivot_row[column_label] = 0;
+                }
             });
-            pivoted._with_row(pivot_row);
+            pivoted._add_row(pivot_row);
             var _a;
         });
         // console.log(pivoted);
         return pivoted;
     };
     Table.prototype.index_by = function (label) {
-        var column = this.column(label).tolist();
+        var column = this.get_column(label).tolist();
         var indexed = {};
         var _this = this;
         column.forEach(function (c, i) {
             if (c in indexed) {
-                indexed[c].push(_this.row(i));
+                indexed[c].push(_this.get_row(i));
             }
             else {
-                indexed[c] = [_this.row(i)];
+                indexed[c] = [_this.get_row(i)];
             }
         });
         return indexed;
     };
     Table.prototype._unused_label = function (label) {
         var original = label;
-        var existing = this.labels();
+        var existing = this.get_column_names();
         var i = 2;
         while (existing.indexOf(label) != -1) {
             label = original + "_" + i;
@@ -14061,20 +14070,20 @@ var Table = (function () {
                 });
             }
         });
-        var joined_labels = this.labels();
-        other.labels().forEach(function (l) {
+        var joined_labels = this.get_column_names();
+        other.get_column_names().forEach(function (l) {
             if (l != other_label) {
                 joined_labels.push(_this._unused_label(l));
             }
         });
         var joined = new Table(null, joined_labels, null);
-        joined._with_rows(joined_rows);
+        joined._add_rows(joined_rows);
         // console.log('joined table');
         // console.log(joined);
         return joined;
     };
     // [pure] generate a table a few statistics information: min, max, median, sum
-    Table.prototype.stats = function () {
+    Table.prototype.summary_statistics = function () {
         var _this = this;
         var stats_table = new Table(null, ['statistics'].concat(this._labels));
         var min_row = { 'statistics': 'min' };
@@ -14082,16 +14091,16 @@ var Table = (function () {
         var median_row = { 'statistics': 'median' };
         var sum_row = { 'statistics': 'sum' };
         this._labels.forEach(function (l) {
-            var cur_col = _this.column(l);
+            var cur_col = _this.get_column(l);
             min_row[l] = cur_col.min();
             max_row[l] = cur_col.max();
             median_row[l] = d3.median(cur_col.tolist());
             sum_row[l] = cur_col.sum();
         });
-        stats_table._with_row(min_row);
-        stats_table._with_row(max_row);
-        stats_table._with_row(median_row);
-        stats_table._with_row(sum_row);
+        stats_table._add_row(min_row);
+        stats_table._add_row(max_row);
+        stats_table._add_row(median_row);
+        stats_table._add_row(sum_row);
         return stats_table;
     };
     // [pure] generate the rows (sorted) under a certain percentile
@@ -14100,23 +14109,21 @@ var Table = (function () {
         var _this = this;
         var prow = {};
         this._labels.forEach(function (l) {
-            var c = _this.column(l);
+            var c = _this.get_column(l);
             c.sort();
             prow[l] = c[Math.ceil(c.length * p) - 1];
         });
-        pt.with_row(prow);
+        pt.add_row(prow);
         return pt;
     };
     // [pure] sample k rows from this table
-    Table.prototype.sample = function (k) {
+    Table.prototype.sample_n_random_rows = function (k) {
         var sampled = new Table(null, this._labels);
         var n = this._t.length;
         for (var i = 0; i < k; i++) {
-            sampled.with_row(this.row(Math.ceil(Math.random() * (n - 1))));
+            sampled._add_row(this.get_row(Math.ceil(Math.random() * (n - 1))));
         }
         return sampled;
-    };
-    Table.prototype.sample_from_distribution = function () {
     };
     // split the current table into two: first k rows and the last n - k rows
     Table.prototype.split = function (k) {
@@ -14124,10 +14131,10 @@ var Table = (function () {
         var first = new Table(null, this._labels);
         var rest = new Table(null, this._labels);
         for (var i = 0; i < k; i++) {
-            first._with_row(this.row(shuffled_indices[i]));
+            first._add_row(this.get_row(shuffled_indices[i]));
         }
         for (var i = k; i < this._t.length; i++) {
-            rest._with_row(this.row(shuffled_indices[i]));
+            rest._add_row(this.get_row(shuffled_indices[i]));
         }
         return { 'first': first, 'rest': rest };
     };
@@ -14189,17 +14196,15 @@ var Table = (function () {
                 var pos_1 = $(this).position();
                 var suggestions_1 = [
                     "set('" + col_label + "', x => x)",
-                    "column('" + col_label + "')",
-                    "select('" + col_label + "')",
-                    "drop('" + col_label + "')",
-                    "relabel('" + col_label + "', 'new_label')",
-                    "relabeled('" + col_label + "', 'new_label')",
+                    "get_column('" + col_label + "')",
+                    "select_columns('" + col_label + "')",
+                    "drop_columns('" + col_label + "')",
+                    "rename_column('" + col_label + "', 'new_label')",
                     "where('" + col_label + "', x => true)",
                     "sort('" + col_label + "')",
-                    "sorted('" + col_label + "')",
-                    "group('" + col_label + "')",
+                    "groupby('" + col_label + "')",
                     "join('" + col_label + "', other_table, other_label?)",
-                    "hist('" + col_label + "')"
+                    "histogram('" + col_label + "')"
                 ];
                 _this.construct_html_suggestions(suggestions_1, pos_1, table_expr);
             }
@@ -14208,12 +14213,12 @@ var Table = (function () {
                 var col2 = window.selected_columns[1];
                 var parameters = "('" + col1 + "', '" + col2 + "')";
                 suggestions = [
-                    "select" + parameters,
-                    "drop" + parameters,
-                    "groups" + parameters,
-                    "plot" + parameters,
-                    "bar" + parameters,
-                    "scatter" + parameters
+                    "select_columns" + parameters,
+                    "drop_columns" + parameters,
+                    "groupsby" + parameters,
+                    "lineplot" + parameters,
+                    "barplot" + parameters,
+                    "scatterplot" + parameters
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
@@ -14223,9 +14228,9 @@ var Table = (function () {
                 var col3 = window.selected_columns[2];
                 var parameters = "('" + col1 + "', '" + col2 + "', '" + col3 + "')";
                 suggestions = [
-                    "select" + parameters,
-                    "drop" + parameters,
-                    "groups" + parameters,
+                    "select_columns" + parameters,
+                    "drop_columns" + parameters,
+                    "groupsby" + parameters,
                     "pivot('" + col1 + "', '" + col2 + "', '" + col3 + "', d3.sum)"
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
@@ -14233,9 +14238,9 @@ var Table = (function () {
             else if (window.selected_columns.length > 3) {
                 var parameters = '(' + window.selected_columns.map(function (x) { return "'" + x + "'"; }).join(', ') + ')';
                 suggestions = [
-                    "select" + parameters,
-                    "drop" + parameters,
-                    "groups" + parameters
+                    "select_columns" + parameters,
+                    "drop_columns" + parameters,
+                    "groupsby" + parameters
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
@@ -14263,8 +14268,8 @@ var Table = (function () {
                 var row = $(this).attr('row');
                 var col = $(this).attr('col');
                 var suggestions = [
-                    "elem(" + row + ", '" + col + "')",
-                    "row(" + row + ")",
+                    "get_element(" + row + ", '" + col + "')",
+                    "get_row(" + row + ")",
                     "split(" + row + ")"
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
@@ -14279,19 +14284,18 @@ var Table = (function () {
         });
         template += '</ul></div>';
         var global_methods = [
-            'converted()',
             'num_rows()',
             'num_columns()',
-            'labels()',
-            'columns()',
-            'with_row()',
-            'with_rows()',
-            'with_column()',
-            'with_columns()',
-            'copy()',
-            'stats()',
-            'percentile()',
-            'sample()',
+            'get_column_names()',
+            'get_columns()',
+            'add_row(array_or_object)',
+            // 'add_rows()',
+            'add_column(column_name, column_values)',
+            // 'add_columns()',
+            'copy_table()',
+            'summary_statistics()',
+            // 'percentile()',
+            'sample_n_random_rows(n)',
         ];
         template += "\n            <div class=\"right\">\n            <h5>Global Operations</h5>\n            <ul>\n        ";
         global_methods.forEach(function (s) {
@@ -14317,7 +14321,7 @@ var Table = (function () {
         this.show(true);
     };
     // plot a ylabel-xlabel figure
-    Table.prototype.plot = function (xlabel, ylabel, xtype) {
+    Table.prototype.vplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'linear'; }
         var id = this.cur_env();
         var values = [];
@@ -14327,7 +14331,7 @@ var Table = (function () {
         var templates = new vgt.VGTemplate();
         vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
     };
-    Table.prototype.plot_lite = function (xlabel, ylabel, xtype) {
+    Table.prototype.lineplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'quantitative'; }
         var id = this.cur_env();
         var values = [];
@@ -14336,22 +14340,24 @@ var Table = (function () {
         });
         var templates = new vglt.VGLTemplate();
         vg.embed("#table-area-" + id, templates.plot(values, xlabel, ylabel, xtype), function (error, result) {
-            console.log(error);
+            // console.log(error);
         });
     };
-    Table.prototype.bar_lite = function (xlabel, ylabel) {
+    Table.prototype.barplot = function (xlabel, ylabel, xtype, ytype) {
+        if (xtype === void 0) { xtype = 'quantitative'; }
+        if (ytype === void 0) { ytype = 'quantitative'; }
         var id = this.cur_env();
         var templates = new vglt.VGLTemplate();
         var values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
-        vg.embed("#table-area-" + id, templates.bar(values, xlabel, ylabel), function (error, result) {
-            console.log(error);
+        vg.embed("#table-area-" + id, templates.bar(values, xlabel, ylabel, xtype, ytype), function (error, result) {
+            // console.log(error);
         });
     };
     // create a ylabel-xlabel bar chart
-    Table.prototype.bar = function (xlabel, ylabel) {
+    Table.prototype.vbar = function (xlabel, ylabel) {
         var id = this.cur_env();
         var templates = new vgt.VGTemplate();
         var values = [];
@@ -14360,7 +14366,7 @@ var Table = (function () {
         });
         vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
     };
-    Table.prototype.scatter_lite = function (xlabel, ylabel, xtype) {
+    Table.prototype.scatterplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'quantitative'; }
         var id = this.cur_env();
         var values = [];
@@ -14369,11 +14375,11 @@ var Table = (function () {
         });
         var templates = new vglt.VGLTemplate();
         vg.embed("#table-area-" + id, templates.scatter(values, xlabel, ylabel, xtype), function (error, result) {
-            console.log(error);
+            // console.log(error);
         });
     };
     // create a ylabel-xlabel bar chart
-    Table.prototype.scatter = function (xlabel, ylabel, xtype) {
+    Table.prototype.vscatter = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'linear'; }
         var id = this.cur_env();
         var values = [];
@@ -14383,8 +14389,9 @@ var Table = (function () {
         var templates = new vgt.VGTemplate();
         vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": "#table-area-" + id }).update(); });
     };
-    Table.prototype.hist_lite = function (column, nbins) {
+    Table.prototype.histogram = function (column, nbins) {
         if (nbins === void 0) { nbins = 10; }
+        // let s = new Set(this.get_column(column).tolist());
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
@@ -14392,12 +14399,12 @@ var Table = (function () {
         });
         var templates = new vglt.VGLTemplate();
         vg.embed("#table-area-" + id, templates.hist(values, nbins), function (error, result) {
-            console.log(error);
+            // console.log(error);
         });
     };
     // create a histogram on a certain column
     // naive version
-    Table.prototype.hist = function (column) {
+    Table.prototype.vhist = function (column) {
         var bins = {};
         this._t.forEach(function (row) {
             var elem = row[column];
@@ -14424,10 +14431,11 @@ var Table = (function () {
             chart({ el: "#table-area-" + id }).update();
         });
     };
+    // @deprecated
     Table.prototype.bhist = function (column, nbins) {
         var bins = {};
         if (nbins) {
-            var col = this.column(column);
+            var col = this.get_column(column);
             var range = col.max() - col.min();
             var step_1 = Math.ceil(range / nbins);
             var start_1 = Math.floor(col.min());
@@ -14463,13 +14471,6 @@ var Table = (function () {
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-            chart({ el: "#table-area-" + id }).update();
-        });
-    };
-    Table.prototype.vhist = function (column) {
-        var templates = new vgt.VGTemplate();
-        var id = this.cur_env();
-        vg.parse.spec(templates.vbar(this._t), function (error, chart) {
             chart({ el: "#table-area-" + id }).update();
         });
     };
@@ -14639,9 +14640,9 @@ var Table = (function () {
         var method_name = method_call.slice(0, method_call.indexOf('('));
         var args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
         // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
-        if (method_name == 'with_row' || method_name == 'with_rows') {
+        if (method_name == 'add_row' || method_name == 'add_rows') {
             var new_table = eval("this." + method_name + "(" + args + ")");
-            args = method_name == 'with_row' ? [eval("this._as_args(" + args + ")")] : eval("this._as_args(" + args + ")")[0];
+            args = method_name == 'add_row' ? [eval("this._as_args(" + args + ")")] : eval("this._as_args(" + args + ")")[0];
             var raw_components = new_table.construct_table_components();
             for (var row = 1; row <= args.length; row++) {
                 for (var i = 0; i < raw_components[0].length; i++) {
@@ -14650,7 +14651,7 @@ var Table = (function () {
             }
             $("#preview-" + this.cur_env()).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
-        else if (method_name == 'with_column' || method_name == 'with_columns') {
+        else if (method_name == 'add_column' || method_name == 'add_columns') {
             var new_table = eval("this." + method_name + "(" + args + ")");
             args = eval("this._as_args(" + args + ")");
             var raw_components = new_table.construct_table_components();
@@ -14661,13 +14662,13 @@ var Table = (function () {
             }
             $("#preview-" + this.cur_env()).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
         }
-        else if (method_name == 'select' || method_name == 'drop') {
+        else if (method_name == 'select_columns' || method_name == 'drop_columns') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             var raw_components_1 = this.construct_table_components();
             var label_locs = eval("this._as_label_indices(" + args + ")");
             var _loop_1 = function (i) {
                 label_locs.forEach(function (loc) {
-                    raw_components_1[i][loc] = $(raw_components_1[i][loc]).attr('class', method_name == 'select' ? 'preview' : 'preview-del').prop('outerHTML');
+                    raw_components_1[i][loc] = $(raw_components_1[i][loc]).attr('class', method_name == 'select_columns' ? 'preview' : 'preview-del').prop('outerHTML');
                 });
             };
             for (var i = 0; i < raw_components_1.length; i++) {
@@ -14675,7 +14676,7 @@ var Table = (function () {
             }
             $("#preview-" + this.cur_env()).html(this.construct_html_table(raw_components_1, true, true, label_locs, method_call));
         }
-        else if (method_name == 'relabeled') {
+        else if (method_name == 'rename_column') {
             // [bug] what if we give it a non-existing label name?
             args = eval("this._as_args(" + args + ")");
             var raw_components = this.construct_table_components();
@@ -14707,10 +14708,10 @@ var Table = (function () {
             }
             $("#preview-" + this.cur_env()).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
         }
-        else if (method_name == 'group' || method_name == 'groups') {
+        else if (method_name == 'groupby' || method_name == 'groupsby') {
             var grouped_table = eval("this." + method_name + "(" + args + ")");
             args = eval("this._as_args(" + args + ")");
-            var group_labels = method_name == 'group' ? [args[0]] : args[0];
+            var group_labels = method_name == 'groupby' ? [args[0]] : args[0];
             var left_group_indices = this._as_label_indices(group_labels);
             var left_raw_components_1 = this.construct_table_components();
             var _loop_2 = function (i) {
@@ -15004,17 +15005,17 @@ function env_init(_this, code_obj) {
 
     function is_supported_preview(func_name) {
         let supported_functions = new Set([
-            'with_row',
-            'with_rows',
-            'with_column',
-            'with_columns',
-            'select',
-            'drop',
-            'relabeled',
+            'add_row',
+            'add_rows',
+            'add_column',
+            'add_columns',
+            'select_columns',
+            'drop_columns',
+            'rename_column',
             'where',
             'sorted',
-            'group',
-            'groups',
+            'groupby',
+            'groupsby',
             'pivot',
             'join'
         ]);
@@ -49910,7 +49911,6 @@ var VGLTemplate = (function () {
     function VGLTemplate() {
     }
     VGLTemplate.prototype.hist = function (_values, nbins) {
-        console.log(nbins);
         var spec = {
             "data": {
                 "values": _values
@@ -49938,7 +49938,7 @@ var VGLTemplate = (function () {
         };
         return embed_spec;
     };
-    VGLTemplate.prototype.bar = function (_values, xtitle, ytitle) {
+    VGLTemplate.prototype.bar = function (_values, xtitle, ytitle, xtype, ytype) {
         var spec = {
             "data": {
                 "values": _values
@@ -49947,12 +49947,14 @@ var VGLTemplate = (function () {
             "encoding": {
                 "x": {
                     "field": "x",
-                    "type": "quantitative"
+                    "title": xtitle,
+                    "type": xtype
                 },
                 "y": {
                     // "aggregate": "average",
                     "field": "y",
-                    "type": "quantitative"
+                    "title": ytitle,
+                    "type": ytype
                 }
             },
             "width": 600,
@@ -49975,11 +49977,13 @@ var VGLTemplate = (function () {
                     "type": xtype,
                     "axis": {
                         'ticks': _values.length
-                    }
+                    },
+                    "title": xtitle
                 },
                 "y": {
                     "field": "y",
-                    "type": "quantitative"
+                    "type": "quantitative",
+                    "title": ytitle
                 }
             },
             "width": 600,
@@ -50002,11 +50006,13 @@ var VGLTemplate = (function () {
                     "type": xtype,
                     "axis": {
                         'ticks': _values.length
-                    }
+                    },
+                    "title": xtitle
                 },
                 "y": {
                     "field": "y",
-                    "type": "quantitative"
+                    "type": "quantitative",
+                    "title": ytitle
                 }
             },
             "width": 600,
@@ -50521,99 +50527,6 @@ var VGTemplate = (function () {
                     "properties": {
                         "enter": {
                             "x": { "scale": "x", "field": "x" },
-                            "width": { "scale": "x", "band": true, "offset": -1 },
-                            "y": { "scale": "y", "field": "y" },
-                            "y2": { "scale": "y", "value": 0 }
-                        },
-                        "update": {
-                            "fill": [
-                                {
-                                    "test": "datum._id == tooltip._id",
-                                    "value": "red"
-                                },
-                                { "value": "steelblue" }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "type": "text",
-                    "properties": {
-                        "enter": {
-                            "align": { "value": "center" },
-                            "fill": { "value": "#333" }
-                        },
-                        "update": {
-                            "x": { "scale": "x", "signal": "tooltip.x" },
-                            "dx": { "scale": "x", "band": true, "mult": 0.5 },
-                            "y": { "scale": "y", "signal": "tooltip.y", "offset": -5 },
-                            "text": { "signal": "tooltip.y" },
-                            "fillOpacity": [
-                                {
-                                    "test": "!tooltip._id",
-                                    "value": 0
-                                },
-                                { "value": 1 }
-                            ]
-                        }
-                    }
-                }
-            ]
-        };
-        return spec;
-    };
-    VGTemplate.prototype.vbar = function (_values) {
-        var spec = {
-            "width": 400,
-            "height": 200,
-            "padding": { "top": 10, "left": 30, "bottom": 30, "right": 10 },
-            "signals": [
-                {
-                    "name": "tooltip",
-                    "init": {},
-                    "streams": [
-                        { "type": "rect:mouseover", "expr": "datum" },
-                        { "type": "rect:mouseout", "expr": "{}" }
-                    ]
-                }
-            ],
-            "data": [
-                {
-                    "name": "table",
-                    "values": _values,
-                    "transform": [
-                        {
-                            "type": "bin",
-                            "field": "month_required",
-                            "output": { "start": "bin_start", "end": "bin_end" },
-                            "maxbins": 12
-                        }
-                    ]
-                }
-            ],
-            "scales": [
-                {
-                    "name": "x",
-                    "type": "linear",
-                    "range": "width",
-                    "domain": { "data": "table", "field": ["bin_start", "bin_end"] }
-                },
-                {
-                    "name": "y",
-                    "type": "linear",
-                    "range": "height",
-                    "domain": { "data": "table", "field": "y" },
-                    "nice": true
-                }
-            ],
-            "axes": [{ "type": "x", "scale": "x" }],
-            "marks": [
-                {
-                    "type": "rect",
-                    "from": { "data": "table" },
-                    "properties": {
-                        "enter": {
-                            "x": { "scale": "x", "field": "bin_start" },
                             "width": { "scale": "x", "band": true, "offset": -1 },
                             "y": { "scale": "y", "field": "y" },
                             "y2": { "scale": "y", "value": 0 }

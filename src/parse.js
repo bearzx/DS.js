@@ -202,17 +202,17 @@ function env_init(_this, code_obj) {
 
     function is_supported_preview(func_name) {
         let supported_functions = new Set([
-            'with_row',
-            'with_rows',
-            'with_column',
-            'with_columns',
-            'select',
-            'drop',
-            'relabeled',
+            'add_row',
+            'add_rows',
+            'add_column',
+            'add_columns',
+            'select_columns',
+            'drop_columns',
+            'rename_column',
             'where',
             'sorted',
-            'group',
-            'groups',
+            'groupby',
+            'groupsby',
             'pivot',
             'join'
         ]);

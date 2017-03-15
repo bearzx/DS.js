@@ -151,7 +151,7 @@ export class Table {
     }
 
     // return an element at [row, col]
-    public elem(row, col) {
+    public get_element(row, col) {
         return this._t[row][col];
     }
 
@@ -161,7 +161,7 @@ export class Table {
     }
 
     // return a list of all the labels
-    public labels() {
+    public get_column_names() {
         let labels_copy = $.extend([], this._labels);
         return labels_copy;
     }
@@ -172,7 +172,7 @@ export class Table {
     }
 
     // return a certain column
-    public column(index_or_label) {
+    public get_column(index_or_label) {
         var col = [];
         if (typeof index_or_label === 'number') {
             var column_label = this._labels[index_or_label];
@@ -189,11 +189,11 @@ export class Table {
     }
 
     // return all the columns in a list
-    public columns() {
+    public get_columns() {
         var _this = this;
         var cols = [];
         this._labels.forEach(function (label) {
-            cols.push(_this.column(label));
+            cols.push(_this.get_column(label));
         });
         return cols;
     }
@@ -203,25 +203,25 @@ export class Table {
     }
 
     // return a certain row
-    row(index: number) {
+    get_row(index: number) {
         return this._t[index];
     }
 
     // return a view of all rows
-    rows() {
+    get_rows() {
         return this._t;
     }
 
     // add one row to the end of the table
-    with_row(row) {
+    add_row(row) {
         let copy = this.copy();
-        copy._with_row(row);
+        copy._add_row(row);
 
         return copy;
     }
 
     // add one row to the end of the table
-    _with_row(row) {
+    _add_row(row) {
         // [TODO] what if row doesn't have enough elements? e.g. lack of values for some columns
         if (row instanceof Array) {
             var o_row = {};
@@ -237,34 +237,34 @@ export class Table {
     }
 
     // [impure] add multiple rows to the end of the table
-    _with_rows(rows) {
+    _add_rows(rows) {
         var _this = this;
         rows.forEach(function (row) {
-            _this._with_row(row);
+            _this._add_row(row);
         });
 
         return this;
     }
 
     // [pure] add multiple rows to the end of the table
-    with_rows(rows) {
+    add_rows(rows) {
         let copy = this.copy();
-        copy._with_rows(rows);
+        copy._add_rows(rows);
 
         return copy;
     }
 
     // [pure] add a column to the end of the table
-    with_column(label, values) {
+    add_column(label, values) {
         // [TODO] what if label is already in _labels?
         let copy = this.copy();
-        copy._with_column(label, values);
+        copy._add_column(label, values);
 
         return copy;
     }
 
     // [impure] add a column to the end of the table
-    _with_column(label, values) {
+    _add_column(label, values) {
         if (values.tolist) {
             values = values.tolist();
         }
@@ -294,15 +294,15 @@ export class Table {
     }
 
     // [pure] add multiple columns to the end of the table
-    with_columns(...labels_and_values: any[]) {
+    add_columns(...labels_and_values: any[]) {
         let copy = this.copy();
-        copy._with_columns(labels_and_values);
+        copy._add_columns(labels_and_values);
         // console.log(copy);
         return copy;
     }
 
     // [impure] add multiple columns to the end of the table
-    _with_columns(...labels_and_values: any[]) {
+    _add_columns(...labels_and_values: any[]) {
         if (labels_and_values[0] instanceof Array) {
             labels_and_values = labels_and_values[0];
         }
@@ -310,9 +310,9 @@ export class Table {
         if (labels_and_values.length % 2 == 0) {
             for (let i = 0; i < labels_and_values.length / 2; i++) {
                 if (labels_and_values[i * 2 + 1].tolist) {
-                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1].tolist());
+                    this._add_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1].tolist());
                 } else {
-                    this._with_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
+                    this._add_column(labels_and_values[i * 2], labels_and_values[i * 2 + 1]);
                 }
             }
         }
@@ -327,10 +327,12 @@ export class Table {
                 let node = document.createElement('div');
                 node.innerHTML = s;
                 column[i] = node.textContent || node.innerText || '';
-                let n = numeral(column[i]);
-                column[i] = n._value ? n._value : column[i];
+                if (i != 0) {
+                    let n = numeral(column[i]);
+                    column[i] = n._value ? n._value : column[i];
+                }
             });
-            _this._with_column(column[0], column.slice(1, column.length));
+            _this._add_column(column[0], column.slice(1, column.length));
         });
 
         return this;
@@ -353,7 +355,7 @@ export class Table {
     }
 
     // [pure] relabel a column name
-    relabeled(label, new_label) {
+    rename_column(label, new_label) {
         var copy = $.extend(true, {}, this);
         copy.relabel(label, new_label);
         return copy;
@@ -364,17 +366,22 @@ export class Table {
         return $.extend(true, {}, this);
     }
 
+    // copy a table
+    copy_table() {
+        return this.copy();
+    }
+
     // [pure] select a column
-    select(...column_label_or_labels: any[]) {
+    select_columns(...column_label_or_labels: any[]) {
         // /console.log(column_label_or_labels);
         var _this = this;
         column_label_or_labels = this._as_labels(column_label_or_labels);
         var table = new Table();
         for (var i = 0; i < this._t.length; i++) {
-            table.with_row({});
+            table.add_row({});
         }
         column_label_or_labels.forEach(function (label) {
-            table = table.with_column(label, _this.column(label));
+            table._add_column(label, _this.get_column(label));
         });
         // console.log(table);
 
@@ -422,12 +429,12 @@ export class Table {
     }
 
     // [pure] drop a column/columns
-    drop(...column_label_or_labels: any[]) {
+    drop_columns(...column_label_or_labels: any[]) {
         var left_columns = this._labels.filter(function (c) {
             return column_label_or_labels.indexOf(c) == -1;
         });
 
-        return this.select.apply(this, left_columns);
+        return this.select_columns.apply(this, left_columns);
     }
 
     // [pure] filter rows based on the judging function
@@ -440,7 +447,7 @@ export class Table {
     }
 
     _where(column_or_label, value_or_predicate, keep_index: boolean) {
-        let table = new Table(null, this.labels(), null);
+        let table = new Table(null, this.get_column_names(), null);
         let indices = [];
         let predicate;
         if (value_or_predicate instanceof Function) {
@@ -450,7 +457,7 @@ export class Table {
         }
         this._t.forEach(function (row, i) {
             if (predicate(row[column_or_label])) {
-                table._with_row(row);
+                table._add_row(row);
                 indices.push(i);
             }
         });
@@ -492,7 +499,7 @@ export class Table {
     }
 
     // [pure] grouping rows based on a label
-    group(column_or_label: any, collect?) {
+    groupby(column_or_label: any, collect?) {
         let label = this._as_label(column_or_label);
         let group_t = {};
         this._t.forEach(function (row) {
@@ -507,7 +514,7 @@ export class Table {
         keys.sort();
         let grouped;
         if (collect) {
-            let old_labels = this.labels();
+            let old_labels = this.get_column_names();
             old_labels.splice(old_labels.indexOf(label), 1);
             grouped = new Table(null, [label].concat(old_labels), null);
             keys.forEach(function(k) {
@@ -515,12 +522,12 @@ export class Table {
                 old_labels.forEach(function(l) {
                     row[l] = collect(group_t[k].map(x => x[l]));
                 });
-                grouped._with_row(row);
+                grouped._add_row(row);
             });
         } else {
             grouped = new Table(null, [label, 'count'], null);
             keys.forEach(function (key) {
-                grouped._with_row({ [label]: key, 'count': group_t[key].length });
+                grouped._add_row({ [label]: key, 'count': group_t[key].length });
             });
         }
 
@@ -529,7 +536,7 @@ export class Table {
     }
 
     // [pure] group rows based on labels
-    groups(columns_or_labels: any[], collect?) {
+    groupsby(columns_or_labels: any[], collect?) {
         let labels = this._as_labels(columns_or_labels);
         // console.log(labels);
         let group_t = {};
@@ -552,7 +559,7 @@ export class Table {
         });
         let grouped;
         if (collect) {
-            let old_labels = this.labels();
+            let old_labels = this.get_column_names();
             labels.forEach(function(l) {
                 old_labels.splice(old_labels.indexOf(l), 1);
             });
@@ -565,7 +572,7 @@ export class Table {
                 old_labels.forEach(function(l) {
                     row[l] = collect(group_t[skey].map(x => x[l]));
                 });
-                grouped._with_row(row);
+                grouped._add_row(row);
             });
         } else {
             grouped = new Table(null, labels.concat(['count']));
@@ -575,7 +582,7 @@ export class Table {
                     row[l] = key_combinations[skey][i];
                 });
                 row['count'] = group_t[skey].length;
-                grouped._with_row(row);
+                grouped._add_row(row);
             });
         }
 
@@ -615,8 +622,11 @@ export class Table {
                 // console.log(`${row_label} | ${column_label}`);
                 let l = pivot_t[row_label][column_label] ? pivot_t[row_label][column_label] : [];
                 pivot_row[column_label] = collect ? collect(l) : l.length;
+                if (!pivot_row[column_label]) {
+                    pivot_row[column_label] = 0;
+                }
             });
-            pivoted._with_row(pivot_row);
+            pivoted._add_row(pivot_row);
         });
 
         // console.log(pivoted);
@@ -624,14 +634,14 @@ export class Table {
     }
 
     private index_by(label) {
-        let column = this.column(label).tolist();
+        let column = this.get_column(label).tolist();
         var indexed = {};
         let _this = this;
         column.forEach(function (c, i) {
             if (c in indexed) {
-                indexed[c].push(_this.row(i));
+                indexed[c].push(_this.get_row(i));
             } else {
-                indexed[c] = [_this.row(i)];
+                indexed[c] = [_this.get_row(i)];
             }
         });
 
@@ -640,7 +650,7 @@ export class Table {
 
     private _unused_label(label) {
         let original = label;
-        let existing = this.labels();
+        let existing = this.get_column_names();
         let i = 2;
         while (existing.indexOf(label) != -1) {
             label = `${original}_${i}`;
@@ -682,15 +692,15 @@ export class Table {
             }
         });
 
-        let joined_labels = this.labels();
-        other.labels().forEach(function (l) {
+        let joined_labels = this.get_column_names();
+        other.get_column_names().forEach(function (l) {
             if (l != other_label) {
                 joined_labels.push(_this._unused_label(l));
             }
         });
 
         let joined = new Table(null, joined_labels, null);
-        joined._with_rows(joined_rows);
+        joined._add_rows(joined_rows);
 
         // console.log('joined table');
         // console.log(joined);
@@ -699,7 +709,7 @@ export class Table {
     }
 
     // [pure] generate a table a few statistics information: min, max, median, sum
-    stats() {
+    summary_statistics() {
         let _this = this;
         let stats_table = new Table(null, ['statistics'].concat(this._labels));
         let min_row = { 'statistics': 'min' };
@@ -707,16 +717,16 @@ export class Table {
         let median_row = { 'statistics': 'median' };
         let sum_row = { 'statistics': 'sum' };
         this._labels.forEach(function (l) {
-            let cur_col = _this.column(l);
+            let cur_col = _this.get_column(l);
             min_row[l] = cur_col.min();
             max_row[l] = cur_col.max();
             median_row[l] = d3.median(cur_col.tolist());
             sum_row[l] = cur_col.sum();
         });
-        stats_table._with_row(min_row);
-        stats_table._with_row(max_row);
-        stats_table._with_row(median_row);
-        stats_table._with_row(sum_row);
+        stats_table._add_row(min_row);
+        stats_table._add_row(max_row);
+        stats_table._add_row(median_row);
+        stats_table._add_row(sum_row);
 
         return stats_table;
     }
@@ -727,30 +737,25 @@ export class Table {
         let _this = this;
         let prow = {};
         this._labels.forEach(function (l) {
-            let c = _this.column(l);
+            let c = _this.get_column(l);
             c.sort();
             prow[l] = c[Math.ceil(c.length * p) - 1];
         });
-        pt.with_row(prow);
+        pt.add_row(prow);
 
         return pt;
     }
 
     // [pure] sample k rows from this table
-    sample(k) {
+    sample_n_random_rows(k) {
         let sampled = new Table(null, this._labels);
         let n = this._t.length;
         for (let i = 0; i < k; i++) {
-            sampled.with_row(this.row(Math.ceil(Math.random() * (n - 1))));
+            sampled._add_row(this.get_row(Math.ceil(Math.random() * (n - 1))));
         }
 
         return sampled;
     }
-
-    sample_from_distribution() {
-
-    }
-
 
     // split the current table into two: first k rows and the last n - k rows
     split(k) {
@@ -758,10 +763,10 @@ export class Table {
         let first = new Table(null, this._labels);
         let rest = new Table(null, this._labels);
         for (let i = 0; i < k; i++) {
-            first._with_row(this.row(shuffled_indices[i]));
+            first._add_row(this.get_row(shuffled_indices[i]));
         }
         for (let i = k; i < this._t.length; i++) {
-            rest._with_row(this.row(shuffled_indices[i]));
+            rest._add_row(this.get_row(shuffled_indices[i]));
         }
 
         return { 'first': first, 'rest': rest };
@@ -828,17 +833,15 @@ export class Table {
                 let pos = $(this).position();
                 let suggestions = [
                     `set('${col_label}', x => x)`,
-                    `column('${col_label}')`,
-                    `select('${col_label}')`,
-                    `drop('${col_label}')`,
-                    `relabel('${col_label}', 'new_label')`,
-                    `relabeled('${col_label}', 'new_label')`,
+                    `get_column('${col_label}')`,
+                    `select_columns('${col_label}')`,
+                    `drop_columns('${col_label}')`,
+                    `rename_column('${col_label}', 'new_label')`,
                     `where('${col_label}', x => true)`,
-                    `sort('${col_label}')`,
-                    `sorted('${col_label}')`,
-                    `group('${col_label}')`,
+                    `sort('${col_label}')`, // sorted?
+                    `groupby('${col_label}')`,
                     `join('${col_label}', other_table, other_label?)`, // [TODO] how to do this?
-                    `hist('${col_label}')`
+                    `histogram('${col_label}')`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length == 2) {
@@ -846,12 +849,12 @@ export class Table {
                 let col2 = window.selected_columns[1];
                 let parameters = `('${col1}', '${col2}')`;
                 suggestions = [
-                    `select` + parameters,
-                    `drop` + parameters,
-                    `groups` + parameters,
-                    `plot` + parameters,
-                    `bar` + parameters,
-                    `scatter` + parameters
+                    `select_columns` + parameters,
+                    `drop_columns` + parameters,
+                    `groupsby` + parameters,
+                    `lineplot` + parameters,
+                    `barplot` + parameters,
+                    `scatterplot` + parameters
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length == 3) {
@@ -860,18 +863,18 @@ export class Table {
                 let col3 = window.selected_columns[2];
                 let parameters = `('${col1}', '${col2}', '${col3}')`;
                 suggestions = [
-                    `select` + parameters,
-                    `drop` + parameters,
-                    `groups` + parameters,
+                    `select_columns` + parameters,
+                    `drop_columns` + parameters,
+                    `groupsby` + parameters,
                     `pivot('${col1}', '${col2}', '${col3}', d3.sum)`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             } else if (window.selected_columns.length > 3) {
                 let parameters = '(' + window.selected_columns.map(x => `'${x}'`).join(', ') + ')';
                 suggestions = [
-                    `select` + parameters,
-                    `drop` + parameters,
-                    `groups` + parameters
+                    `select_columns` + parameters,
+                    `drop_columns` + parameters,
+                    `groupsby` + parameters
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
             }
@@ -901,8 +904,8 @@ export class Table {
                 let row = $(this).attr('row');
                 let col = $(this).attr('col');
                 let suggestions = [
-                    `elem(${row}, '${col}')`,
-                    `row(${row})`,
+                    `get_element(${row}, '${col}')`,
+                    `get_row(${row})`,
                     `split(${row})`
                 ];
                 _this.construct_html_suggestions(suggestions, pos, table_expr);
@@ -923,19 +926,18 @@ export class Table {
         });
         template += '</ul></div>';
         let global_methods = [
-            'converted()',
             'num_rows()',
             'num_columns()',
-            'labels()',
-            'columns()',
-            'with_row()',
-            'with_rows()',
-            'with_column()',
-            'with_columns()',
-            'copy()',
-            'stats()',
-            'percentile()',
-            'sample()',
+            'get_column_names()',
+            'get_columns()',
+            'add_row(array_or_object)',
+            // 'add_rows()',
+            'add_column(column_name, column_values)',
+            // 'add_columns()',
+            'copy_table()',
+            'summary_statistics()',
+            // 'percentile()',
+            'sample_n_random_rows(n)',
         ];
         template += `
             <div class="right">
@@ -969,7 +971,7 @@ export class Table {
     }
 
     // plot a ylabel-xlabel figure
-    plot(xlabel, ylabel, xtype: string = 'linear') {
+    vplot(xlabel, ylabel, xtype: string = 'linear') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -979,7 +981,7 @@ export class Table {
         vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
-    plot_lite(xlabel, ylabel, xtype: string = 'quantitative') {
+    lineplot(xlabel, ylabel, xtype: string = 'quantitative') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -987,24 +989,24 @@ export class Table {
         });
         let templates = new vglt.VGLTemplate();
         vg.embed(`#table-area-${id}`, templates.plot(values, xlabel, ylabel, xtype), function(error, result) {
-            console.log(error);
+            // console.log(error);
         });
     }
 
-    bar_lite(xlabel, ylabel) {
+    barplot(xlabel, ylabel, xtype: string = 'quantitative', ytype: string = 'quantitative') {
         let id = this.cur_env();
         let templates = new vglt.VGLTemplate();
         let values = [];
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
-        vg.embed(`#table-area-${id}`, templates.bar(values, xlabel, ylabel), function(error, result) {
-            console.log(error);
+        vg.embed(`#table-area-${id}`, templates.bar(values, xlabel, ylabel, xtype, ytype), function(error, result) {
+            // console.log(error);
         });
     }
 
     // create a ylabel-xlabel bar chart
-    bar(xlabel, ylabel) {
+    vbar(xlabel, ylabel) {
         let id = this.cur_env();
         let templates = new vgt.VGTemplate();
         let values = [];
@@ -1014,7 +1016,7 @@ export class Table {
         vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
-    scatter_lite(xlabel, ylabel, xtype: string = 'quantitative') {
+    scatterplot(xlabel, ylabel, xtype: string = 'quantitative') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -1022,12 +1024,12 @@ export class Table {
         });
         let templates = new vglt.VGLTemplate();
         vg.embed(`#table-area-${id}`, templates.scatter(values, xlabel, ylabel, xtype), function(error, result) {
-            console.log(error);
+            // console.log(error);
         });
     }
 
     // create a ylabel-xlabel bar chart
-    scatter(xlabel, ylabel, xtype: string = 'linear') {
+    vscatter(xlabel, ylabel, xtype: string = 'linear') {
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -1037,7 +1039,8 @@ export class Table {
         vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
     }
 
-    hist_lite(column: string, nbins: number = 10) {
+    histogram(column: string, nbins: number = 10) {
+        // let s = new Set(this.get_column(column).tolist());
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -1045,13 +1048,13 @@ export class Table {
         });
         let templates = new vglt.VGLTemplate();
         vg.embed(`#table-area-${id}`, templates.hist(values, nbins), function(error, result) {
-            console.log(error);
+            // console.log(error);
         });
     }
 
     // create a histogram on a certain column
     // naive version
-    hist(column: string) {
+    vhist(column: string) {
         var bins = {};
         this._t.forEach(function (row) {
             var elem = row[column];
@@ -1078,10 +1081,11 @@ export class Table {
         });
     }
 
+    // @deprecated
     bhist(column: string, nbins: number) {
         let bins = {};
         if (nbins) {
-            let col = this.column(column);
+            let col = this.get_column(column);
             let range = col.max() - col.min();
             let step = Math.ceil(range / nbins);
             let start = Math.floor(col.min());
@@ -1115,14 +1119,6 @@ export class Table {
         var templates = new vgt.VGTemplate();
         var id = this.cur_env();
         vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-            chart({ el: `#table-area-${id}` }).update();
-        });
-    }
-
-    vhist(column: string) {
-        var templates = new vgt.VGTemplate();
-        var id = this.cur_env();
-        vg.parse.spec(templates.vbar(this._t), function (error, chart) {
             chart({ el: `#table-area-${id}` }).update();
         });
     }
@@ -1313,9 +1309,9 @@ export class Table {
 
         // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
-        if (method_name == 'with_row' || method_name == 'with_rows') {
+        if (method_name == 'add_row' || method_name == 'add_rows') {
             let new_table = eval(`this.${method_name}(${args})`);
-            args = method_name == 'with_row' ? [eval(`this._as_args(${args})`)] : eval(`this._as_args(${args})`)[0];
+            args = method_name == 'add_row' ? [eval(`this._as_args(${args})`)] : eval(`this._as_args(${args})`)[0];
             let raw_components = new_table.construct_table_components();
             for (let row = 1; row <= args.length; row++) {
                 for (let i = 0; i < raw_components[0].length; i++) {
@@ -1324,7 +1320,7 @@ export class Table {
             }
 
             $(`#preview-${this.cur_env()}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
-        } else if (method_name == 'with_column' || method_name == 'with_columns') {
+        } else if (method_name == 'add_column' || method_name == 'add_columns') {
             let new_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
             let raw_components = new_table.construct_table_components();
@@ -1335,18 +1331,18 @@ export class Table {
             }
 
             $(`#preview-${this.cur_env()}`).html(new_table.construct_html_table(raw_components, true, true, null, method_call));
-        } else if (method_name == 'select' || method_name == 'drop') {
+        } else if (method_name == 'select_columns' || method_name == 'drop_columns') {
             // [bug] what if we do t.drop('1', '2', '3').drop('1') - we should get an error?
             let raw_components = this.construct_table_components();
             let label_locs = eval(`this._as_label_indices(${args})`);
             for (let i = 0; i < raw_components.length; i++) {
                 label_locs.forEach(function(loc) {
-                    raw_components[i][loc] = $(raw_components[i][loc]).attr('class', method_name == 'select' ? 'preview' : 'preview-del').prop('outerHTML');
+                    raw_components[i][loc] = $(raw_components[i][loc]).attr('class', method_name == 'select_columns' ? 'preview' : 'preview-del').prop('outerHTML');
                 });
             }
 
             $(`#preview-${this.cur_env()}`).html(this.construct_html_table(raw_components, true, true, label_locs, method_call));
-        } else if (method_name == 'relabeled') {
+        } else if (method_name == 'rename_column') {
             // [bug] what if we give it a non-existing label name?
             args = eval(`this._as_args(${args})`);
             let raw_components = this.construct_table_components();
@@ -1377,10 +1373,10 @@ export class Table {
                 raw_components[i][label_loc] = $(raw_components[i][label_loc]).attr('class', 'preview').prop('outerHTML');
             }
             $(`#preview-${this.cur_env()}`).html(sorted_table.construct_html_table(raw_components, true, true, [label_loc], method_call));
-        } else if (method_name == 'group' || method_name == 'groups') {
+        } else if (method_name == 'groupby' || method_name == 'groupsby') {
             let grouped_table = eval(`this.${method_name}(${args})`);
             args = eval(`this._as_args(${args})`);
-            let group_labels = method_name == 'group' ? [args[0]] : args[0];
+            let group_labels = method_name == 'groupby' ? [args[0]] : args[0];
             let left_group_indices = this._as_label_indices(group_labels);
             let left_raw_components = this.construct_table_components();
             for (let i = 0; i < left_raw_components.length; i++) {

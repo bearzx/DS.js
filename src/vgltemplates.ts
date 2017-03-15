@@ -36,7 +36,7 @@ export class VGLTemplate {
         return embed_spec;
     }
 
-    public bar(_values, xtitle, ytitle) {
+    public bar(_values, xtitle, ytitle, xtype, ytype) {
         let spec = {
             "data": {
                 "values": _values
@@ -45,12 +45,14 @@ export class VGLTemplate {
             "encoding": {
                 "x": {
                     "field": "x",
-                    "type": "quantitative"
+                    "title": xtitle,
+                    "type": xtype
                 },
                 "y": {
                     // "aggregate": "average",
                     "field": "y",
-                    "type": "quantitative"
+                    "title": ytitle,
+                    "type": ytype
                 }
             },
             "width": 600,
@@ -76,11 +78,13 @@ export class VGLTemplate {
                     "type": xtype,
                     "axis": {
                         'ticks': _values.length
-                    }
+                    },
+                    "title": xtitle
                 },
                 "y": {
                     "field": "y",
-                    "type": "quantitative"
+                    "type": "quantitative",
+                    "title": ytitle
                 }
             },
             "width": 600,
@@ -106,11 +110,13 @@ export class VGLTemplate {
                     "type": xtype,
                     "axis": {
                         'ticks': _values.length
-                    }
+                    },
+                    "title": xtitle
                 },
                 "y": {
                     "field": "y",
                     "type": "quantitative",
+                    "title": ytitle
                 }
             },
             "width": 600,

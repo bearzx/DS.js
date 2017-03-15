@@ -1,3 +1,4 @@
+webpack
 ipdo=192.241.240.169
 dest=bearzx@$ipdo:/var/www/bearzx.com/ds.js
 scp -r out/ $dest
