@@ -319,29 +319,32 @@ function env_init(_this, code_obj) {
             bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
             // console.log(code);
+
             try {
                 let res = eval(code);
-                if (cur_line.length && res && res.__showable__) {
-                    // [TODO] should we use cur_line or all the code?
-                    let expr = esprima.parse(cur_line, { loc: true }).body[0];
-                    // let expr = esprima.parse(code, { loc: true }).body[0];
-                    if (expr) {
-                        if (expr.type == 'ExpressionStatement') {
-                            expr = expr.expression;
+                setTimeout(function() {
+                    if (cur_line.length && res && res.__showable__) {
+                        // [TODO] should we use cur_line or all the code?
+                        let expr = esprima.parse(cur_line, { loc: true }).body[0];
+                        // let expr = esprima.parse(code, { loc: true }).body[0];
+                        if (expr) {
+                            if (expr.type == 'ExpressionStatement') {
+                                expr = expr.expression;
+                            }
+                            if (expr.type == 'AssignmentExpression') {
+                                res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                            } else if (expr.type == 'CallExpression') {
+                                res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                            } else if (expr.type == 'Identifier') {
+                                res.show(false);
+                            }
                         }
-                        if (expr.type == 'AssignmentExpression') {
-                            res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                        } else if (expr.type == 'CallExpression') {
-                            res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                        } else if (expr.type == 'Identifier') {
-                            res.show(false);
-                        }
+                    } else if (cur_line.length) {
+                        $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
+                    } else {
+                        $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                     }
-                } else if (cur_line.length) {
-                    $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
-                } else {
-                    $(`#table-area-${editor.datai}-${editor.envi}`).html('');
-                }
+                }, 2);
             }
             catch (e) {
                 console.log(e);

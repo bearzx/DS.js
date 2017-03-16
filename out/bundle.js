@@ -13710,6 +13710,7 @@ var Table = (function () {
         return this;
     };
     Table.prototype.from_columns = function (columns) {
+        // console.log(columns);
         var _this = this;
         columns.forEach(function (column) {
             column.forEach(function (s, i) {
@@ -14149,6 +14150,7 @@ var Table = (function () {
         if (!table_expr) {
             table_expr = "t" + window.datai;
         }
+        $("#table-area-" + this.cur_env()).html('');
         $("#table-area-" + this.cur_env()).html(this.construct_html_table(raw_components, hide, hide));
         $('.suggestion-panel').hide();
         var _this = this;
@@ -14323,6 +14325,8 @@ var Table = (function () {
     // plot a ylabel-xlabel figure
     Table.prototype.vplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'linear'; }
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
@@ -14333,6 +14337,8 @@ var Table = (function () {
     };
     Table.prototype.lineplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'quantitative'; }
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
@@ -14344,8 +14350,10 @@ var Table = (function () {
         });
     };
     Table.prototype.barplot = function (xlabel, ylabel, xtype, ytype) {
-        if (xtype === void 0) { xtype = 'quantitative'; }
+        if (xtype === void 0) { xtype = 'nominal'; }
         if (ytype === void 0) { ytype = 'quantitative'; }
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         var id = this.cur_env();
         var templates = new vglt.VGLTemplate();
         var values = [];
@@ -14368,6 +14376,8 @@ var Table = (function () {
     };
     Table.prototype.scatterplot = function (xlabel, ylabel, xtype) {
         if (xtype === void 0) { xtype = 'quantitative'; }
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         var id = this.cur_env();
         var values = [];
         this._t.forEach(function (row) {
@@ -15122,29 +15132,32 @@ function env_init(_this, code_obj) {
             bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
             // console.log(code);
+
             try {
                 let res = eval(code);
-                if (cur_line.length && res && res.__showable__) {
-                    // [TODO] should we use cur_line or all the code?
-                    let expr = esprima.parse(cur_line, { loc: true }).body[0];
-                    // let expr = esprima.parse(code, { loc: true }).body[0];
-                    if (expr) {
-                        if (expr.type == 'ExpressionStatement') {
-                            expr = expr.expression;
+                setTimeout(function() {
+                    if (cur_line.length && res && res.__showable__) {
+                        // [TODO] should we use cur_line or all the code?
+                        let expr = esprima.parse(cur_line, { loc: true }).body[0];
+                        // let expr = esprima.parse(code, { loc: true }).body[0];
+                        if (expr) {
+                            if (expr.type == 'ExpressionStatement') {
+                                expr = expr.expression;
+                            }
+                            if (expr.type == 'AssignmentExpression') {
+                                res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
+                            } else if (expr.type == 'CallExpression') {
+                                res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
+                            } else if (expr.type == 'Identifier') {
+                                res.show(false);
+                            }
                         }
-                        if (expr.type == 'AssignmentExpression') {
-                            res.show(false, cur_line.slice(expr.left.loc.start.column, expr.left.loc.end.column));
-                        } else if (expr.type == 'CallExpression') {
-                            res.show(false, cur_line.slice(expr.loc.start.column, expr.loc.end.column));
-                        } else if (expr.type == 'Identifier') {
-                            res.show(false);
-                        }
+                    } else if (cur_line.length) {
+                        $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
+                    } else {
+                        $(`#table-area-${editor.datai}-${editor.envi}`).html('');
                     }
-                } else if (cur_line.length) {
-                    $(`#table-area-${editor.datai}-${editor.envi}`).html(JSON.stringify(res));
-                } else {
-                    $(`#table-area-${editor.datai}-${editor.envi}`).html('');
-                }
+                }, 2);
             }
             catch (e) {
                 console.log(e);

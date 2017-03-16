@@ -321,6 +321,7 @@ export class Table {
     }
 
     from_columns(columns: any[]) {
+        // console.log(columns);
         let _this = this;
         columns.forEach(function(column) {
             column.forEach(function(s, i) {
@@ -784,6 +785,7 @@ export class Table {
             table_expr = `t${window.datai}`;
         }
 
+        $(`#table-area-${this.cur_env()}`).html('');
         $(`#table-area-${this.cur_env()}`).html(this.construct_html_table(raw_components, hide, hide));
         $('.suggestion-panel').hide();
 
@@ -972,6 +974,8 @@ export class Table {
 
     // plot a ylabel-xlabel figure
     vplot(xlabel, ylabel, xtype: string = 'linear') {
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -982,6 +986,8 @@ export class Table {
     }
 
     lineplot(xlabel, ylabel, xtype: string = 'quantitative') {
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
@@ -993,7 +999,9 @@ export class Table {
         });
     }
 
-    barplot(xlabel, ylabel, xtype: string = 'quantitative', ytype: string = 'quantitative') {
+    barplot(xlabel, ylabel, xtype: string = 'nominal', ytype: string = 'quantitative') {
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         let id = this.cur_env();
         let templates = new vglt.VGLTemplate();
         let values = [];
@@ -1017,6 +1025,8 @@ export class Table {
     }
 
     scatterplot(xlabel, ylabel, xtype: string = 'quantitative') {
+        xlabel = this._as_label(xlabel);
+        ylabel = this._as_label(ylabel);
         let id = this.cur_env();
         let values = [];
         this._t.forEach(function (row) {
