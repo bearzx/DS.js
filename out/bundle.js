@@ -14850,8 +14850,7 @@ function env_init(_this, code_obj) {
             <div class="repl">
                 <div class="inputs">
                     <div id="preview-${datai}-${envi}" class="preview-panel"></div>
-                    <div id="${editor_id}" class="editor">
-                    </div>
+                    <div id="${editor_id}" class="editor"></div>
                 </div>
             </div>
             <div class="show-panel">
