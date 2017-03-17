@@ -321,7 +321,7 @@ export class Table {
     }
 
     from_columns(columns: any[]) {
-        // console.log(columns);
+        console.log(columns);
         let _this = this;
         columns.forEach(function(column) {
             column.forEach(function(s, i) {

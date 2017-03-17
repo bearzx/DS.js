@@ -13710,7 +13710,7 @@ var Table = (function () {
         return this;
     };
     Table.prototype.from_columns = function (columns) {
-        // console.log(columns);
+        console.log(columns);
         var _this = this;
         columns.forEach(function (column) {
             column.forEach(function (s, i) {
