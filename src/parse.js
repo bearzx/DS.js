@@ -3,6 +3,7 @@ window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
 window.nj = require('numjs');
+require('jshint');
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
 require('../libs/jquery.ba-bbq.js');

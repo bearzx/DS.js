@@ -321,21 +321,21 @@ export class Table {
     }
 
     from_columns(columns: any[]) {
-        console.log(columns);
         let _this = this;
         columns.forEach(function(column) {
-            column.forEach(function(s, i) {
+            for (let i = 0; i < column.length; i++) {
                 let node = document.createElement('div');
-                node.innerHTML = s;
+                node.innerHTML = column[i];
                 column[i] = node.textContent || node.innerText || '';
                 if (i != 0) {
                     let n = numeral(column[i]);
                     column[i] = n._value ? n._value : column[i];
                 }
-            });
+            }
             _this._add_column(column[0], column.slice(1, column.length));
         });
 
+        // console.log(this);
         return this;
     }
 
