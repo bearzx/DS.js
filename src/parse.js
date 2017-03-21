@@ -79,6 +79,7 @@ function env_init(_this, code_obj) {
             let datai = _editor.datai;
             let envi = _editor.envi;
             if ($(`#env-${datai}-${envi} .preview-panel`).css('display') != 'none') {
+                remove_marks(_editor);
                 $(`#env-${datai}-${envi} .preview-panel`).hide();
             } else {
                 let ast = esprima.parse(_editor.getValue(), { loc: true });
@@ -105,6 +106,22 @@ function env_init(_this, code_obj) {
     //         $('.suggestion-panel').hide();
     //     }
     // });
+
+    function mark_id(editor, rown, col_start, col_end) {
+        let Range = ace.require('ace/range').Range;
+        console.log(`${rown} ${col_start}, ${col_end}`);
+        let r = new Range(rown, col_start, rown, col_end);
+        editor.getSession().addMarker(r, 'preview-hl', 'line');
+    }
+
+    function remove_marks(editor) {
+        let markers = editor.getSession().getMarkers();
+        Object.keys(markers).forEach(function(mk) {
+            if (markers[mk].clazz == 'preview-hl') {
+                editor.getSession().removeMarker(mk);
+            }
+        });
+    }
 
     function find_and_preview(expr, editor, line, row, col, cur_start, cur_end) {
         let datai = editor.datai;
@@ -143,6 +160,7 @@ function env_init(_this, code_obj) {
                     }
                     refresh_table(datai, envi);
                     try {
+                        mark_id(editor, row, identifier_start, identifier_end);
                         eval(pre_eval_code);
                         eval(`${identifier_name}.preview('self()')`);
                         let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();
@@ -176,6 +194,7 @@ function env_init(_this, code_obj) {
                     pre_eval_code += cur_line_partial;
                     refresh_table(datai, envi);
                     try {
+                        mark_id(editor, row, method_start, method_end);
                         let partial_result = eval(pre_eval_code);
                         eval(`partial_result.preview(\`${method_call}\`)`);
                         let pos = $(`#env-${datai}-${envi} .ace_cursor`).position();

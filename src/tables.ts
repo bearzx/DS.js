@@ -853,7 +853,7 @@ export class Table {
                 suggestions = [
                     `select_columns` + parameters,
                     `drop_columns` + parameters,
-                    `groupsby` + parameters,
+                    `groupby` + parameters,
                     `lineplot` + parameters,
                     `barplot` + parameters,
                     `scatterplot` + parameters
