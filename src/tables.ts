@@ -329,14 +329,18 @@ export class Table {
                 column[i] = node.textContent || node.innerText || '';
                 if (i != 0) {
                     let n = numeral(column[i]);
-                    column[i] = n._value ? n._value : column[i];
+                    column[i] = n._value ? n._value : _this._string_clean(column[i]);
                 }
             }
-            _this._add_column(column[0], column.slice(1, column.length));
+            _this._add_column(_this._string_clean(column[0]), column.slice(1, column.length));
         });
 
         // console.log(this);
         return this;
+    }
+
+    _string_clean(s: string) {
+        return s.replace('\n', ' ').trim();
     }
 
     // [impure] relabel a column name
@@ -840,7 +844,7 @@ export class Table {
                     `drop_columns('${col_label}')`,
                     `rename_column('${col_label}', 'new_label')`,
                     `where('${col_label}', x => true)`,
-                    `sort('${col_label}')`, // sorted?
+                    `sorted('${col_label}')`, // sorted?
                     `groupby('${col_label}')`,
                     `join('${col_label}', other_table, other_label?)`, // [TODO] how to do this?
                     `histogram('${col_label}')`
@@ -1317,7 +1321,7 @@ export class Table {
         let method_name = method_call.slice(0, method_call.indexOf('('));
         let args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
 
-        // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
+        console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
 
         if (method_name == 'add_row' || method_name == 'add_rows') {
             let new_table = eval(`this.${method_name}(${args})`);

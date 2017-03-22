@@ -27209,13 +27209,16 @@ var Table = (function () {
                 column[i] = node.textContent || node.innerText || '';
                 if (i != 0) {
                     var n = numeral(column[i]);
-                    column[i] = n._value ? n._value : column[i];
+                    column[i] = n._value ? n._value : _this._string_clean(column[i]);
                 }
             }
-            _this._add_column(column[0], column.slice(1, column.length));
+            _this._add_column(_this._string_clean(column[0]), column.slice(1, column.length));
         });
         // console.log(this);
         return this;
+    };
+    Table.prototype._string_clean = function (s) {
+        return s.replace('\n', ' ').trim();
     };
     // [impure] relabel a column name
     Table.prototype.relabel = function (label, new_label) {
@@ -27694,7 +27697,7 @@ var Table = (function () {
                     "drop_columns('" + col_label + "')",
                     "rename_column('" + col_label + "', 'new_label')",
                     "where('" + col_label + "', x => true)",
-                    "sort('" + col_label + "')",
+                    "sorted('" + col_label + "')",
                     "groupby('" + col_label + "')",
                     "join('" + col_label + "', other_table, other_label?)",
                     "histogram('" + col_label + "')"
@@ -28140,7 +28143,7 @@ var Table = (function () {
     Table.prototype.preview = function (method_call) {
         var method_name = method_call.slice(0, method_call.indexOf('('));
         var args = method_call.slice(method_call.indexOf('(') + 1, method_call.lastIndexOf(')'));
-        // console.log(`method_call: ${method_call}, method_name: ${method_name}, args: ${args}`);
+        console.log("method_call: " + method_call + ", method_name: " + method_name + ", args: " + args);
         if (method_name == 'add_row' || method_name == 'add_rows') {
             var new_table = eval("this." + method_name + "(" + args + ")");
             args = method_name == 'add_row' ? [eval("this._as_args(" + args + ")")] : eval("this._as_args(" + args + ")")[0];
@@ -28336,7 +28339,7 @@ function env_init(_this, code_obj) {
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="buttons">
                 <!-- <button datai="${datai}" envi="${envi}" class="run">&#9654;</button> -->
-                <button datai="${datai}" envi="${envi}" class="toggle-sg">Pick Data</button>
+                <button datai="${datai}" envi="${envi}" class="toggle-sg">Select Data</button>
                 <button id="hide-env-${datai}-${envi}" datai="${datai}" envi="${envi}" class="hide-env">&#10005;</button>
             </div>
             <div class="repl">
@@ -28785,7 +28788,7 @@ $(document).ready(function() {
         if (data_link) {
             data_link = data_link.split('?')[0];
             if (data_link.endsWith('.csv') || data_link.endsWith('.tsv')) {
-                $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append ds.js</button>`);
+                $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" data-link=${data_link} class="open-dsjs">Append DS.js editor</button>`);
                 // pre-load the csv file
                 // eval(`
                 //     window.table_store['t${datai}'] = new Table.Table(null, null, '${data_link}');
@@ -28797,7 +28800,7 @@ $(document).ready(function() {
 
     // html table detection
     $('table').each(function(i) {
-        $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" class="open-dsjs-htable">Append ds.js</button>`);
+        $(this).after(`<button id="open-dsjs-${datai}" datai="${datai}" class="open-dsjs-htable">Append DS.js editor</button>`);
         $(this).addClass(`dsjs-htable-${datai}`);
         // eval(`
         //     window.table_store['t${datai}'] = new Table.Table(null, null, null);
