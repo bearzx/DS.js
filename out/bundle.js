@@ -28334,7 +28334,6 @@ function env_init(_this, code_obj) {
     let editor_id = `editor-${datai}-${envi}`;
     // create new environment
     let ds_env = `
-        <h4>ds.js environment ${datai}-${envi}</h4>
         <button id="show-env-${datai}-${envi}" class="show-env" datai="${datai}" envi="${envi}">open</button>
         <div id="${env_id}" class="dsjs-env ${env_class}">
             <div class="buttons">
