@@ -27687,6 +27687,7 @@ var Table = (function () {
             }
             var suggestions;
             var pos = $(this).position();
+            console.log(window.selected_columns.length);
             if (window.selected_columns.length == 1) {
                 var col_label = $(this).text();
                 var pos_1 = $(this).position();
@@ -27802,6 +27803,7 @@ var Table = (function () {
             left: pos.left + 25,
             top: pos.top + 15
         }).show('fast');
+        console.log($("#suggestion-" + datai).css('display'));
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
             var new_code = table_expr + '.' + $(this).text() + ';';
@@ -28363,12 +28365,12 @@ function env_init(_this, code_obj) {
         cur = $(cur).parent();
     }
     $(cur).after(ds_env);
-    var editor = ace.edit(editor_id);
+    let editor = ace.edit(editor_id);
     editor.datai = datai;
     editor.envi = envi;
     editor.last_rown = 0;
     editor.setTheme("ace/theme/chrome");
-    // editor.setBehavioursEnabled(false);
+    // editor.setOptions({ fontSize: "15pt" });
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
     if (code_obj) {
@@ -28717,17 +28719,18 @@ function env_init(_this, code_obj) {
         }
     });
 
-    $('.table-area').click(function(e) {
-        let pos = $(this).position();
-        let table_pos = $(this).children('.ds-table').position();
-        if (table_pos) {
-            let width = $(this).children('.ds-table').width();
-            let height = $(this).children('.ds-table').height();
-            if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
-                $(this).siblings('.suggestion-panel').hide();
-            }
-        }
-    });
+    // cancel this out because this will hide the last columns when the table is too big
+    // $('.table-area').click(function(e) {
+    //     let pos = $(this).position();
+    //     let table_pos = $(this).children('.ds-table').position();
+    //     if (table_pos) {
+    //         let width = $(this).children('.ds-table').width();
+    //         let height = $(this).children('.ds-table').height();
+    //         if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
+    //             $(this).siblings('.suggestion-panel').hide();
+    //         }
+    //     }
+    // });
 
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
@@ -74609,7 +74612,7 @@ var VGLTemplate = (function () {
                     "field": "x",
                     "type": xtype,
                     "axis": {
-                        'ticks': _values.length
+                        'ticks': 10
                     },
                     "title": xtitle
                 },

@@ -109,7 +109,7 @@ export class VGLTemplate {
                     "field": "x",
                     "type": xtype,
                     "axis": {
-                        'ticks': _values.length
+                        'ticks': 10
                     },
                     "title": xtitle
                 },

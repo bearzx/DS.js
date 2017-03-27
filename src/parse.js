@@ -56,12 +56,12 @@ function env_init(_this, code_obj) {
         cur = $(cur).parent();
     }
     $(cur).after(ds_env);
-    var editor = ace.edit(editor_id);
+    let editor = ace.edit(editor_id);
     editor.datai = datai;
     editor.envi = envi;
     editor.last_rown = 0;
     editor.setTheme("ace/theme/chrome");
-    // editor.setBehavioursEnabled(false);
+    // editor.setOptions({ fontSize: "15pt" });
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
     if (code_obj) {
@@ -410,17 +410,18 @@ function env_init(_this, code_obj) {
         }
     });
 
-    $('.table-area').click(function(e) {
-        let pos = $(this).position();
-        let table_pos = $(this).children('.ds-table').position();
-        if (table_pos) {
-            let width = $(this).children('.ds-table').width();
-            let height = $(this).children('.ds-table').height();
-            if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
-                $(this).siblings('.suggestion-panel').hide();
-            }
-        }
-    });
+    // cancel this out because this will hide the last columns when the table is too big
+    // $('.table-area').click(function(e) {
+    //     let pos = $(this).position();
+    //     let table_pos = $(this).children('.ds-table').position();
+    //     if (table_pos) {
+    //         let width = $(this).children('.ds-table').width();
+    //         let height = $(this).children('.ds-table').height();
+    //         if (e.pageX > (table_pos.left + width) || e.pageY > (table_pos.top + height)) {
+    //             $(this).siblings('.suggestion-panel').hide();
+    //         }
+    //     }
+    // });
 
     $('.toggle-sg').click(function() {
         let datai = $(this).attr('datai');
