@@ -3,12 +3,9 @@ window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
 window.nj = require('numjs');
-window.jshint = require('jshint');
+window.JSHINT = require('jshint').JSHINT;
 window.jshint_options = {
-    undef: true,
-    'globals': {
-        'MY_GLOBAL': true
-    }
+    undef: true
 };
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
@@ -335,25 +332,48 @@ function env_init(_this, code_obj) {
             // and get the result
             editor.last_rown = rown;
             let all_code = editor.getValue().split('\n');
+            let part_code = all_code.slice(0, rown + 1);
+            let code_s = part_code.join('\n');
 
+            window.JSHINT(part_code, window.jshint_options, {});
+            let undefs = {};
+            window.JSHINT.errors.forEach(function(e) {
+                // console.log(e);
+                if (e.code == 'W117') {
+                    if (!(e.a in undefs)) {
+                        undefs[e.a] = [e.line];
+                    } else {
+                        undefs[e.a].push(e.line);
+                    }
+                }
+            });
 
+            // console.log(undefs);
 
-            let code = '';
-            for (let i = 0; i <= rown; i++) {
-                code += all_code[i] + '\n';
-                // code += all_code[i].trim();
-            }
+            let annotations = [];
+            Object.keys(undefs).forEach(function(v) {
+                undefs[v].forEach(function(l) {
+                    annotations.push({
+                        row: l - 1,
+                        column: 0,
+                        text: `${v} is global`,
+                        type: 'info'
+                    });
+                });
+            });
+
+            editor.getSession().clearAnnotations();
+            editor.getSession().setAnnotations(annotations);
+
             bind_env(editor.datai, editor.envi);
             refresh_table(editor.datai, editor.envi);
-            // console.log(code);
 
             try {
-                let res = eval(code);
+                let res = eval(code_s);
                 setTimeout(function() {
                     if (cur_line.length && res && res.__showable__) {
                         // [TODO] should we use cur_line or all the code?
                         let expr = esprima.parse(cur_line, { loc: true }).body[0];
-                        // let expr = esprima.parse(code, { loc: true }).body[0];
                         if (expr) {
                             if (expr.type == 'ExpressionStatement') {
                                 expr = expr.expression;
