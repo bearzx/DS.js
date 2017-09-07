@@ -3,7 +3,13 @@ window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
 window.nj = require('numjs');
-require('jshint');
+window.jshint = require('jshint');
+window.jshint_options = {
+    undef: true,
+    'globals': {
+        'MY_GLOBAL': true
+    }
+};
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
 require('../libs/jquery.ba-bbq.js');
@@ -329,6 +335,9 @@ function env_init(_this, code_obj) {
             // and get the result
             editor.last_rown = rown;
             let all_code = editor.getValue().split('\n');
+
+
+
             let code = '';
             for (let i = 0; i <= rown; i++) {
                 code += all_code[i] + '\n';

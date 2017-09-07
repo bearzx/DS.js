@@ -53,7 +53,14 @@ javascript: (
             document.body.appendChild(vgejs);
         }
 
-        function d3csv_load() {
+        function jshint_load() {
+            var jshintjs = document.createElement('script');
+            jshintjs.onload = vega_load;
+            jshintjs.setAttribute('src', 'https://cdnjs.cloudflare.com/ajax/libs/jshint/2.9.5/jshint.js');
+            document.body.appendChild(jshintjs);
+        }
+
+        function d3dsv_load() {
             var d3dsvjs = document.createElement('script');
             d3dsvjs.onload = vega_load;
             d3dsvjs.setAttribute('src', 'https://d3js.org/d3-dsv.v1.min.js');
@@ -65,7 +72,7 @@ javascript: (
         document.body.appendChild(acejs);
 
         var d3js = document.createElement('script');
-        d3js.onload = d3csv_load;
+        d3js.onload = d3dsv_load;
         d3js.setAttribute('src', 'https://d3js.org/d3.v3.min.js');
         document.body.appendChild(d3js);
     } ()

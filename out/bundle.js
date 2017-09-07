@@ -27687,7 +27687,6 @@ var Table = (function () {
             }
             var suggestions;
             var pos = $(this).position();
-            console.log(window.selected_columns.length);
             if (window.selected_columns.length == 1) {
                 var col_label = $(this).text();
                 var pos_1 = $(this).position();
@@ -27803,7 +27802,6 @@ var Table = (function () {
             left: pos.left + 25,
             top: pos.top + 15
         }).show('fast');
-        console.log($("#suggestion-" + datai).css('display'));
         $(".suggestion-item").click(function () {
             var editor = ace.edit("editor-" + datai);
             var new_code = table_expr + '.' + $(this).text() + ';';
@@ -28312,12 +28310,13 @@ exports.Table = Table;
 window.esprima = __webpack_require__(40);
 window.numeral = __webpack_require__(60);
 window.nj = __webpack_require__(72);
-__webpack_require__(48);
+window.JSHINT = __webpack_require__(48);
 __webpack_require__(29);
 __webpack_require__(78);
 __webpack_require__(28);
 // window.d3 = require('script!../libs/d3.v3.min.js');
 // window.vg = require('script!../libs/vega/vega.js');
+console.log(JSHINT);
 
 function env_init(_this, code_obj) {
     let datai = $(_this).attr('datai');
