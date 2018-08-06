@@ -21,9 +21,12 @@
     "cheerio": "^0.22.0",
     "cheerio-tableparser": "^1.0.1",
     "d3": "^4.4.0",
+    "esprima": "^4.0.1",
     "jquery": "^3.1.1",
     "jshint": "^2.9.4",
     "jstransform": "^11.0.2",
+    "numeral": "^2.0.6",
+    "numjs": "^0.16.0",
     "through": "^2.3.8",
     "transform-loader": "^0.2.3",
     "ts-loader": "^1.2.2"
