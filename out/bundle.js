@@ -28525,7 +28525,7 @@ function env_init(_this, code_obj) {
     }
 
     function between(i, start, end) {
-        return ((i >= start) && (i <= end))
+        return ((i >= start) && (i <= end));
     }
 
     function is_supported_preview(func_name) {
