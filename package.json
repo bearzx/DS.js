@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/bearzx/ds.js#readme",
   "dependencies": {
-    "@types/jquery": "^2.0.34",
     "ace-builds": "^1.2.5",
     "cheerio": "^0.22.0",
     "cheerio-tableparser": "^1.0.1",
@@ -33,6 +32,7 @@
     "@types/core-js": "^0.9.35",
     "@types/jquery": "^2.0.34",
     "@types/node": "^6.0.54",
+    "@types/handlebars": "4.0.33",
     "ace-builds": "^1.2.5",
     "css-loader": "^0.26.1",
     "style-loader": "^0.13.1",
