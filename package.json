@@ -32,7 +32,6 @@
     "ts-loader": "^1.2.2"
   },
   "devDependencies": {
-    "@types/core-js": "^0.9.35",
     "@types/jquery": "^2.0.34",
     "@types/node": "^6.0.54",
     "@types/handlebars": "4.0.33",

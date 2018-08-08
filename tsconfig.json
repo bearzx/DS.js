@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    // "target": "ES6",
+    "target": "ES6",
     "module": "commonjs",
     "sourceMap": true
   },
@@ -8,7 +8,6 @@
     "node"
   ],
   "files": [
-    // "demo.ts",
     "./src/tables.ts",
     "./src/vgtemplates.ts",
     "./src/vgltemplates.ts"
