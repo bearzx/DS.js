@@ -6,6 +6,7 @@ window.JSHINT = require('jshint').JSHINT;
 window.jshint_options = {
     undef: true
 };
+window._ = require('lodash');
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
 require('../libs/jquery.ba-bbq.js');

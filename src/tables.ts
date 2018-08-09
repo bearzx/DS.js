@@ -10,9 +10,9 @@ declare var window: any;
 declare var esprima: any;
 declare var numeral: any;
 declare var nj: any;
+declare var _: any;
 
 export class Table {
-
     private _t: any = [];
     private _labels: any = [];
     private _column_order: any = {};
@@ -368,10 +368,12 @@ export class Table {
 
     // copy a table
     copy() {
-        // return $.extend(true, {}, this);
-        let tcopy = $.extend(true, {}, this);
-        Object.setPrototypeOf(tcopy, Object.getPrototypeOf(this));
-        return tcopy;
+        // [Xiong] deep clone hack. Now using lodash
+        // let tcopy = $.extend(true, {}, this);
+        // Object.setPrototypeOf(tcopy, Object.getPrototypeOf(this));
+        // [End]
+
+        return _.cloneDeep(this);
     }
 
     // copy a table
