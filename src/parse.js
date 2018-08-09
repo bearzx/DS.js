@@ -1,5 +1,4 @@
 window.$ = window.jQuery = require('jquery');
-// window.$ = window.jQuerySG;
 window.esprima = require('esprima');
 window.numeral = require('numeral');
 window.nj = require('numjs');
@@ -10,8 +9,6 @@ window.jshint_options = {
 require('../libs/jquery.tableparser.js');
 require('./array_last.js');
 require('../libs/jquery.ba-bbq.js');
-// window.d3 = require('script!../libs/d3.v3.min.js');
-// window.vg = require('script!../libs/vega/vega.js');
 
 function env_init(_this, code_obj) {
     let datai = $(_this).attr('datai');
@@ -64,7 +61,6 @@ function env_init(_this, code_obj) {
     editor.envi = envi;
     editor.last_rown = 0;
     editor.setTheme("ace/theme/chrome");
-    // editor.setOptions({ fontSize: "15pt" });
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
     if (code_obj) {

@@ -1,5 +1,6 @@
 # DS.js Release TODOs
-- [ ] Code cleaning
+- [ ] Core code cleaning
+- [ ] Loader code cleaning
 - [ ] Example testing
 - [ ] Compiled ds.js bookmarklet hosting
 - [ ] Improved readme with API document

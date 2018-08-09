@@ -27274,7 +27274,10 @@ class Table {
     }
     // copy a table
     copy() {
-        return $.extend(true, {}, this);
+        // return $.extend(true, {}, this);
+        let tcopy = $.extend(true, {}, this);
+        Object.setPrototypeOf(tcopy, Object.getPrototypeOf(this));
+        return tcopy;
     }
     // copy a table
     copy_table() {
@@ -28339,7 +28342,6 @@ exports.Table = Table;
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function($) {window.$ = window.jQuery = __webpack_require__(3);
-// window.$ = window.jQuerySG;
 window.esprima = __webpack_require__(40);
 window.numeral = __webpack_require__(60);
 window.nj = __webpack_require__(72);
@@ -28350,8 +28352,6 @@ window.jshint_options = {
 __webpack_require__(29);
 __webpack_require__(78);
 __webpack_require__(28);
-// window.d3 = require('script!../libs/d3.v3.min.js');
-// window.vg = require('script!../libs/vega/vega.js');
 
 function env_init(_this, code_obj) {
     let datai = $(_this).attr('datai');
@@ -28404,7 +28404,6 @@ function env_init(_this, code_obj) {
     editor.envi = envi;
     editor.last_rown = 0;
     editor.setTheme("ace/theme/chrome");
-    // editor.setOptions({ fontSize: "15pt" });
     editor.getSession().setMode("ace/mode/javascript");
     editor.getSession().setUseWrapMode(true);
     if (code_obj) {

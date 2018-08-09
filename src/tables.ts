@@ -368,7 +368,10 @@ export class Table {
 
     // copy a table
     copy() {
-        return $.extend(true, {}, this);
+        // return $.extend(true, {}, this);
+        let tcopy = $.extend(true, {}, this);
+        Object.setPrototypeOf(tcopy, Object.getPrototypeOf(this));
+        return tcopy;
     }
 
     // copy a table
@@ -778,7 +781,7 @@ export class Table {
     }
 
     // show the table in the show-panel
-    show(hide = false, table_expr?) {
+    public show(hide = false, table_expr?) {
         let raw_components = this.construct_table_components();
         for (let i = 0; i < raw_components[0].length; i++) {
             raw_components[0][i] = $(raw_components[0][i]).attr('class', 'table-header-col').prop('outerHTML');
@@ -794,6 +797,7 @@ export class Table {
         $('.suggestion-panel').hide();
 
         let _this = this;
+
         // events binding for table header
         // this event binding is a legacy code when we want to open the suggestion pane via hovering on a single column header
         // $('.table-header-col').hover(function() {
