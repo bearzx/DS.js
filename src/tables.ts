@@ -361,9 +361,10 @@ export class Table {
 
     // [pure] relabel a column name
     rename_column(label, new_label) {
-        var copy = $.extend(true, {}, this);
-        copy.relabel(label, new_label);
-        return copy;
+        // var copy = $.extend(true, {}, this);
+        var _copy = this.copy();
+        _copy.relabel(label, new_label);
+        return _copy;
     }
 
     // copy a table
