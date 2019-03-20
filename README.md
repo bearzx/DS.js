@@ -1,6 +1,4 @@
-**
-Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.
-**
+**Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
 
 # DS.js Release TODOs
 - [ ] Core code cleaning
