@@ -24,10 +24,10 @@ module.exports = {
     })
   ],
   module: {
-    loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' },
-      { test: /\.less$/, loader: 'style!css!less' },
-      { test: /\.css$/, loader: "style-loader!css-loader" },
+    rules: [
+      { test: /\.ts$/, use: 'ts-loader' },
+      { test: /\.less$/, use: 'style!css!less' },
+      { test: /\.css$/, use: "style-loader!css-loader" },
       // {
       //   test: require.resolve('./libs/vega'),
       //   loaders: [
@@ -36,7 +36,7 @@ module.exports = {
       // },
       {
         test: /\.json$/,
-        loader: 'json-loader'
+        use: 'json-loader'
       }
     ]
   }
