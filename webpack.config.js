@@ -2,7 +2,7 @@ var webpack = require('webpack');
 module.exports = {
   entry: ['./src/parse.js', './src/tables.ts'],
   output: {
-    filename: './out/bundle.js',
+    filename: 'bundle.js',
     libraryTarget: 'var',
     library: 'Table'
   },
