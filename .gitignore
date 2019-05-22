@@ -2,9 +2,4 @@ node_modules
 .vscode
 typings
 .DS_Store
-data
-doc
-samples
-tests
 tmp
-tools

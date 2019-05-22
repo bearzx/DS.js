@@ -1,0 +1,89 @@
+---
+var t = new Table.Table(null, ['Even', 'Odd']);
+t.with_row([2, 3]).with_row([4, 5]);
+t.show();
+
+---
+var t = new Table.Table();
+t.with_columns('Odd', [3, 5], 'Even', [2, 4]);
+t.show();
+
+---
+var t = new Table.Table();
+t.read_table_csv_sync('data/nc-est2014-agesex-res.csv');
+ var partial = t.select('SEX', 'AGE', 4, 8);
+// t.show();
+// partial.show();
+var simple = partial.relabeled(2, '2010').relabel(3, '2014');
+simple.show();
+
+---
+simple.column(3) - simple.column(2)
+
+---
+simple.with_columns([
+    'Change', simple.column('2014') - simple.column('2010')
+])
+
+---
+females = census.where('SEX', 2)
+sum(females.where(females.column('AGE') < 999))
+
+---
+var census = new Table.Table();
+census.read_table_csv_sync('data/nc-est2014-agesex-res.csv');
+var partial = census.select('SEX', 'AGE', 4, 8);
+// census.show();
+// partial.show();
+// var simple = partial.relabeled(2, '2010').relabel(3, '2014');
+// simple.show();
+// totals = t.where('AGE', 999);
+// totals.show();
+// census.hist('AGE');
+females = census.where('SEX', 2);
+females.where('AGE', function (x) { return x < 999; }).show();
+
+---
+var census = new Table.Table();
+census.read_table_csv_sync('data/nc-est2014-agesex-res.csv');
+census.group('SEX');
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.show();
+var other = new Table.Table();
+other.with_columns( 'a', [9, 1, 1, 1],'d', [1, 2, 2, 10],'e', [3, 4, 5, 6]);
+// other.show();
+var joined = table.join('a', other, 'd').show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.stats().show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.percentile(0.2).show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.sample(2).show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+var a = table.split(1);
+a.first.show();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.scatter();
+
+---
+var table = new Table.Table();
+table.with_columns('a', [9, 3, 3, 1],'b', [1, 2, 2, 10],'c', [3, 4, 5, 6]);
+table.boxplot();
