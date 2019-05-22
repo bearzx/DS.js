@@ -1,4 +1,3 @@
-import * as vgt from './vgtemplates';
 import * as vglt from './vgltemplates';
 
 declare var d3: any;
@@ -984,17 +983,17 @@ export class Table {
     }
 
     // plot a ylabel-xlabel figure
-    vplot(xlabel, ylabel, xtype: string = 'linear') {
-        xlabel = this._as_label(xlabel);
-        ylabel = this._as_label(ylabel);
-        let id = this.cur_env();
-        let values = [];
-        this._t.forEach(function (row) {
-            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-        });
-        let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    }
+    // vplot(xlabel, ylabel, xtype: string = 'linear') {
+    //     xlabel = this._as_label(xlabel);
+    //     ylabel = this._as_label(ylabel);
+    //     let id = this.cur_env();
+    //     let values = [];
+    //     this._t.forEach(function (row) {
+    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+    //     });
+    //     let templates = new vgt.VGTemplate();
+    //     vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+    // }
 
     lineplot(xlabel, ylabel, xtype: string = 'quantitative') {
         xlabel = this._as_label(xlabel);
@@ -1025,15 +1024,15 @@ export class Table {
     }
 
     // create a ylabel-xlabel bar chart
-    vbar(xlabel, ylabel) {
-        let id = this.cur_env();
-        let templates = new vgt.VGTemplate();
-        let values = [];
-        this._t.forEach(function (row) {
-            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-        });
-        vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    }
+    // vbar(xlabel, ylabel) {
+    //     let id = this.cur_env();
+    //     let templates = new vgt.VGTemplate();
+    //     let values = [];
+    //     this._t.forEach(function (row) {
+    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+    //     });
+    //     vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+    // }
 
     scatterplot(xlabel, ylabel, xtype: string = 'quantitative') {
         xlabel = this._as_label(xlabel);
@@ -1050,15 +1049,15 @@ export class Table {
     }
 
     // create a ylabel-xlabel bar chart
-    vscatter(xlabel, ylabel, xtype: string = 'linear') {
-        let id = this.cur_env();
-        let values = [];
-        this._t.forEach(function (row) {
-            values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-        });
-        let templates = new vgt.VGTemplate();
-        vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    }
+    // vscatter(xlabel, ylabel, xtype: string = 'linear') {
+    //     let id = this.cur_env();
+    //     let values = [];
+    //     this._t.forEach(function (row) {
+    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
+    //     });
+    //     let templates = new vgt.VGTemplate();
+    //     vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
+    // }
 
     histogram(column: string, nbins: number = 10) {
         // let s = new Set(this.get_column(column).tolist());
@@ -1075,95 +1074,96 @@ export class Table {
 
     // create a histogram on a certain column
     // naive version
-    vhist(column: string) {
-        var bins = {};
-        this._t.forEach(function (row) {
-            var elem = row[column];
-            if (elem.length != 0) {
-                if (elem in bins) {
-                    bins[elem] += 1;
-                } else {
-                    bins[elem] = 1;
-                }
-            }
-        });
-        var data = [];
-        var xs = Object.keys(bins);
-        xs.sort((a, b) => parseInt(a) - parseInt(b));
-        // console.log(xs);
-        xs.forEach(function (x) {
-            data.push({ 'x': x, 'y': bins[x] });
-        });
-        // console.log(data);
-        var templates = new vgt.VGTemplate();
-        var id = this.cur_env();
-        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-            chart({ el: `#table-area-${id}` }).update();
-        });
-    }
+    // vhist(column: string) {
+    //     var bins = {};
+    //     this._t.forEach(function (row) {
+    //         var elem = row[column];
+    //         if (elem.length != 0) {
+    //             if (elem in bins) {
+    //                 bins[elem] += 1;
+    //             } else {
+    //                 bins[elem] = 1;
+    //             }
+    //         }
+    //     });
+    //     var data = [];
+    //     var xs = Object.keys(bins);
+    //     xs.sort((a, b) => parseInt(a) - parseInt(b));
+    //     // console.log(xs);
+    //     xs.forEach(function (x) {
+    //         data.push({ 'x': x, 'y': bins[x] });
+    //     });
+    //     // console.log(data);
+    //     var templates = new vgt.VGTemplate();
+    //     var id = this.cur_env();
+    //     vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
+    //         chart({ el: `#table-area-${id}` }).update();
+    //     });
+    // }
 
     // @deprecated
-    bhist(column: string, nbins: number) {
-        let bins = {};
-        if (nbins) {
-            let col = this.get_column(column);
-            let range = col.max() - col.min();
-            let step = Math.ceil(range / nbins);
-            let start = Math.floor(col.min());
-            for (let i = 0; i < nbins; i++) {
-                bins[start + i * step] = 0;
-            }
-            this._t.forEach(function(row) {
-                let elem = row[column];
-                let i = Math.floor((elem - start) / step);
-                bins[start + i * step] += 1;
-            });
-        } else {
-            this._t.forEach(function (row) {
-                let elem = row[column];
-                if (elem.length != 0) {
-                    if (elem in bins) {
-                        bins[elem] += 1;
-                    } else {
-                        bins[elem] = 1;
-                    }
-                }
-            });
-        }
-        console.log(bins);
-        var data = [];
-        var xs = Object.keys(bins);
-        xs.sort((a, b) => parseInt(a) - parseInt(b));
-        xs.forEach(function (x) {
-            data.push({ 'x': x, 'y': bins[x] });
-        });
-        var templates = new vgt.VGTemplate();
-        var id = this.cur_env();
-        vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-            chart({ el: `#table-area-${id}` }).update();
-        });
-    }
+    // bhist(column: string, nbins: number) {
+    //     let bins = {};
+    //     if (nbins) {
+    //         let col = this.get_column(column);
+    //         let range = col.max() - col.min();
+    //         let step = Math.ceil(range / nbins);
+    //         let start = Math.floor(col.min());
+    //         for (let i = 0; i < nbins; i++) {
+    //             bins[start + i * step] = 0;
+    //         }
+    //         this._t.forEach(function(row) {
+    //             let elem = row[column];
+    //             let i = Math.floor((elem - start) / step);
+    //             bins[start + i * step] += 1;
+    //         });
+    //     } else {
+    //         this._t.forEach(function (row) {
+    //             let elem = row[column];
+    //             if (elem.length != 0) {
+    //                 if (elem in bins) {
+    //                     bins[elem] += 1;
+    //                 } else {
+    //                     bins[elem] = 1;
+    //                 }
+    //             }
+    //         });
+    //     }
+    //     console.log(bins);
+    //     var data = [];
+    //     var xs = Object.keys(bins);
+    //     xs.sort((a, b) => parseInt(a) - parseInt(b));
+    //     xs.forEach(function (x) {
+    //         data.push({ 'x': x, 'y': bins[x] });
+    //     });
+    //     var templates = new vgt.VGTemplate();
+    //     var id = this.cur_env();
+    //     vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
+    //         chart({ el: `#table-area-${id}` }).update();
+    //     });
+    // }
 
     // create box-plots for each column
-    boxplot() {
-        let id = this.cur_env();
-        let templates = new vgt.VGTemplate();
-        let values = [];
-        let _this = this;
-        this._t.forEach(function(row) {
-            _this._labels.forEach(function(l, i) {
-                values.push({
-                    'x': l,
-                    'y2': 0,
-                    'group': 1,
-                    'y': row[l]
-                });
-            });
-        });
-        vg.parse.spec(templates.boxplot(values), function (error, chart) {
-            chart({ el: `#table-area-${id}` }).update();
-        });
-    }
+    // [TODO] reimplement with vgl
+    // boxplot() {
+    //     let id = this.cur_env();
+    //     let templates = new vgt.VGTemplate();
+    //     let values = [];
+    //     let _this = this;
+    //     this._t.forEach(function(row) {
+    //         _this._labels.forEach(function(l, i) {
+    //             values.push({
+    //                 'x': l,
+    //                 'y2': 0,
+    //                 'group': 1,
+    //                 'y': row[l]
+    //             });
+    //         });
+    //     });
+    //     vg.parse.spec(templates.boxplot(values), function (error, chart) {
+    //         chart({ el: `#table-area-${id}` }).update();
+    //     });
+    // }
 
     construct_table_components() {
         let components = [];
