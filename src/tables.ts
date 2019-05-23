@@ -4,6 +4,7 @@ declare var d3: any;
 declare var $: any;
 declare var vg: any;
 declare var vega: any;
+declare var vegaEmbed: any;
 declare var ace: any;
 declare var window: any;
 declare var esprima: any;
@@ -1074,98 +1075,27 @@ export class Table {
         });
     }
 
-    // create a histogram on a certain column
-    // naive version
-    // vhist(column: string) {
-    //     var bins = {};
-    //     this._t.forEach(function (row) {
-    //         var elem = row[column];
-    //         if (elem.length != 0) {
-    //             if (elem in bins) {
-    //                 bins[elem] += 1;
-    //             } else {
-    //                 bins[elem] = 1;
-    //             }
-    //         }
-    //     });
-    //     var data = [];
-    //     var xs = Object.keys(bins);
-    //     xs.sort((a, b) => parseInt(a) - parseInt(b));
-    //     // console.log(xs);
-    //     xs.forEach(function (x) {
-    //         data.push({ 'x': x, 'y': bins[x] });
-    //     });
-    //     // console.log(data);
-    //     var templates = new vgt.VGTemplate();
-    //     var id = this.cur_env();
-    //     vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-    //         chart({ el: `#table-area-${id}` }).update();
-    //     });
-    // }
+    boxplot(xlabel: string, ylabel: string) {
+        let id = this.cur_env();
+        let values = [];
+        let spec = {
+            "data": {"values": this._t},
+            "mark": "boxplot",
+            "encoding": {
+                "x": {
+                    "field": xlabel,
+                    "type": "quantitative",
+                    "axis": {"title": xlabel}
+                },
+                "y": {
+                    "field": ylabel,
+                    "type": "nominal"
+                }
+            }
+        };
 
-    // @deprecated
-    // bhist(column: string, nbins: number) {
-    //     let bins = {};
-    //     if (nbins) {
-    //         let col = this.get_column(column);
-    //         let range = col.max() - col.min();
-    //         let step = Math.ceil(range / nbins);
-    //         let start = Math.floor(col.min());
-    //         for (let i = 0; i < nbins; i++) {
-    //             bins[start + i * step] = 0;
-    //         }
-    //         this._t.forEach(function(row) {
-    //             let elem = row[column];
-    //             let i = Math.floor((elem - start) / step);
-    //             bins[start + i * step] += 1;
-    //         });
-    //     } else {
-    //         this._t.forEach(function (row) {
-    //             let elem = row[column];
-    //             if (elem.length != 0) {
-    //                 if (elem in bins) {
-    //                     bins[elem] += 1;
-    //                 } else {
-    //                     bins[elem] = 1;
-    //                 }
-    //             }
-    //         });
-    //     }
-    //     console.log(bins);
-    //     var data = [];
-    //     var xs = Object.keys(bins);
-    //     xs.sort((a, b) => parseInt(a) - parseInt(b));
-    //     xs.forEach(function (x) {
-    //         data.push({ 'x': x, 'y': bins[x] });
-    //     });
-    //     var templates = new vgt.VGTemplate();
-    //     var id = this.cur_env();
-    //     vg.parse.spec(templates.bar(data, '', ''), function (error, chart) {
-    //         chart({ el: `#table-area-${id}` }).update();
-    //     });
-    // }
-
-    // create box-plots for each column
-    // [TODO] reimplement with vgl
-    // boxplot() {
-    //     let id = this.cur_env();
-    //     let templates = new vgt.VGTemplate();
-    //     let values = [];
-    //     let _this = this;
-    //     this._t.forEach(function(row) {
-    //         _this._labels.forEach(function(l, i) {
-    //             values.push({
-    //                 'x': l,
-    //                 'y2': 0,
-    //                 'group': 1,
-    //                 'y': row[l]
-    //             });
-    //         });
-    //     });
-    //     vg.parse.spec(templates.boxplot(values), function (error, chart) {
-    //         chart({ el: `#table-area-${id}` }).update();
-    //     });
-    // }
+        vegaEmbed(`#table-area-${id}`, spec, { actions: false });
+    }
 
     construct_table_components() {
         let components = [];
