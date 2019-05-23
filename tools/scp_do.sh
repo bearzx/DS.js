@@ -1,7 +1,7 @@
-webpack
-ipdo=192.241.240.169
+# webpack
+ipdo=206.189.204.243
 dest=bearzx@$ipdo:/var/www/bearzx.com/ds.js
-scp -r out/ $dest
+scp -r dist/ $dest
 # scp -r samples/ $dest
 # scp -r data/ bearzx@$ipdo:/var/www/bearzx.com/ds.js
 # scp libs/selector-gadget/selectorgadget_combined.css $dest/out

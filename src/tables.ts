@@ -178,12 +178,14 @@ export class Table {
             this._t.forEach(function (row) {
                 col.push(row[column_label]);
             });
-            return nj.array(col);
+            // return nj.array(col);
+            return col;
         } else if (typeof index_or_label === 'string') {
             this._t.forEach(function (row) {
                 col.push(row[index_or_label]);
             });
-            return nj.array(col);
+            // return nj.array(col);
+            return col;
         }
     }
 
@@ -644,7 +646,7 @@ export class Table {
     }
 
     private index_by(label) {
-        let column = this.get_column(label).tolist();
+        let column = this.get_column(label);
         var indexed = {};
         let _this = this;
         column.forEach(function (c, i) {
@@ -728,10 +730,10 @@ export class Table {
         let sum_row = { 'statistics': 'sum' };
         this._labels.forEach(function (l) {
             let cur_col = _this.get_column(l);
-            min_row[l] = cur_col.min();
-            max_row[l] = cur_col.max();
-            median_row[l] = d3.median(cur_col.tolist());
-            sum_row[l] = cur_col.sum();
+            min_row[l] = d3.min(cur_col);
+            max_row[l] = d3.max(cur_col);
+            median_row[l] = d3.median(cur_col);
+            sum_row[l] = d3.sum(cur_col);
         });
         stats_table._add_row(min_row);
         stats_table._add_row(max_row);

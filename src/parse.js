@@ -1,7 +1,7 @@
 window.$ = window.jQuery = require('jquery');
 window.esprima = require('esprima');
 window.numeral = require('numeral');
-window.nj = require('numjs');
+// window.nj = require('numjs');
 window.JSHINT = require('jshint').JSHINT;
 window.jshint_options = {
     undef: true
