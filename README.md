@@ -14,18 +14,18 @@ Programming Environment for Learning Data Science](http://www.pgbovine.net/publi
 
 # Installation
 
-#What you can do with DS.js
-##Detect tabular datasets
+# What you can do with DS.js
+## Detect tabular datasets
 
-##Program with table.js API
+## Program with table.js API
 
-##Visualize data
+## Visualize data
 
-##Share your code via URLs
+## Share your code via URLs
 
-#Demo Videos
+# Demo Videos
 
-#Example Webpages
+# Example Webpages
 
 # License
 MIT
