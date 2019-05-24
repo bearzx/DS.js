@@ -1,4 +1,4 @@
-**Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
+<!-- **Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
 
 # DS.js Release TODOs
 - [ ] Core code cleaning
@@ -6,10 +6,26 @@
 - [ ] Example testing
 - [ ] Compiled ds.js bookmarklet hosting
 - [ ] Improved readme with API document
-- [ ] Paper link
+- [ ] Paper link -->
 
 # DS.js
-DS.js is a set of tool to enable users to do basic data science works on the web. You can load tabular data sets from either data links and HTML tables, and perform table operations using either our table library, or arbitrary external javascript libraries.
+DS.js is a bookmarklet that converts any webpage with tabular datasets into an environment to learn basic Data Science programming. More details can be found in our UIST2017 research paper [DS.js: Turn Any Webpage into an Example-Centric Live
+Programming Environment for Learning Data Science](http://www.pgbovine.net/publications/DSjs-turn-any-webpage-into-data-science-IDE_UIST-2017.pdf).
+
+# Installation
+
+#What you can do with DS.js
+##Detect tabular datasets
+
+##Program with table.js API
+
+##Visualize data
+
+##Share your code via URLs
+
+#Demo Videos
+
+#Example Webpages
 
 # License
 MIT
