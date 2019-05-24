@@ -985,19 +985,6 @@ export class Table {
         this.show(true);
     }
 
-    // plot a ylabel-xlabel figure
-    // vplot(xlabel, ylabel, xtype: string = 'linear') {
-    //     xlabel = this._as_label(xlabel);
-    //     ylabel = this._as_label(ylabel);
-    //     let id = this.cur_env();
-    //     let values = [];
-    //     this._t.forEach(function (row) {
-    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-    //     });
-    //     let templates = new vgt.VGTemplate();
-    //     vg.parse.spec(templates.plot(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    // }
-
     lineplot(xlabel, ylabel, xtype: string = 'quantitative') {
         xlabel = this._as_label(xlabel);
         ylabel = this._as_label(ylabel);
@@ -1007,9 +994,7 @@ export class Table {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vglt.VGLTemplate();
-        vg.embed(`#table-area-${id}`, templates.plot(values, xlabel, ylabel, xtype), function(error, result) {
-            // console.log(error);
-        });
+        vegaEmbed(`#table-area-${id}`, templates.lineplot(values, xlabel, ylabel, xtype), { actions: false });
     }
 
     barplot(xlabel, ylabel, xtype: string = 'nominal', ytype: string = 'quantitative') {
@@ -1021,21 +1006,8 @@ export class Table {
         this._t.forEach(function (row) {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
-        vg.embed(`#table-area-${id}`, templates.bar(values, xlabel, ylabel, xtype, ytype), function(error, result) {
-            // console.log(error);
-        });
+        vegaEmbed(`#table-area-${id}`, templates.barplot(values, xlabel, ylabel, xtype, ytype), { actions: false });
     }
-
-    // create a ylabel-xlabel bar chart
-    // vbar(xlabel, ylabel) {
-    //     let id = this.cur_env();
-    //     let templates = new vgt.VGTemplate();
-    //     let values = [];
-    //     this._t.forEach(function (row) {
-    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-    //     });
-    //     vg.parse.spec(templates.bar(values, xlabel, ylabel), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    // }
 
     scatterplot(xlabel, ylabel, xtype: string = 'quantitative') {
         xlabel = this._as_label(xlabel);
@@ -1046,21 +1018,8 @@ export class Table {
             values.push({ 'x': row[xlabel], 'y': row[ylabel] });
         });
         let templates = new vglt.VGLTemplate();
-        vg.embed(`#table-area-${id}`, templates.scatter(values, xlabel, ylabel, xtype), function(error, result) {
-            // console.log(error);
-        });
+        vegaEmbed(`#table-area-${id}`, templates.scatterplot(values, xlabel, ylabel, xtype), { actions: false });
     }
-
-    // create a ylabel-xlabel bar chart
-    // vscatter(xlabel, ylabel, xtype: string = 'linear') {
-    //     let id = this.cur_env();
-    //     let values = [];
-    //     this._t.forEach(function (row) {
-    //         values.push({ 'x': row[xlabel], 'y': row[ylabel] });
-    //     });
-    //     let templates = new vgt.VGTemplate();
-    //     vg.parse.spec(templates.scatter(values, xlabel, ylabel, xtype), function (chart) { chart({ "el": `#table-area-${id}` }).update(); });
-    // }
 
     histogram(column: string, nbins: number = 10) {
         // let s = new Set(this.get_column(column).tolist());
@@ -1070,31 +1029,13 @@ export class Table {
             values.push({ 'x': row[column] });
         });
         let templates = new vglt.VGLTemplate();
-        vg.embed(`#table-area-${id}`, templates.hist(values, nbins), function(error, result) {
-            // console.log(error);
-        });
+        vegaEmbed(`#table-area-${id}`, templates.histogram(values, nbins), { actions: false });
     }
 
     boxplot(xlabel: string, ylabel: string) {
         let id = this.cur_env();
-        let values = [];
-        let spec = {
-            "data": {"values": this._t},
-            "mark": "boxplot",
-            "encoding": {
-                "x": {
-                    "field": xlabel,
-                    "type": "quantitative",
-                    "axis": {"title": xlabel}
-                },
-                "y": {
-                    "field": ylabel,
-                    "type": "nominal"
-                }
-            }
-        };
-
-        vegaEmbed(`#table-area-${id}`, spec, { actions: false });
+        let templates = new vglt.VGLTemplate();
+        vegaEmbed(`#table-area-${id}`, templates.boxplot(this._t, xlabel, ylabel), { actions: false });
     }
 
     construct_table_components() {

@@ -5,7 +5,7 @@ export class VGLTemplate {
 
     }
 
-    public hist(_values, nbins) {
+    public histogram(_values, nbins) {
         let spec = {
             "data": {
                 "values": _values
@@ -27,16 +27,10 @@ export class VGLTemplate {
             "height": 300
         };
 
-        let embed_spec = {
-            mode: "vega-lite",
-            spec: spec,
-            actions: false
-        };
-
-        return embed_spec;
+        return spec;
     }
 
-    public bar(_values, xtitle, ytitle, xtype, ytype) {
+    public barplot(_values, xtitle, ytitle, xtype, ytype) {
         let spec = {
             "data": {
                 "values": _values
@@ -59,16 +53,10 @@ export class VGLTemplate {
             "height": 300
         };
 
-        let embed_spec = {
-            mode: "vega-lite",
-            spec: spec,
-            actions: false
-        };
-
-        return embed_spec;
+        return spec;
     }
 
-    public plot(_values, xtitle, ytitle, xtype) {
+    public lineplot(_values, xtitle, ytitle, xtype) {
         let spec = {
             "data": { "values": _values },
             "mark": "line",
@@ -91,16 +79,10 @@ export class VGLTemplate {
             "height": 300
         };
 
-        let embed_spec = {
-            mode: "vega-lite",
-            spec: spec,
-            actions: false
-        };
-
-        return embed_spec;
+        return spec;
     }
 
-    public scatter(_values, xtitle, ytitle, xtype) {
+    public scatterplot(_values, xtitle, ytitle, xtype) {
         let spec = {
             "data": { "values": _values },
             "mark": "circle",
@@ -123,13 +105,27 @@ export class VGLTemplate {
             "height": 300,
         };
 
-        let embed_spec = {
-            mode: "vega-lite",
-            spec: spec,
-            actions: false
+        return spec;
+    }
+
+    public boxplot(_values, xlabel, ylabel, xtype = "quantitative", ytype = "nominal") {
+        let spec = {
+            "data": {"values": _values},
+            "mark": "boxplot",
+            "encoding": {
+                "x": {
+                    "field": xlabel,
+                    "type": xtype,
+                    "axis": {"title": xlabel}
+                },
+                "y": {
+                    "field": ylabel,
+                    "type": ytype
+                }
+            }
         };
 
-        return embed_spec;
+        return spec;
     }
 
 }
