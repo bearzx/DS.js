@@ -17,7 +17,7 @@ Simply drag <a href="javascript: (    function() {        function js_load(url, 
 # DS.js Workflow
 ## Detect Tabular Datasets
 Simply click on the DS.js bookmarklet to put DS.js environments under csv/tsv links or HTML tables.
-> GIF here
+![Open DS.js](imgs/open-dsjs.gif)
 
 ## Program with table.js API
 Manipulate the parsed datasets with dataframe style programming APIs.
