@@ -38,7 +38,7 @@ Copy the URL of the webpage with capsulated DS.js code and send it to others to 
 # table.js APIs
 > TODO
 
-# Demo Videos
+# Demo Vlogs
 > TODO
 
 # Example Pages
