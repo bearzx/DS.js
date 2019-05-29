@@ -17,7 +17,7 @@ Simply drag <a href="javascript: (    function() {        function js_load(url, 
 
 # DS.js Workflow
 
-> TODO
+Here we show a typical workflow of using DS.js to put lightweight environments under tabular datasets and program inside it.
 
 ## Detect Tabular Datasets
 Simply click on the DS.js bookmarklet to put DS.js environments under csv/tsv links or HTML tables.
@@ -53,13 +53,35 @@ Copy the URL of the webpage with capsulated DS.js code and send it to others to 
 ![Share Code via URLs](imgs/share-code.gif)
 
 # table.js APIs
-> TODO
+table.js is compiled from `src/table.ts` TypeScript source file. Here we show some short descriptions on its public APIs.
+
+| Function | is for ... |
+| :------------- | :------------- |
+| `convert(cast: Function)` | convert all the elements with a cast function (e.g. parseInt) |
+| `converted(cast: Function)` | functional version of `convert` |
+| `auto_convert()` | |
+| `read_table_csv_sync(url: string)` | |
+| `read_table_tsv_sync(url: string)` | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
+|  | |
 
 # Demo Vlogs
 > TODO
 
 # Example Pages
 A made-up webpage with example code to show the table.js APIs can be found [here](https://www.bearzx.com/ds.js/samples/demo.html?dsjs%5B0-0%5D%5Bcode%5D=t0%3B%20%2F%2F%20This%20table%20is%20denoted%20as%20t0%0At0.num_rows()%3B%0At0.num_columns()%3B%0At0.get_row(50)%3B%0At0.get_column(%27PLAYER%27)%3B%0At0.get_element(10%2C%20%27POSITION%27)%3B%0At0.get_column_names()%3B%0At0.sample_n_random_rows(10)%3B%0A%0At0.add_row(%7B%22RANK%22%3A101%2C%22PLAYER%22%3A%22Jason%20Thompson%22%2C%22POSITION%22%3A%22PF%22%2C%22TEAM%22%3A%22Golden%20State%20Warriors%22%2C%22SALARY(M)%22%3A7.008475%7D)%3B%0At0.add_column(%27Blah%27%2C%20%5B1234%5D)%3B%0At0.rename_column(%27POSITION%27%2C%20%27PLAYER%20POSITION%27)%3B%0At0.select_columns(%27RANK%27%2C%20%27PLAYER%27)%3B%0At0.drop_columns(%27SALARY(M)%27)%3B%0At0.sorted(%27SALARY(M)%27)%3B%0At0.where(%27POSITION%27%2C%20x%20%3D%3E%20x%20%3D%3D%20%27SF%27)%3B%0At0.groupby(%27POSITION%27)%3B%0At0_1%20%3D%20t0.select_columns(%27RANK%27%2C%20%27PLAYER%27%2C%20%27POSITION%27)%3B%0At0_2%20%3D%20t0.drop_columns(%27RANK%27%2C%20%27POSITION%27)%3B%0At0_1.join(%27PLAYER%27%2C%20t0_2%2C%20%27PLAYER%27)%3B%0At0.pivot(%27POSITION%27%2C%20%27TEAM%27%2C%20%27SALARY(M)%27%2C%20d3.mean)%3B%0A%0At0.lineplot(%27RANK%27%2C%20%27SALARY(M)%27)%3B%0At0.scatterplot(%27RANK%27%2C%20%27SALARY(M)%27)%3B%0At0.groupby(%27TEAM%27).barplot(%27TEAM%27%2C%20%27count%27%2C%20%27nominal%27)%3B%0At0.histogram(%27SALARY(M)%27%2C%2030)%3B%0At0.boxplot(%27SALARY(M)%27%2C%20%27POSITION%27)%3B%0A&dsjs%5B0-0%5D%5Bcrow%5D=26&dsjs%5B0-0%5D%5Bccol%5D=0).
+
+# Build Instructions
+> TODO
 
 # License
 MIT

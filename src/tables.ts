@@ -87,7 +87,7 @@ export class Table {
         });
     }
 
-    // unimplemented
+    // [TODO] implement this
     public copy_from(t: Table) {
         return this;
     }
