@@ -1,0 +1,139 @@
+// constructor of the class
+// t?: Table - make this table a copy of t
+// l?: pre-alllocated labels
+// url?: a data url to load from
+// datai?: environment id to refer to certain editor/show-panels
+constructor(t?: Table, l?: any[], url?, datai?)
+
+// convert all the elements with a cast function (e.g. parseInt)
+// cast - converion function
+public convert(cast: Function)
+
+// [pure] function version of "convert"
+public converted(cast: Function)
+
+// try to convert each element of the table to a number by employing
+// the numeral.js library
+public auto_convert()
+
+// read a csv async-ly, users need to wrap their code
+// into a callback function
+public read_table_csv_async(url: string, callback: any)
+
+// read a csv synchronous-ly
+public read_table_csv_sync(url: string)
+
+// change values in a column
+// using a user-defined mapping function
+public set(column_or_label, f)
+
+// return an element at [row, col]
+public elem(row, col)
+
+// return the number of rows
+public num_rows()
+
+// return a list of all the labels
+public labels()
+
+// return the number of columns
+public num_columns()
+
+// return a certain column
+public column(index_or_label)
+
+// return all the columns in a list
+public columns()
+
+// return a certain row
+row(index: number)
+
+// [pure] add one row to the end of the table
+with_row(row)
+
+// [impure] add one row to the end of the table
+_with_row(row)
+
+// [impure] add multiple rows to the end of the table
+_with_rows(rows)
+
+// [pure] add multiple rows to the end of the table
+with_rows(rows)
+
+// [pure] add a column to the end of the table
+with_column(label, values)
+
+// [impure] add a column to the end of the table
+_with_column(label, values)
+
+// [pure] add multiple columns to the end of the table
+with_columns(...labels_and_values: any[])
+
+// [impure] add multiple columns to the end of the table
+_with_columns(...labels_and_values: any[])
+
+// [impure] relabel a column name
+relabel(label, new_label)
+
+// [pure] relabel a column name
+relabeled(label, new_label)
+
+// copy a table
+copy()
+
+// [pure] select a column
+select(...column_label_or_labels: any[])
+
+// [pure] drop a column/columns
+drop(...column_label_or_labels: any[])
+
+// [pure] filter rows based on the judging function
+where(column_or_label, value_or_predicate)
+
+// [impure] sort all rows based on a column
+sort(column_or_label, descending = false, distinct = false)
+
+// [pure] sort all rows based on a column
+sorted(column_or_label, descending = false, distinct = false)
+
+// [pure] grouping rows based on a label
+group(column_or_label: any, collect?)
+
+// [pure] group rows based on labels
+groups(columns_or_labels: any[], collect?)
+
+// [pure] generate a pivot table
+pivot(columns, rows, values, collect?, zero?)
+
+// [pure] join this table with another table
+join(column_label, other: Table, other_label?)
+
+// [pure] generate a table a few statistics information: min, max, median, sum
+stats()
+
+// [pure] generate the rows (sorted) under a certain percentile
+percentile(p)
+
+// [pure] sample k rows from this table
+sample(k)
+
+// split the current table into two: first k rows and the last n - k rows
+split(k)
+
+// show the table in the show-panel
+show(hide = false)
+
+// plot a ylabel-xlabel figure
+plot(xlabel, ylabel)
+
+// create a ylabel-xlabel bar chart
+bar(xlabel, ylabel)
+
+// create a ylabel-xlabel bar chart
+scatter(xlabel, ylabel)
+
+// create a histogram on a certain column
+hist(column: string)
+
+// create box-plots for each column
+boxplot()
