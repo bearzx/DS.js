@@ -19,7 +19,7 @@
 {"name":"ds.js","description":"DS.js source code","@type":"WebSite","url":"http://localhost:4000/","headline":"ds.js","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=857bc5c5f4edfaf39371a83d066b1588f5d558ac">
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
   </head>
   <body>
     <div class="container-lg px-3 my-5 markdown-body">
@@ -27,7 +27,8 @@
       <h1><a href="http://localhost:4000/">ds.js</a></h1>
       
 
-      <!-- **Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
+      
+<!-- **Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
 
 # DS.js Release TODOs
 - [ ] Core code cleaning
@@ -44,32 +45,54 @@ Programming Environment for Learning Data Science</a>.</p>
 <p>Simply drag <a href="javascript: (    function() {        function js_load(url, cb) {            console.log(`loading ${url}`);            var js = document.createElement('script');            js.src = url;            if (cb) {                js.onload = cb;            }            document.body.appendChild(js);        }        function css_load(url, cb) {            var css = document.createElement('link');            css.setAttribute('href', url);            css.setAttribute('rel', 'stylesheet');            css.onload = cb;            document.head.appendChild(css);        }        sg_js_load = () =&gt; js_load('https://www.bearzx.com/ds.js/out/selectorgadget_combined.js');        sg_css_load = () =&gt; css_load('https://www.bearzx.com/ds.js/out/selectorgadget_combined.css', sg_js_load);        bundle_js_load = () =&gt; js_load('https://www.bearzx.com/ds.js/dist/bundle.js', sg_css_load);        bundle_css_load = () =&gt; css_load('https://www.bearzx.com/ds.js/out/ds.js.css', bundle_js_load);        vge_load = () =&gt; js_load('https://cdn.jsdelivr.net/npm/vega-embed@4', bundle_css_load);        vgl_load = () =&gt; js_load('https://cdn.jsdelivr.net/npm/vega-lite@3', vge_load);        vega_load = () =&gt; js_load('https://cdn.jsdelivr.net/npm/vega@5', vgl_load);        d3csv_load = () =&gt; js_load('https://d3js.org/d3-dsv.v1.min.js', vega_load);        d3_load = () =&gt; js_load('https://d3js.org/d3.v3.min.js', d3csv_load);        js_load('https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js', d3_load);    }());">this link</a> to your bookmark bar and you are all set.</p>
 
 <h1 id="dsjs-workflow">DS.js Workflow</h1>
+
+<blockquote>
+  <p>TODO</p>
+</blockquote>
+
 <h2 id="detect-tabular-datasets">Detect Tabular Datasets</h2>
-<p>Simply click on the DS.js bookmarklet to put DS.js environments under csv/tsv links or HTML tables.
+<p>Simply click on the DS.js bookmarklet to put DS.js environments under csv/tsv links or HTML tables.</p>
+<blockquote>
+  <p>GIF Demo
 <img src="/imgs/open-dsjs.gif" alt="Open DS.js" /></p>
+</blockquote>
 
 <h2 id="program-with-tablejs-api">Program with table.js API</h2>
 <p>Manipulate the parsed datasets with dataframe style programming APIs.</p>
 <blockquote>
-  <p>GIF here</p>
+  <p>GIF Demo
+<img src="/imgs/program-tablejs.gif" alt="Program with table.js API" /></p>
 </blockquote>
 
 <h2 id="visualize-data">Visualize Data</h2>
 <p>Create visualizations with table.js, which wraps vega APIs.</p>
 <blockquote>
-  <p>GIF here</p>
+  <p>GIF Demo
+<img src="imgs/visualize-data.gif" alt="Visualize Data" /></p>
 </blockquote>
 
 <h2 id="preview-from-code-to-data-or-vice-versa">Preview from Code to Data or vice versa</h2>
 <p>Get hints about the usage of table.js APIs with previews.</p>
+
+<h3 id="code-to-data-preivew">Code to Data Preivew</h3>
+<p>Move the editor cursor to a table.js manipulation function and press <span class="shortcut">⌘ + B</span> to preview its effect.</p>
 <blockquote>
-  <p>GIF here</p>
+  <p>GIF Demo
+<img src="imgs/c2d-preview.gif" alt="Code to Data Preview" /></p>
+</blockquote>
+
+<h3 id="data-to-code-preview">Data to Code Preview</h3>
+<p>When the output pane is showing a table, click on any cell to get in-context suggestions on available table.js APIs.</p>
+<blockquote>
+  <p>GIF Demo
+<img src="imgs/d2c-preview.gif" alt="Data to Code Preview" /></p>
 </blockquote>
 
 <h2 id="share-your-code-via-urls">Share your code via URLs</h2>
 <p>Copy the URL of the webpage with capsulated DS.js code and send it to others to share your work.</p>
 <blockquote>
-  <p>GIF here</p>
+  <p>GIF Demo
+<img src="imgs/share-code.gif" alt="Share Code via URLs" /></p>
 </blockquote>
 
 <h1 id="tablejs-apis">table.js APIs</h1>
