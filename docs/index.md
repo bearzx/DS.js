@@ -53,9 +53,9 @@ Copy the URL of the webpage with capsulated DS.js code and send it to others to 
 ![Share Code via URLs](imgs/share-code.gif)
 
 # table.js APIs
+<!-- specify argument type indicators? -->
 table.js is compiled from `src/table.ts` TypeScript source file. Here we show some short descriptions on its public APIs.
 
-<!-- specify argument type indicators? -->
 | Function | is for ... |
 | :------------- | :------------- |
 | `convert(cast: Function)` | convert all the elements with a cast function (e.g. parseInt) |
