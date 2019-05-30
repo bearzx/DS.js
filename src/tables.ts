@@ -451,7 +451,7 @@ export class Table {
     }
 
     // [pure] filter rows based on the judging function
-    where(column_or_label, value_or_predicate) {
+    public where(column_or_label, value_or_predicate) {
         return this._where(column_or_label, value_or_predicate, false);
     }
 
@@ -479,6 +479,7 @@ export class Table {
     }
 
     // [impure] sort all rows based on a column
+    // [TODO] cleanup distinct argument
     sort(column_or_label, descending = false, distinct = false) {
         column_or_label = this._as_label(column_or_label);
         var compare = function (a, b) {
@@ -604,6 +605,7 @@ export class Table {
     }
 
     // [pure] generate a pivot table
+    // [TODO] cleanup zero? argument
     pivot(columns, rows, values, collect?, zero?) {
         // [TODO] implement more optional arguments
         let column_labels = new Set();
@@ -722,7 +724,7 @@ export class Table {
     }
 
     // [pure] generate a table a few statistics information: min, max, median, sum
-    summary_statistics() {
+    public summary_statistics() {
         let _this = this;
         let stats_table = new Table(null, ['statistics'].concat(this._labels));
         let min_row = { 'statistics': 'min' };
@@ -745,7 +747,7 @@ export class Table {
     }
 
     // [pure] generate the rows (sorted) under a certain percentile
-    percentile(p) {
+    public percentile(p) {
         let pt = new Table(null, this._labels);
         let _this = this;
         let prow = {};
@@ -760,7 +762,7 @@ export class Table {
     }
 
     // [pure] sample k rows from this table
-    sample_n_random_rows(k) {
+    public sample_n_random_rows(k) {
         let sampled = new Table(null, this._labels);
         let n = this._t.length;
         for (let i = 0; i < k; i++) {
@@ -771,7 +773,7 @@ export class Table {
     }
 
     // split the current table into two: first k rows and the last n - k rows
-    split(k) {
+    public split(k) {
         let shuffled_indices = d3.shuffle(d3.range(this._t.length));
         let first = new Table(null, this._labels);
         let rest = new Table(null, this._labels);

@@ -55,6 +55,7 @@ Copy the URL of the webpage with capsulated DS.js code and send it to others to 
 # table.js APIs
 table.js is compiled from `src/table.ts` TypeScript source file. Here we show some short descriptions on its public APIs.
 
+<!-- specify argument type indicators? -->
 | Function | is for ... |
 | :------------- | :------------- |
 | `convert(cast: Function)` | convert all the elements with a cast function (e.g. parseInt) |
@@ -62,17 +63,38 @@ table.js is compiled from `src/table.ts` TypeScript source file. Here we show so
 | `auto_convert()` | |
 | `read_table_csv_sync(url: string)` | |
 | `read_table_tsv_sync(url: string)` | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
-|  | |
+| `set(column_or_label, f)` | |
+| `get_element(row, col)` | |
+| `num_rows()` | |
+| `get_column_names()` | |
+| `num_columns()` | |
+| `get_column(index_or_label)` | |
+| `get_columns()` | |
+| `get_row(index)` | |
+| `get_rows()` | |
+| `add_rows(rows)` | |
+| `add_column(label, values)` | |
+| `add_columns(...label_and_vales)` | |
+| `rename_column(label, new_label)` | |
+| `copy_table()` | |
+| `select_columns(...column_label_or_labels)` | |
+| `drop_columns(...column_label_or_labels)` | |
+| `where(column_or_label, value_or_predicate)` | |
+| `sort(column_or_label, descending = false)` | |
+| `sorted(column_or_label, descending = false)` | |
+| `groupby(column_or_label, collect?)` | |
+| `groupsby(columns_or_labels, collect?)` | |
+| `pivot(columns, rows, values, collect?)` | |
+| `join(column_label, other: Table, other_label?)` | |
+| `summary_statistics()` | |
+| `percentile(p)` | |
+| `sample_n_random_rows(k)` | |
+| `split(k)` | |
+| `lineplot(xlabel, ylabel, xtype = 'quantitative')` | |
+| `barplot(xlabel, ylabel, xtype = 'nominal', ytype = 'quantitative' )` | |
+| `scatterplot(xlabel, ylabel, xtype = 'quantitative')` | |
+| `histogram(column, nbins = 10)` | |
+| `boxplot(xlabel, ylabel)` | |
 
 # Demo Vlogs
 > TODO
