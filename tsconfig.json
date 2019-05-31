@@ -9,7 +9,6 @@
   ],
   "files": [
     "./src/tables.ts",
-    "./src/vgtemplates.ts",
     "./src/vgltemplates.ts"
   ],
   "exclude": [
