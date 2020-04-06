@@ -1,0 +1,71 @@
+/* line 1, _sass/test.scss */
+img.gif {
+  visibility: hidden;
+}
+
+/* line 5, _sass/test.scss */
+.jsgif {
+  position: relative;
+}
+
+/* line 9, _sass/test.scss */
+.gifcontrol {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition: background 0.25s ease-in-out;
+  z-index: 100;
+}
+/* line 17, _sass/test.scss */
+.gifcontrol:after {
+  transition: background 0.25s ease-in-out;
+  position: absolute;
+  content: "";
+  display: block;
+  left: calc(50% - 25px);
+  top: calc(50% - 25px);
+}
+/* line 26, _sass/test.scss */
+.gifcontrol.loading {
+  background: rgba(255, 255, 255, 0.75);
+}
+/* line 28, _sass/test.scss */
+.gifcontrol.loading:after {
+  background: #ff9900;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+}
+/* line 36, _sass/test.scss */
+.gifcontrol.playing {
+  /* Only show the 'stop' button on hover */
+}
+/* line 38, _sass/test.scss */
+.gifcontrol.playing:after {
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+  border-left: 20px solid #ff9900;
+  border-right: 20px solid #ff9900;
+  width: 50px;
+  height: 50px;
+  box-sizing: border-box;
+}
+/* line 47, _sass/test.scss */
+.gifcontrol.playing:hover:after {
+  opacity: 1;
+}
+/* line 52, _sass/test.scss */
+.gifcontrol.paused {
+  background: rgba(255, 255, 255, 0.5);
+}
+/* line 54, _sass/test.scss */
+.gifcontrol.paused:after {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 25px 0 25px 50px;
+  border-color: transparent transparent transparent #ff9900;
+}
