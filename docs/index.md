@@ -1,20 +1,10 @@
-
-<!-- **Note: DS.js source code is still on its research prototype status (spaghetti-like code). Cleaning and documentation is on the way. Please contact the authors if you feel confused about any part of it.**
-
-# DS.js Release TODOs
+<!-- # DS.js Release TODOs
 - [ ] Core code cleaning
 - [ ] Loader code cleaning
 - [ ] Example testing
 - [ ] Compiled ds.js bookmarklet hosting
 - [ ] Improved readme with API document
 - [ ] Paper link -->
-
-<!-- <link href="assets/css/test.css" rel="stylesheet">
-<script src="https://solarisedesign.co.uk/_themes/solarise/js/libgif.js"></script>
-<script src="assets/js/test.js"></script> -->
-
-<!-- <link href="assets/css/giftag.css" rel="stylesheet"> -->
-<!-- <script src="assets/js/giftag.js"></script> -->
 
 <script src="https://unpkg.com/freezeframe/dist/freezeframe.min.js"></script>
 <script src="assets/js/gif.js"></script>
