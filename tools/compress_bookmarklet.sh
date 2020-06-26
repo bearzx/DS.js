@@ -1,1 +1,1 @@
-cat bookmarklets/load.js | tr -d '\n'
+cat bookmarklets/load-dsjs-wc.js | tr -d '\n'

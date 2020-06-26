@@ -5,3 +5,4 @@ typings
 tmp
 _site
 .sass-cache
+bower_components
