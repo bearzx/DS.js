@@ -34,7 +34,6 @@ class DSJS extends LitElement {
 window.customElements.define('dsjs-wc', DSJS);
 
 document.querySelectorAll('table').forEach(t => {
-  // let t = document.querySelector('table');
   let parent = t.parentNode;
   let e = document.createElement('dsjs-wc');
   parent.insertBefore(e, t.nextSibling);
