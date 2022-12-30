@@ -25,16 +25,16 @@
     "numeral": "^2.0.6",
     "through": "^2.3.8",
     "transform-loader": "^0.2.3",
-    "ts-loader": "^6.0.1",
+    "ts-loader": "^9.4.2",
     "typedoc": "^0.14.2",
-    "webpack": "^4.32.2"
+    "webpack": "^5.75.0"
   },
   "devDependencies": {
     "@types/handlebars": "4.0.33",
     "@types/jquery": "^2.0.34",
     "@types/node": "^6.0.54",
-    "css-loader": "^0.26.1",
-    "style-loader": "^0.13.1",
-    "webpack-cli": "^3.3.2"
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.1",
+    "webpack-cli": "^5.0.1"
   }
 }
